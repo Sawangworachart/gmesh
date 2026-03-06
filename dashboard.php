@@ -1,93 +1,64 @@
 <?php
-// หน้า dashboard ของ admin
+// =========================================
+// หน้า Dashboard (Admin)
+// =========================================
+
 session_start();
-include_once 'auth.php';
-require_once 'db.php';
+include_once 'auth.php'; // ตรวจสอบการล็อกอิน
+require_once 'db.php';   // เชื่อมต่อฐานข้อมูล
 
-// 1. รับค่าแยกกัน 3 ตัวแปร (ถ้าไม่มีค่าส่งมา ให้เป็นค่าว่าง)
-$year_pm      = isset($_GET['year_pm']) ? $_GET['year_pm'] : '';
-$year_service = isset($_GET['year_service']) ? $_GET['year_service'] : '';
-$year_product = isset($_GET['year_product']) ? $_GET['year_product'] : '';
+// --- 1. รับค่าปีที่เลือกสำหรับกราฟ (ถ้าไม่มีให้เป็นค่าว่าง) ---
+$year_pm      = $_GET['year_pm'] ?? '';
+$year_service = $_GET['year_service'] ?? '';
+$year_product = $_GET['year_product'] ?? '';
 
-// 2. เตรียมเงื่อนไข SQL แยกกันสำหรับ 3 กราฟ
-$where_pm = "";
-$where_service = "";
-$where_product = "";
+// --- 2. เตรียมเงื่อนไข SQL (WHERE clause) ---
+$where_pm = $year_pm ? " WHERE YEAR(deliver_work_date) = '" . $conn->real_escape_string($year_pm) . "' " : "";
+$where_service = $year_service ? " WHERE YEAR(d.start_date) = '" . $conn->real_escape_string($year_service) . "' " : "";
+$where_product = $year_product ? " WHERE YEAR(start_date) = '" . $conn->real_escape_string($year_product) . "' " : "";
 
-// สร้างเงื่อนไขสำหรับ PM
-if ($year_pm !== '') {
-    $esc_pm = $conn->real_escape_string($year_pm);
-    $where_pm = " WHERE YEAR(deliver_work_date) = '$esc_pm' ";
-}
-
-// สร้างเงื่อนไขสำหรับ Service
-if ($year_service !== '') {
-    $esc_sv = $conn->real_escape_string($year_service);
-    $where_service = " WHERE YEAR(d.start_date) = '$esc_sv' ";
-}
-
-// สร้างเงื่อนไขสำหรับ Product
-if ($year_product !== '') {
-    $esc_pd = $conn->real_escape_string($year_product);
-    $where_product = " WHERE YEAR(start_date) = '$esc_pd' ";
-}
-
-// -------------------------------------------------------
-// 1.1 ดึงข้อมูลสำหรับ Stats Cards
-// -------------------------------------------------------
+// --- 3. ดึงข้อมูลสถิติรวม (Stats Cards) ---
+// 3.1 จำนวน PM ทั้งหมด
 $sql_pm_total = "SELECT COUNT(*) as total FROM pm_project";
-$res_pm = $conn->query($sql_pm_total);
-$pm_total = $res_pm ? $res_pm->fetch_assoc()['total'] : 0;
+$pm_total = $conn->query($sql_pm_total)->fetch_assoc()['total'] ?? 0;
 
-$sql_service_active = "
-SELECT COUNT(*) as total 
-FROM service_project_detail d
-LEFT JOIN service_project_new n ON d.service_id = n.service_id
-";
-$res_service = $conn->query($sql_service_active);
-$service_active = $res_service ? $res_service->fetch_assoc()['total'] : 0;
+// 3.2 จำนวน Service ที่ Active
+$sql_service_active = "SELECT COUNT(*) as total FROM service_project_detail d LEFT JOIN service_project_new n ON d.service_id = n.service_id";
+$service_active = $conn->query($sql_service_active)->fetch_assoc()['total'] ?? 0;
 
+// 3.3 จำนวนลูกค้า (กลุ่มลูกค้า)
 $sql_cust_group = "SELECT COUNT(*) as total FROM customer_groups";
-$res_cust_group = $conn->query($sql_cust_group);
-$group_total = $res_cust_group ? $res_cust_group->fetch_assoc()['total'] : 0;
+$group_total = $conn->query($sql_cust_group)->fetch_assoc()['total'] ?? 0;
 
+// 3.4 จำนวน Product Claim
 $sql_product = "SELECT COUNT(*) as total FROM product";
-$res_product = $conn->query($sql_product);
-$product_total = $res_product ? $res_product->fetch_assoc()['total'] : 0;
+$product_total = $conn->query($sql_product)->fetch_assoc()['total'] ?? 0;
 
-// -------------------------------------------------------
-// 1.2 Chart Data (สถานะโครงการ PM - กรองตามปี)
-// -------------------------------------------------------
+// --- 4. ดึงข้อมูลสำหรับกราฟ (Chart Data) ---
+
+// 4.1 กราฟสถานะ PM
 $sql_pm_status = "SELECT status, COUNT(*) as count FROM pm_project $where_pm GROUP BY status";
 $res_pm_status = $conn->query($sql_pm_status);
-
 $status_aggregated = [];
+
 if ($res_pm_status) {
     while ($row = $res_pm_status->fetch_assoc()) {
         $rawStatus = $row['status'];
-        // แปลงสถานะตัวเลขเป็นข้อความตาม Database Comment
-        if ($rawStatus == 2) $status_th = 'กำลังดำเนินการ';
-        elseif ($rawStatus == 3) $status_th = 'ดำเนินการเสร็จสิ้น';
-        elseif ($rawStatus == 1) $status_th = 'รอการตรวจสอบ';
-        else $status_th = 'อื่นๆ';
-
-        if (!isset($status_aggregated[$status_th])) {
-            $status_aggregated[$status_th] = 0;
-        }
-        $status_aggregated[$status_th] += $row['count'];
+        // แปลงรหัสสถานะเป็นข้อความภาษาไทย
+        $status_th = match ($rawStatus) {
+            '2' => 'กำลังดำเนินการ',
+            '3' => 'ดำเนินการเสร็จสิ้น',
+            '1' => 'รอการตรวจสอบ',
+            default => 'อื่นๆ',
+        };
+        $status_aggregated[$status_th] = ($status_aggregated[$status_th] ?? 0) + $row['count'];
     }
 }
 $pm_labels = array_keys($status_aggregated);
 $pm_data = array_values($status_aggregated);
 
-// --- ดึงข้อมูลกราฟ Service Project (ใช้ตาราง service_project_new) ---
-$sql_service_chart = "
-SELECT d.service_type as status, COUNT(*) as count
-FROM service_project_detail d
-LEFT JOIN service_project_new n ON d.service_id = n.service_id
-$where_service
-GROUP BY d.service_type
-";
+// 4.2 กราฟสถานะ Service
+$sql_service_chart = "SELECT d.service_type as status, COUNT(*) as count FROM service_project_detail d LEFT JOIN service_project_new n ON d.service_id = n.service_id $where_service GROUP BY d.service_type";
 $res_service_chart = $conn->query($sql_service_chart);
 $service_labels = [];
 $service_data = [];
@@ -95,17 +66,18 @@ $service_data = [];
 if ($res_service_chart) {
     while ($row = $res_service_chart->fetch_assoc()) {
         $rawType = $row['status'];
-        if ($rawType == 1) $status_th = 'On-site';
-        elseif ($rawType == 2) $status_th = 'Remote';
-        elseif ($rawType == 3) $status_th = 'แจ้ง Subcontractor';
-        else $status_th = 'อื่นๆ';
-
+        $status_th = match ($rawType) {
+            '1' => 'On-site',
+            '2' => 'Remote',
+            '3' => 'แจ้ง Subcontractor',
+            default => 'อื่นๆ',
+        };
         $service_labels[] = $status_th;
         $service_data[] = $row['count'];
     }
 }
 
-// --- ดึงข้อมูลกราฟ Product ---
+// 4.3 กราฟสถานะ Product
 $sql_product_chart = "SELECT status, COUNT(*) as count FROM product $where_product GROUP BY status";
 $res_product_chart = $conn->query($sql_product_chart);
 $product_labels = [];
@@ -114,12 +86,13 @@ $product_data = [];
 if ($res_product_chart) {
     while ($row = $res_product_chart->fetch_assoc()) {
         $rawStatus = $row['status'];
-        if ($rawStatus == 1) $status_th = 'รอสินค้าจากลูกค้า';
-        elseif ($rawStatus == 2) $status_th = 'ตรวจสอบ';
-        elseif ($rawStatus == 3) $status_th = 'รอสินค้าจาก supplier';
-        elseif ($rawStatus == 4) $status_th = 'ส่งคืนลูกค้า';
-        else $status_th = 'อื่นๆ';
-
+        $status_th = match ($rawStatus) {
+            '1' => 'รอสินค้าจากลูกค้า',
+            '2' => 'ตรวจสอบ',
+            '3' => 'รอสินค้าจาก supplier',
+            '4' => 'ส่งคืนลูกค้า',
+            default => 'อื่นๆ',
+        };
         $product_labels[] = $status_th;
         $product_data[] = $row['count'];
     }
@@ -132,20 +105,28 @@ if ($res_product_chart) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MaintDash</title>
+    <title>MaintDash - Dashboard</title>
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    
+    <!-- Libraries -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="CSS/dashboard.css">
+    
+    <!-- Custom CSS (แยกไฟล์) -->
+    <link rel="stylesheet" href="assets/css/dashboard.css">
 </head>
 
 <body>
+    <!-- Sidebar -->
     <?php include 'sidebar.php'; ?>
 
     <div class="main-content">
         <div class="dashboard-content-wrapper">
+            <!-- Header -->
             <div class="dashboard-header d-flex flex-column flex-md-row justify-content-between align-items-md-center">
                 <div class="header-left-content">
                     <div class="header-icon-box"><i class="fas fa-chart-line"></i></div>
@@ -163,9 +144,10 @@ if ($res_product_chart) {
                 </div>
             </div>
 
+            <!-- Stats Cards Row 1 -->
             <div class="row g-3 mb-4">
                 <div class="col-12 col-sm-6 col-xl-3">
-                    <div class="stats-card card-primitive" onclick="location.href='pm_project.php'" style="cursor: pointer;">
+                    <div class="stats-card card-primitive" onclick="location.href='pm_project.php'">
                         <div class="stats-card-info">
                             <p>Preventive Maintenance</p>
                             <h3 class="stat-val" data-count="<?php echo $pm_total; ?>">0</h3>
@@ -175,7 +157,7 @@ if ($res_product_chart) {
                 </div>
 
                 <div class="col-12 col-sm-6 col-xl-3">
-                    <div class="stats-card card-service" onclick="location.href='service_project.php'" style="cursor: pointer;">
+                    <div class="stats-card card-service" onclick="location.href='service_project.php'">
                         <div class="stats-card-info">
                             <p>Service</p>
                             <h3 class="stat-val" data-count="<?php echo $service_active; ?>">0</h3>
@@ -185,7 +167,7 @@ if ($res_product_chart) {
                 </div>
 
                 <div class="col-12 col-sm-6 col-xl-3">
-                    <div class="stats-card card-product" onclick="location.href='product.php'" style="cursor: pointer;">
+                    <div class="stats-card card-product" onclick="location.href='product.php'">
                         <div class="stats-card-info">
                             <p>Product Claim</p>
                             <h3 class="stat-val" data-count="<?php echo $product_total; ?>">0</h3>
@@ -195,7 +177,7 @@ if ($res_product_chart) {
                 </div>
 
                 <div class="col-12 col-sm-6 col-xl-3">
-                    <div class="stats-card card-customer" onclick="location.href='customers.php'" style="cursor: pointer;">
+                    <div class="stats-card card-customer" onclick="location.href='customers.php'">
                         <div class="stats-card-info">
                             <p>Customers</p>
                             <h3 class="stat-val" data-count="<?php echo $group_total; ?>">0</h3>
@@ -205,6 +187,7 @@ if ($res_product_chart) {
                 </div>
             </div>
 
+            <!-- Charts Row 1: PM Status -->
             <div class="row g-4 mb-4">
                 <div class="col-12">
                     <div class="stats-card card-white p-4 h-100">
@@ -220,11 +203,10 @@ if ($res_product_chart) {
                                 <select class="form-select form-select-sm rounded-pill border-0 shadow-sm px-3" style="width: 140px; background-color: #f8f9fa;" id="yearPmSelect">
                                     <?php
                                     $currentYear = date('Y');
-                                    $sel_pm = $year_pm;
-                                    echo "<option value='' " . ($sel_pm === '' ? 'selected' : '') . ">ดูทั้งหมด</option>";
+                                    echo "<option value='' " . ($year_pm === '' ? 'selected' : '') . ">ดูทั้งหมด</option>";
                                     for ($i = 0; $i < 10; $i++) {
                                         $y = $currentYear - $i;
-                                        echo "<option value='$y' " . ($sel_pm == $y ? 'selected' : '') . ">" . ($y + 543) . "</option>";
+                                        echo "<option value='$y' " . ($year_pm == $y ? 'selected' : '') . ">" . ($y + 543) . "</option>";
                                     }
                                     ?>
                                 </select>
@@ -237,6 +219,7 @@ if ($res_product_chart) {
                 </div>
             </div>
 
+            <!-- Charts Row 2: Service & Product -->
             <div class="row g-4 mb-4">
                 <div class="col-lg-6">
                     <div class="stats-card card-white p-4 h-100">
@@ -291,6 +274,7 @@ if ($res_product_chart) {
                 </div>
             </div>
 
+            <!-- Recent Projects Table -->
             <div class="row g-4 mb-4">
                 <div class="col-12">
                     <div class="stats-card card-white p-4 h-100">
@@ -314,34 +298,35 @@ if ($res_product_chart) {
                                 </thead>
                                 <tbody>
                                     <?php
-                                    // เปลี่ยน LIMIT เป็น 10 รายการล่าสุด
+                                    // ดึงข้อมูล 10 รายการล่าสุด
                                     $sql_latest = "SELECT p.*, c.customers_name FROM pm_project p 
-                           LEFT JOIN customers c ON p.customers_id = c.customers_id 
-                           ORDER BY p.pmproject_id DESC LIMIT 10";
+                                                   LEFT JOIN customers c ON p.customers_id = c.customers_id 
+                                                   ORDER BY p.pmproject_id DESC LIMIT 10";
                                     $res_latest = $conn->query($sql_latest);
 
                                     if ($res_latest && $res_latest->num_rows > 0) {
                                         while ($row = $res_latest->fetch_assoc()) {
                                             $st = $row['status'];
-
-                                            // เปลี่ยนจาก $badge_style เป็นการระบุ class แทน
-                                            if ($st == 1) {
-                                                $status_text = 'รอการตรวจสอบ';
-                                                $badge_class = 'badge-pending';
-                                            } elseif ($st == 2) {
-                                                $status_text = 'กำลังดำเนินการ';
-                                                $badge_class = 'badge-processing';
-                                            } elseif ($st == 3) {
-                                                $status_text = 'ดำเนินการเสร็จสิ้น';
-                                                $badge_class = 'badge-completed';
-                                            }
+                                            // กำหนด Class ของ Badge ตามสถานะ
+                                            $badge_class = match ($st) {
+                                                '1' => 'badge-pending',
+                                                '2' => 'badge-processing',
+                                                '3' => 'badge-completed',
+                                                default => 'badge-secondary',
+                                            };
+                                            $status_text = match ($st) {
+                                                '1' => 'รอการตรวจสอบ',
+                                                '2' => 'กำลังดำเนินการ',
+                                                '3' => 'ดำเนินการเสร็จสิ้น',
+                                                default => 'อื่นๆ',
+                                            };
 
                                             echo "<tr>
-                        <td>" . htmlspecialchars($row['project_name']) . "</td>
-                        <td>" . htmlspecialchars($row['customers_name']) . "</td>
-                       <td><span class='badge rounded-pill $badge_class' style='padding: 5px 15px;'>$status_text</span></td>
-                        <td class='text-end'>" . date('d/m/Y', strtotime($row['deliver_work_date'])) . "</td>
-                    </tr>";
+                                                <td>" . htmlspecialchars($row['project_name']) . "</td>
+                                                <td>" . htmlspecialchars($row['customers_name']) . "</td>
+                                                <td><span class='badge rounded-pill $badge_class' style='padding: 5px 15px;'>$status_text</span></td>
+                                                <td class='text-end'>" . date('d/m/Y', strtotime($row['deliver_work_date'])) . "</td>
+                                            </tr>";
                                         }
                                     } else {
                                         echo "<tr><td colspan='4' class='text-center py-4 text-muted'>ไม่พบข้อมูลโครงการล่าสุด</td></tr>";
@@ -356,185 +341,29 @@ if ($res_product_chart) {
         </div>
     </div>
 
+    <!-- JS Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- ส่งข้อมูล PHP ไปให้ JS ใช้งาน -->
     <script>
-        // 1. กราฟ PM Status
-        const ctx = document.getElementById('pmStatusChart').getContext('2d');
-        const pmChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
+        window.dashboardData = {
+            pm: {
                 labels: <?php echo json_encode($pm_labels); ?>,
-                datasets: [{
-                    data: <?php echo json_encode($pm_data); ?>,
-                    backgroundColor: ['#8b5cf6', '#f59e0b', '#10b981', '#455a64'], // ใช้สีเดิมของคุณ
-                    borderWidth: 0
-                }]
+                data: <?php echo json_encode($pm_data); ?>
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20,
-                            font: {
-                                size: 16, // <<< เพิ่มบรรทัดนี้
-                                weight: '400'
-                            },
-
-                            // ส่วนที่เพิ่มเข้าไปเพื่อให้แสดงตัวเลข
-                            generateLabels: (chart) => {
-                                const data = chart.data;
-                                return data.labels.map((label, i) => ({
-                                    text: `${label}: ${data.datasets[0].data[i]}`,
-                                    fillStyle: data.datasets[0].backgroundColor[i],
-                                    strokeStyle: 'transparent',
-                                    pointStyle: 'circle',
-                                    index: i
-                                }));
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        // 2. กราฟ Service Status
-        const serviceCtx = document.getElementById('serviceStatusChart').getContext('2d');
-        const serviceChart = new Chart(serviceCtx, {
-            type: 'pie',
-            data: {
+            service: {
                 labels: <?php echo json_encode($service_labels); ?>,
-                datasets: [{
-                    data: <?php echo json_encode($service_data); ?>,
-                    backgroundColor: ['#2ecc71', '#3498db', '#9b59b6', '#f1c40f'], // ใช้สีเดิมของคุณ
-                    borderWidth: 0
-                }]
+                data: <?php echo json_encode($service_data); ?>
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20,
-                            font: {
-                                size: 16, // <<< เพิ่มบรรทัดนี้
-                                weight: '400'
-                            },
-                            generateLabels: (chart) => {
-                                const data = chart.data;
-                                return data.labels.map((label, i) => ({
-                                    text: `${label}: ${data.datasets[0].data[i]}`,
-                                    fillStyle: data.datasets[0].backgroundColor[i],
-                                    strokeStyle: 'transparent',
-                                    pointStyle: 'circle',
-                                    index: i
-                                }));
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        // 3. กราฟ Product Status
-        const productCtx = document.getElementById('productStatusChart').getContext('2d');
-        const productChart = new Chart(productCtx, {
-            type: 'doughnut',
-            data: {
+            product: {
                 labels: <?php echo json_encode($product_labels); ?>,
-                datasets: [{
-                    data: <?php echo json_encode($product_data); ?>,
-                    backgroundColor: ['#e74c3c', '#34495e', '#cddc39', '#95a5a6'], // ใช้สีเดิมของคุณ
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20,
-                            font: {
-                                size: 16,
-                                weight: '400'
-                            },
-                            generateLabels: (chart) => {
-                                const data = chart.data;
-                                return data.labels.map((label, i) => ({
-                                    text: `${label}: ${data.datasets[0].data[i]}`,
-                                    fillStyle: data.datasets[0].backgroundColor[i],
-                                    strokeStyle: 'transparent',
-                                    pointStyle: 'circle',
-                                    index: i
-                                }));
-                            }
-                        }
-                    }
-
-                }
+                data: <?php echo json_encode($product_data); ?>
             }
-        });
-
-        async function loadChart(type, year, chart) {
-            const res = await fetch(`dashboard_chart_data.php?type=${type}&year=${year}`);
-            const data = await res.json();
-            chart.data.labels = data.labels;
-            chart.data.datasets[0].data = data.data;
-            chart.update();
-        }
-
-        document.getElementById('yearPmSelect')
-            .addEventListener('change', e => {
-                loadChart('pm', e.target.value, pmChart);
-            });
-
-        document.getElementById('yearServiceSelect')
-            .addEventListener('change', e => {
-                loadChart('service', e.target.value, serviceChart);
-            });
-
-        document.getElementById('yearProductSelect')
-            .addEventListener('change', e => {
-                loadChart('product', e.target.value, productChart);
-            });
-
-            function animateCounters() {
-    $('.stat-val').each(function() {
-        const $this = $(this);
-        const countTo = parseInt($this.attr('data-count')) || 0;
-        
-        $({ countNum: 0 }).animate({
-            countNum: countTo
-        }, {
-            duration: 1500, // ความเร็ว (1.5 วินาที)
-            easing: 'swing',
-            step: function() {
-                // อัปเดตตัวเลขและใส่ comma (,)
-                $this.text(Math.floor(this.countNum).toLocaleString());
-            },
-            complete: function() {
-                $this.text(this.countNum.toLocaleString());
-            }
-        });
-    });
-}
-
-$(document).ready(function() {
-    animateCounters();
-});
+        };
     </script>
+    
+    <!-- Custom JS (แยกไฟล์) -->
+    <script src="assets/js/dashboard.js"></script>
 </body>
-
 </html>

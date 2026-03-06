@@ -1,10 +1,15 @@
 <?php
-// หน้า Edit user ของ superadmin
+/**
+ * ไฟล์: manage_admin.php
+ * คำอธิบาย: ระบบจัดการผู้ใช้งานสำหรับ Super Admin (Edit User)
+ * สามารถ เพิ่ม/ลบ/แก้ไข/รีเซ็ตรหัสผ่าน และกำหนดสิทธิ์การเข้าถึงได้
+ */
+
 session_start();
 include_once 'auth.php';
 require_once 'db.php';
 
-/* 🔐 ป้องกันสิทธิ์ */
+/* 🔐 ตรวจสอบสิทธิ์: เฉพาะ Super Admin เท่านั้น */
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'superadmin') {
     header("Location: dashboard.php");
     exit();
@@ -12,8 +17,12 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'superadmin') {
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
+// --------------------------------------------------------------------------
+//  API HANDLER (Backend Logic)
+// --------------------------------------------------------------------------
 if (isset($_GET['api']) && $_GET['api'] == 'true') {
 
+    // Double check permission for API
     if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'superadmin') {
         echo json_encode(['success' => false, 'message' => 'Unauthorized']);
         exit;
@@ -22,11 +31,12 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
     header('Content-Type: application/json');
 
     try {
-
+        // 1. ดึงข้อมูลผู้ใช้ทั้งหมด
         if ($action == 'fetch_all') {
             $result = $conn->query("SELECT id, username, role, status FROM user ORDER BY id DESC");
             $data = $result->fetch_all(MYSQLI_ASSOC);
 
+            // คำนวณสถิติ
             $total = count($data);
             $active = array_sum(array_column($data, 'status'));
 
@@ -42,6 +52,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             exit;
         }
 
+        // 2. ดึงข้อมูลรายคน (สำหรับแก้ไข)
         if ($action == 'fetch_single') {
             $id = intval($_GET['id']);
             $stmt = $conn->prepare("SELECT id, username, role, status FROM user WHERE id=?");
@@ -53,6 +64,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             exit;
         }
 
+        // 3. บันทึกข้อมูล (เพิ่ม/แก้ไข)
         if ($action == 'save') {
             $id = intval($_POST['id']);
             $username = $_POST['username'];
@@ -60,20 +72,22 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             $role = $_POST['role'];
             $status = intval($_POST['status']);
 
+            // เช็คชื่อซ้ำ
             $check = $conn->prepare("SELECT id FROM user WHERE username=? AND id!=?");
             $check->bind_param("si", $username, $id);
             $check->execute();
             if ($check->get_result()->num_rows > 0) {
-                throw new Exception("ชื่อผู้ใช้งานซ้ำ");
+                throw new Exception("ชื่อผู้ใช้งานซ้ำ (Username already exists)");
             }
 
             if ($id == 0) {
+                // Create
                 if (strlen($password) < 6) throw new Exception("รหัสผ่านต้องอย่างน้อย 6 ตัว");
-
                 $hash = password_hash($password, PASSWORD_DEFAULT);
                 $stmt = $conn->prepare("INSERT INTO user (username,password,role,status) VALUES (?,?,?,?)");
                 $stmt->bind_param("sssi", $username, $hash, $role, $status);
             } else {
+                // Update
                 if (!empty($password)) {
                     $hash = password_hash($password, PASSWORD_DEFAULT);
                     $stmt = $conn->prepare("UPDATE user SET username=?, password=?, role=?, status=? WHERE id=?");
@@ -89,6 +103,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             exit;
         }
 
+        // 4. รีเซ็ตรหัสผ่าน
         if ($action == 'reset_password') {
             $id = intval($_POST['id']);
             $password = $_POST['password'];
@@ -104,6 +119,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             exit;
         }
 
+        // 5. ลบผู้ใช้งาน
         if ($action == 'delete') {
             $id = intval($_POST['id']);
             $stmt = $conn->prepare("DELETE FROM user WHERE id=?");
@@ -120,79 +136,68 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MaintDash</title>
+    <title>Edit User (Super Admin) - MaintDash</title>
 
     <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    
+    <!-- External Libs -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="CSS/manage_admin.css?v=<?php echo time(); ?>">
-
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="js/global_delete.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/manage_admin.css">
 </head>
-
 <body>
 
+    <!-- Sidebar -->
     <?php include 'sidebar.php'; ?>
 
+    <!-- Main Content -->
     <div class="main-content">
 
+        <!-- Header -->
         <div class="header-banner-custom">
             <div class="header-left-content">
-                <div class="header-icon-circle icon-bg-purple-light">
-                    <i class="fas fa-user-cog" style="color: #7e22ce;"></i>
+                <div class="header-icon-circle">
+                    <i class="fas fa-user-cog"></i>
                 </div>
                 <div class="header-text-group">
-                    <h2 class="header-main-title">Edit user</h2>
-                    <p class="header-sub-desc">จัดการข้อมูลผู้ใช้งานและกำหนดสิทธิ์เข้าถึงระบบ</p>
+                    <h2>Edit User Management</h2>
+                    <p>ระบบจัดการผู้ใช้งานและกำหนดสิทธิ์เข้าถึง (สำหรับ Super Admin)</p>
                 </div>
             </div>
 
             <div class="header-right-action">
                 <button class="btn-pill-primary" onclick="openModal('create')">
-                    <i class="fas fa-plus"></i> เพิ่มข้อมูล
+                    <i class="fas fa-plus"></i> เพิ่มผู้ใช้งาน
                 </button>
             </div>
         </div>
 
+        <!-- Stats Cards -->
         <div class="stats-row">
             <div class="stat-card card-all active" onclick="filterByStatus('all', this)">
-                <div class="stat-icon-box bg-light-purple">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-info">
-                    <p>ทั้งหมด</p>
-                    <h3 id="statTotal">0</h3>
-                </div>
+                <div class="stat-icon-box bg-light-purple"><i class="fas fa-users"></i></div>
+                <div class="stat-info"><p>ทั้งหมด</p><h3 id="statTotal">0</h3></div>
             </div>
             <div class="stat-card card-active" onclick="filterByStatus('1', this)">
-                <div class="stat-icon-box bg-light-green">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <div class="stat-info">
-                    <p>ใช้งานอยู่</p>
-                    <h3 id="statActive">0</h3>
-                </div>
+                <div class="stat-icon-box bg-light-green"><i class="fas fa-user-check"></i></div>
+                <div class="stat-info"><p>ใช้งานอยู่</p><h3 id="statActive">0</h3></div>
             </div>
             <div class="stat-card card-inactive" onclick="filterByStatus('0', this)">
-                <div class="stat-icon-box bg-light-red">
-                    <i class="fas fa-user-slash"></i>
-                </div>
-                <div class="stat-info">
-                    <p>ระงับการใช้งาน</p>
-                    <h3 id="statInactive">0</h3>
-                </div>
+                <div class="stat-icon-box bg-light-red"><i class="fas fa-user-slash"></i></div>
+                <div class="stat-info"><p>ระงับการใช้งาน</p><h3 id="statInactive">0</h3></div>
             </div>
         </div>
 
+        <!-- Toolbar -->
         <div class="table-toolbar">
             <div class="search-container-custom">
                 <i class="fas fa-search"></i>
@@ -200,32 +205,35 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             </div>
         </div>
 
+        <!-- Table -->
         <div class="card-table">
             <table class="table-custom">
                 <thead>
                     <tr>
                         <th width="10%">ลำดับ</th>
                         <th width="25%">ชื่อผู้ใช้ (Username)</th>
-                        <th width="15%">จัดการรหัสผ่าน</th>
+                        <th width="10%">รหัสผ่าน</th>
                         <th width="15%">สิทธิ์ (Role)</th>
                         <th width="15%">สถานะ (Status)</th>
-                        <th width="10%" class="text-center">จัดการ</th>
+                        <th width="15%" class="text-center">จัดการ</th>
                     </tr>
                 </thead>
-
-                <tbody id="tableBody"></tbody>
+                <tbody id="tableBody">
+                    <!-- Data loaded via JS -->
+                </tbody>
             </table>
-            <div id="noData" style="text-align:center; padding:30px; display:none; color:#999;">
-                <i class="fas fa-inbox fa-2x"></i><br>ไม่พบข้อมูล
+            <div id="noData" style="text-align:center; padding:40px; display:none; color:#94a3b8;">
+                <i class="fas fa-folder-open fa-2x"></i><br>ไม่พบข้อมูล
             </div>
         </div>
     </div>
 
+    <!-- Modal Form -->
     <div id="userModal" class="modal-overlay">
-        <div class="modal-box custom-modal-style" style="max-width: 650px;">
+        <div class="modal-box">
             <div class="modal-header-custom">
                 <div class="header-left">
-                    <div class="header-icon-box icon-bg-purple">
+                    <div class="header-icon-box">
                         <i class="fas fa-user-shield"></i>
                     </div>
                     <div class="header-titles">
@@ -239,14 +247,12 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             </div>
 
             <form id="userForm">
-                <div class="modal-body custom-scroll">
+                <div class="modal-body">
                     <input type="hidden" name="id" id="userId" value="0">
                     <input type="hidden" name="action" value="save">
 
                     <div class="section-header">
-                        <div class="section-indicator" style="background:#8b5cf6;"></div>
-                        <i class="fas fa-id-card section-icon" style="color:#8b5cf6;"></i>
-                        <span style="color:#8b5cf6;">ข้อมูลบัญชี</span>
+                        <i class="fas fa-id-card"></i> ข้อมูลบัญชี
                     </div>
 
                     <div class="form-group">
@@ -261,13 +267,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
                         <label class="form-label">รหัสผ่าน (Password)</label>
                         <div class="input-icon-wrapper">
                             <i class="fas fa-lock input-icon"></i>
-                            <input type="password"
-                                class="form-control-custom"
-                                name="password"
-                                id="password"
-                                placeholder="ตั้งรหัสผ่านอย่างน้อย 6 ตัว"
-                                minlength="6">
-
+                            <input type="password" class="form-control-custom" name="password" id="password" placeholder="ตั้งรหัสผ่านอย่างน้อย 6 ตัว" minlength="6">
                             <i class="fas fa-eye toggle-password" onclick="togglePassword()" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; color:#94a3b8;"></i>
                         </div>
                         <small style="color:#94a3b8; margin-top:5px; display:block;" id="passwordHint">
@@ -275,10 +275,8 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
                         </small>
                     </div>
 
-                    <div class="section-header mt-4">
-                        <div class="section-indicator" style="background:#8b5cf6;"></div>
-                        <i class="fas fa-sliders-h section-icon" style="color:#8b5cf6;"></i>
-                        <span style="color:#8b5cf6;">สิทธิ์การใช้งานและสถานะ</span>
+                    <div class="section-header" style="margin-top:20px;">
+                        <i class="fas fa-sliders-h"></i> สิทธิ์การใช้งานและสถานะ
                     </div>
 
                     <div class="form-grid">
@@ -308,7 +306,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
                 </div>
 
                 <div class="modal-footer-custom">
-                    <button type="submit" id="saveBtn" class="btn-save-custom" style="background:#8b5cf6;">
+                    <button type="submit" id="saveBtn" class="btn-save-custom">
                         <i class="fas fa-check-circle"></i> บันทึกข้อมูล
                     </button>
                 </div>
@@ -316,311 +314,8 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
         </div>
     </div>
 
-    <script>
-        const API_URL = 'manage_admin.php?api=true';
+    <!-- Custom JS -->
+    <script src="assets/js/manage_admin.js"></script>
 
-        $(document).ready(function() {
-            loadData();
-
-            $('#userForm').submit(function(e) {
-                e.preventDefault();
-
-                const pwd = $('#password').val();
-                const userId = $('#userId').val();
-
-                // ถ้าเป็นการเพิ่มใหม่ หรือกรอก password ตอนแก้ไข
-                if ((userId == 0 || pwd !== '') && pwd.length < 6) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'รหัสผ่านไม่ถูกต้อง',
-                        text: 'รหัสผ่านต้องยาวอย่างน้อย 6 ตัวอักษร'
-                    });
-                    return;
-                }
-
-                const formData = $(this).serialize();
-                $.post(API_URL, formData, function(res) {
-                    if (res.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'สำเร็จ',
-                            text: res.message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
-                        closeModal();
-                        loadData();
-                    } else {
-                        Swal.fire('Error', res.message, 'error');
-                    }
-                }, 'json');
-            });
-
-
-            // Close Modal Outside
-            $(window).click(function(e) {
-                if ($(e.target).hasClass('modal-overlay')) closeModal();
-            });
-        });
-
-        function loadData() {
-            $.post(API_URL, {
-                action: 'fetch_all'
-            }, function(res) {
-
-                if (res.success) {
-
-                    $('#statTotal').text(res.stats.total);
-                    $('#statActive').text(res.stats.active);
-                    $('#statInactive').text(res.stats.inactive);
-
-                    let html = '';
-
-                    if (res.data.length === 0) {
-
-                        html = '<tr><td colspan="6" class="text-center" style="padding:30px; color:#999;">ไม่พบข้อมูลผู้ใช้งาน</td></tr>';
-
-                    } else {
-
-                        res.data.forEach((user, index) => {
-
-                            // ===== ROLE BADGE =====
-                            let roleBadge = '';
-
-                            if (user.role === 'superadmin') {
-                                roleBadge = '<span class="badge badge-super"><i class="fas fa-crown"></i> Super Admin</span>';
-                            } else if (user.role === 'admin') {
-                                roleBadge = '<span class="badge badge-admin"><i class="fas fa-shield-alt"></i> Admin</span>';
-                            } else {
-                                roleBadge = '<span class="badge badge-user"><i class="fas fa-user"></i> User</span>';
-                            }
-
-                            // ===== AVATAR LETTER =====
-                            const avatarLetter = user.username ?
-                                user.username.charAt(0).toUpperCase() :
-                                '?';
-
-                            // ===== STATUS BADGE =====
-                            let statusBadge = '';
-                            if (user.status == 1) {
-                                statusBadge = '<span class="badge badge-active"><i class="fas fa-check-circle"></i> Active</span>';
-                            } else {
-                                statusBadge = '<span class="badge badge-inactive"><i class="fas fa-times-circle"></i> Inactive</span>';
-                            }
-
-                            // ===== ROW HTML =====
-                            html += `
-                        <tr class="user-row" data-status="${user.status}">
-                            <td>
-                                <span style="color:#aaa; font-weight:bold;">
-                                    ${index + 1}
-                                </span>
-                            </td>
-
-                            <td>
-                                <div style="display:flex; align-items:center; gap:12px;">
-                                    <div class="user-avatar">${avatarLetter}</div>
-                                    <div style="font-weight:600; color:#334155">
-                                        ${user.username}
-                                    </div>
-                                </div>
-                            </td>
-
-                            <td class="password-cell">
-                                <button type="button"
-                                    class="btn-icon reset-pwd"
-                                    data-id="${user.id}"
-                                    title="รีเซ็ตรหัสผ่าน">
-                                    <i class="fas fa-key"></i>
-                                </button>
-                            </td>
-
-                            <td>${roleBadge}</td>
-                            <td>${statusBadge}</td>
-
-                            <td class="text-center">
-                                <button class="btn-icon"
-                                    style="color:#8b5cf6;"
-                                    onclick="editUser(${user.id})">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-
-                                <button class="btn-icon"
-                                    style="color:#ef4444;"
-                                    onclick="deleteUser(${user.id})">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                        });
-                    }
-
-                    $('#tableBody').html(html);
-                    $('#noData').toggle(res.data.length === 0);
-                }
-
-            }, 'json');
-        }
-
-
-
-        function filterByStatus(status, el) {
-            $('.stat-card').removeClass('active');
-            $(el).addClass('active');
-
-            const rows = $("#tableBody tr");
-            if (status === 'all') {
-                rows.show();
-            } else {
-                rows.hide().filter(function() {
-                    return $(this).attr('data-status') == status;
-                }).show();
-            }
-        }
-
-        function filterTable() {
-            var value = $('#searchInput').val().toLowerCase();
-            $("#tableBody tr").filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-            });
-        }
-
-        function openModal(mode) {
-            $('#userForm')[0].reset();
-            $('#userId').val('0');
-            $('#password').attr('required', true);
-            $('#passwordHint').hide();
-
-            if (mode === 'create') {
-                $('#modalTitle').text('เพิ่มผู้ใช้งานใหม่');
-                $('.header-subtitle').text('กำหนดชื่อผู้ใช้และสิทธิ์การเข้าถึง');
-                $('#saveBtn').html('<i class="fas fa-check-circle"></i> บันทึกข้อมูล');
-                $('#role').val('user');
-            }
-            $('#userModal').addClass('show');
-        }
-
-        function closeModal() {
-            $('.modal-overlay').removeClass('show');
-        }
-
-        function togglePassword() {
-            const input = $('#password');
-            const icon = $('.toggle-password');
-            if (input.attr('type') === 'password') {
-                input.attr('type', 'text');
-                icon.removeClass('fa-eye').addClass('fa-eye-slash');
-            } else {
-                input.attr('type', 'password');
-                icon.removeClass('fa-eye-slash').addClass('fa-eye');
-            }
-        }
-
-        function editUser(id) {
-            $.get(API_URL, {
-                action: 'fetch_single',
-                id: id
-            }, function(res) {
-                if (res.success) {
-                    const d = res.data;
-                    $('#userId').val(d.id);
-                    $('#username').val(d.username);
-                    $('#role').val(d.role);
-                    $('#status').val(d.status);
-                    $('#password').val('').removeAttr('required');
-                    $('#passwordHint').show();
-
-                    $('#modalTitle').text('แก้ไขข้อมูลผู้ใช้งาน');
-                    $('.header-subtitle').text('รหัสผู้ใช้: ' + d.id);
-                    $('#saveBtn').html('<i class="fas fa-save"></i> อัปเดตข้อมูล');
-                    $('#userModal').addClass('show');
-                }
-            }, 'json');
-        }
-
-        // แทนที่ฟังก์ชัน deleteUser เดิมด้วยอันนี้ครับ
-        function deleteUser(id) {
-            Swal.fire({
-                title: 'ยืนยันการลบ?',
-                text: "ข้อมูลผู้ใช้งานนี้จะถูกลบถาวร!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'ลบข้อมูล',
-                cancelButtonText: 'ยกเลิก',
-                customClass: {
-                    container: 'swal-z-index' // เพิ่ม class เพื่อจัดการ z-index
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.post(API_URL, {
-                            action: 'delete',
-                            id: id
-                        }, function(res) {
-                            if (res.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'ลบสำเร็จ',
-                                    text: res.message,
-                                    timer: 1000,
-                                    showConfirmButton: false
-                                });
-                                loadData(); // โหลดตารางใหม่
-                            } else {
-                                Swal.fire('เกิดข้อผิดพลาด', res.message, 'error');
-                            }
-                        }, 'json')
-                        .fail(function() {
-                            Swal.fire('Error', 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
-                        });
-                }
-            });
-        }
-        $(document).on('click', '.reset-pwd', function() {
-            const userId = $(this).data('id');
-
-            Swal.fire({
-                title: 'รีเซ็ตรหัสผ่าน',
-
-                icon: 'warning',
-
-                input: 'password',
-                inputLabel: 'กำหนดรหัสผ่านใหม่',
-                inputPlaceholder: 'อย่างน้อย 6 ตัวอักษร',
-
-                showCancelButton: true,
-                confirmButtonText: 'บันทึก',
-                cancelButtonText: 'ยกเลิก',
-
-                confirmButtonColor: '#f59e0b', // ⭐ สีเหลือง
-                cancelButtonColor: '#94a3b8', // ⭐ เทา
-                reverseButtons: true, // ⭐ ปุ่มสลับข้าง (UX ดี)
-
-                inputValidator: (value) => {
-                    if (!value || value.length < 6) {
-                        return 'รหัสผ่านต้องยาวอย่างน้อย 6 ตัวอักษร';
-                    }
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.post(API_URL, {
-                        action: 'reset_password',
-                        id: userId,
-                        password: result.value
-                    }, function(res) {
-                        if (res.success) {
-                            Swal.fire('สำเร็จ', 'รีเซ็ตรหัสผ่านเรียบร้อย', 'success');
-                            loadData();
-                        } else {
-                            Swal.fire('ผิดพลาด', res.message, 'error');
-                        }
-                    }, 'json');
-                }
-            });
-        });
-    </script>
 </body>
-
 </html>

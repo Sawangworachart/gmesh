@@ -1,11 +1,18 @@
 <?php
-// หน้า product ของ user
+/**
+ * ไฟล์: product_user.php
+ * คำอธิบาย: หน้าแสดงข้อมูลสถานะการเคลมสินค้า (Product Claim) สำหรับผู้ใช้งานทั่วไป (User View)
+ * แสดงรายการอุปกรณ์ที่ส่งซ่อม สถานะ และประวัติ
+ */
+
 session_start();
 include_once 'auth.php'; 
 require_once 'db.php';
 
-// --- 1. ดึงข้อมูลสถิติ (Stats) จากตารางเดียวกันกับ Admin (ดึงจาก TinyInt 1,2,3,4) ---
+// --- 1. ดึงข้อมูลสถิติ (Stats) จากตาราง Product ---
 $stats = ['total' => 0, 's1' => 0, 's2' => 0, 's3' => 0, 's4' => 0];
+
+// ใช้ COUNT + CASE WHEN เพื่อลดจำนวน Query เหลือ 1 ครั้ง
 $sql_stats = "SELECT 
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) as s1,
@@ -14,6 +21,7 @@ $sql_stats = "SELECT
                 SUM(CASE WHEN status = 4 THEN 1 ELSE 0 END) as s4
               FROM product";
 $res_stats = mysqli_query($conn, $sql_stats);
+
 if($res_stats) {
     $row_s = mysqli_fetch_assoc($res_stats);
     $stats = [
@@ -25,7 +33,7 @@ if($res_stats) {
     ];
 }
 
-// --- 2. ดึงข้อมูลสินค้า/อุปกรณ์ (Table) JOIN เพื่อดึงชื่อลูกค้าเหมือน Admin ---
+// --- 2. ดึงข้อมูลรายการสินค้าทั้งหมด (Table Data) ---
 $products = [];
 $sql = "SELECT p.*, c.customers_name, c.agency 
         FROM product p 
@@ -39,20 +47,27 @@ if ($result) {
         $status_th = 'ไม่ระบุ';
         $badgeClass = 'st-default';
 
-        if ($status_val == 1) {
-            $status_th = 'รอสินค้าจากลูกค้า';
-            $badgeClass = 'st-product-s1'; 
-        } elseif ($status_val == 2) {
-            $status_th = 'ตรวจสอบ';
-            $badgeClass = 'st-product-s2'; 
-        } elseif ($status_val == 3) {
-            $status_th = 'รอสินค้าจาก supplier';
-            $badgeClass = 'st-product-s3'; 
-        } elseif ($status_val == 4) {
-            $status_th = 'ส่งคืนลูกค้า';
-            $badgeClass = 'st-product-s4'; 
+        // กำหนดข้อความและสี Badge ตามสถานะ
+        switch ($status_val) {
+            case 1:
+                $status_th = 'รอสินค้าจากลูกค้า';
+                $badgeClass = 'st-product-s1'; 
+                break;
+            case 2:
+                $status_th = 'ตรวจสอบ';
+                $badgeClass = 'st-product-s2'; 
+                break;
+            case 3:
+                $status_th = 'รอสินค้าจาก supplier';
+                $badgeClass = 'st-product-s3'; 
+                break;
+            case 4:
+                $status_th = 'ส่งคืนลูกค้า';
+                $badgeClass = 'st-product-s4'; 
+                break;
         }
 
+        // จัดรูปแบบวันที่
         $start_date_fmt = (!empty($row['start_date']) && $row['start_date'] != '0000-00-00') ? date('d/m/Y', strtotime($row['start_date'])) : '-';
         $end_date_fmt = (!empty($row['end_date']) && $row['end_date'] != '0000-00-00') ? date('d/m/Y', strtotime($row['end_date'])) : '-';
 
@@ -78,44 +93,59 @@ if ($result) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MaintDash - Products</title>
+    <title>Product Claim - MaintDash</title>
     <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    
+    <!-- External Libs -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="CSS/product_user.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/product_user.css">
 </head>
 <body>
+    <!-- Sidebar -->
     <?php include 'sidebar_user.php'; ?>
 
+    <!-- Main Content -->
     <div class="main-content">
+        
+        <!-- Header -->
         <div class="page-header-card">
-            <h1 style="margin:0; font-size:1.8rem; color:#1e293b;">Product Claim</h1>
-            <p style="margin:5px 0 0; color:#64748b; font-size:1rem;">ระบบจัดการและติดตามสถานะงานซ่อม ตั้งแต่รับอุปกรณ์จนถึงส่งคืนลูกค้า</p>
+            <h1>Product Claim</h1>
+            <p>ระบบจัดการและติดตามสถานะงานซ่อม ตั้งแต่รับอุปกรณ์จนถึงส่งคืนลูกค้า</p>
         </div>
 
+        <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card grad-all">
-                <div class="stat-label">ทั้งหมด</div><div class="stat-val"><?= number_format($stats['total']) ?></div>
+                <div class="stat-label">ทั้งหมด</div>
+                <div class="stat-val"><?= number_format($stats['total']) ?></div>
                 <i class="fas fa-layer-group fa-bg"></i>
             </div>
             <div class="stat-card grad-s1">
-                <div class="stat-label">รอสินค้าจากลูกค้า</div><div class="stat-val"><?= number_format($stats['s1']) ?></div>
+                <div class="stat-label">รอสินค้าจากลูกค้า</div>
+                <div class="stat-val"><?= number_format($stats['s1']) ?></div>
                 <i class="fas fa-clock fa-bg"></i>
             </div>
             <div class="stat-card grad-s2">
-                <div class="stat-label">ตรวจสอบ</div><div class="stat-val"><?= number_format($stats['s2']) ?></div>
+                <div class="stat-label">ตรวจสอบ</div>
+                <div class="stat-val"><?= number_format($stats['s2']) ?></div>
                 <i class="fas fa-search fa-bg"></i>
             </div>
             <div class="stat-card grad-s3">
-                <div class="stat-label">รอสินค้าจาก supplier</div><div class="stat-val"><?= number_format($stats['s3']) ?></div>
+                <div class="stat-label">รอสินค้าจาก supplier</div>
+                <div class="stat-val"><?= number_format($stats['s3']) ?></div>
                 <i class="fas fa-truck-loading fa-bg"></i>
             </div>
             <div class="stat-card grad-s4">
-                <div class="stat-label">ส่งคืนลูกค้า</div><div class="stat-val"><?= number_format($stats['s4']) ?></div>
+                <div class="stat-label">ส่งคืนลูกค้า</div>
+                <div class="stat-val"><?= number_format($stats['s4']) ?></div>
                 <i class="fas fa-check-double fa-bg"></i>
             </div>
         </div>
 
+        <!-- Toolbar -->
         <div class="toolbar-container">
             <div class="search-pill">
                 <i class="fas fa-search"></i>
@@ -123,6 +153,7 @@ if ($result) {
             </div>
         </div>
 
+        <!-- Table -->
         <div class="table-container">
             <div class="scroll-area">
                 <table class="bordered-table" id="productTable">
@@ -130,9 +161,11 @@ if ($result) {
                         <tr>
                             <th width="5%">ลำดับ</th>
                             <th width="22%">ลูกค้า / เเผนก</th>
-                            <th width="8%">อุปกรณ์ / S/N</th> <th width="15%" style="text-align: center;">สถานะ</th>
-                            <th width="30%">รายละเอียดการซ่อม</th> <th width="15%">วันที่เริ่ม / วันที่สิ้นสุด</th>
-                            <th width="5%" class="text-center">จัดการ</th>
+                            <th width="8%">อุปกรณ์ / S/N</th> 
+                            <th width="15%" style="text-align: center;">สถานะ</th>
+                            <th width="30%">รายละเอียดการซ่อม</th> 
+                            <th width="15%">ระยะเวลาดำเนินการ</th>
+                            <th width="5%" class="text-center">ดูข้อมูล</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -140,18 +173,28 @@ if ($result) {
                             <tr><td colspan="7" style="text-align:center; padding:40px; color:#999;">ไม่พบข้อมูลอุปกรณ์ในระบบ</td></tr>
                         <?php else: foreach ($products as $idx => $row): ?>
                         <tr>
-                            <td style="text-align: center; font-weight: bold;"><?= $idx + 1 ?></td>
-                            <td><strong><?= htmlspecialchars($row['customer']) ?></strong><br><small style="color:#94a3b8;"><?= htmlspecialchars($row['department']) ?></small></td>
-                            <td><strong style="color:var(--primary);"><?= htmlspecialchars($row['device_name']) ?></strong><br><small>S/N: <?= htmlspecialchars($row['sn'] ?: '-') ?></small></td>
-                            <td style="text-align: center;"><span class="status-pill <?= $row['badge_class'] ?>"><?= $row['status_th'] ?></span></td>
-                            <td style="color:#64748b;"><?= mb_strimwidth($row['symptom'], 0, 80, "...") ?></td>
-                            <td>
+                            <td style="text-align: center; font-weight: bold; color:#64748b;"><?= $idx + 1 ?></td>
+                            <td data-label="ลูกค้า / เเผนก">
+                                <div style="font-weight:600; color:#334155;"><?= htmlspecialchars($row['customer']) ?></div>
+                                <small style="color:#94a3b8;"><?= htmlspecialchars($row['department']) ?></small>
+                            </td>
+                            <td data-label="อุปกรณ์ / S/N">
+                                <div style="font-weight: 600; color:var(--primary);"><?= htmlspecialchars($row['device_name']) ?></div>
+                                <small style="font-family:monospace; color:#64748b;">S/N: <?= htmlspecialchars($row['sn'] ?: '-') ?></small>
+                            </td>
+                            <td data-label="สถานะ" style="text-align: center;">
+                                <span class="status-pill <?= $row['badge_class'] ?>"><?= $row['status_th'] ?></span>
+                            </td>
+                            <td data-label="รายละเอียด" style="color:#64748b;">
+                                <?= mb_strimwidth($row['symptom'], 0, 80, "...") ?>
+                            </td>
+                            <td data-label="ระยะเวลา">
                                 <div class="date-info">
-                                    <span style="color:#2563eb;"><i class="fas fa-play-circle"></i> <?= $row['start_date'] ?></span><br>
+                                    <span style="color:#2563eb;"><i class="fas fa-play-circle"></i> <?= $row['start_date'] ?></span>
                                     <span style="color:#dc2626;"><i class="fas fa-flag-checkered"></i> <?= $row['end_date'] ?></span>
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="จัดการ">
                                 <button class="btn-view" onclick="viewDetail(<?= htmlspecialchars(json_encode($row)) ?>)">
                                     <i class="far fa-eye"></i>
                                 </button>
@@ -164,15 +207,20 @@ if ($result) {
         </div>
     </div>
 
-    <div class="modal-overlay" id="viewModal" onclick="if(event.target == this) closeModal()">
+    <!-- Modal Detail -->
+    <div class="modal-overlay" id="viewModal">
         <div class="modal-box">
             <div class="modal-header">
-                <h3 style="margin:0;"><i class="fas fa-file-invoice"></i> รายละเอียดอุปกรณ์</h3>
-                <span style="cursor:pointer; font-size:1.8rem;" onclick="closeModal()">&times;</span>
+                <h3><i class="fas fa-file-invoice"></i> รายละเอียดอุปกรณ์</h3>
+                <span class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></span>
             </div>
-            <div style="padding:25px;" id="v_content"></div>
+            <div class="modal-body" id="v_content">
+                <!-- Content injected via JS -->
+            </div>
         </div>
     </div>
-<script src="js/product_user.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/product_user.js"></script>
 </body>
 </html>

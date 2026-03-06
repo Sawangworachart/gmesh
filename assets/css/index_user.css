@@ -1,0 +1,155 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   1. GLOBAL STYLES (สไตล์หลักของหน้าเว็บ)
+   ========================================================================== */
+body {
+    font-family: 'Sarabun', sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 0;
+}
+
+/* ==========================================================================
+   2. HEADER STYLES (ส่วนหัวของหน้า)
+   ========================================================================== */
+.premium-header {
+    background: linear-gradient(135deg, #0061ff 0%, #60efff 100%); /* ไล่สีฟ้าสดใส */
+    color: white;
+    padding: 40px 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 97, 255, 0.3); /* เงาฟุ้งๆ สีฟ้า */
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+/* ใส่ไอคอนระฆังจางๆ ด้านหลังเป็น Background Graphic */
+.premium-header::after {
+    content: '\f0f3';
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    right: -20px;
+    bottom: -40px;
+    font-size: 180px;
+    opacity: 0.15;
+    transform: rotate(-20deg);
+    pointer-events: none;
+}
+
+.header-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0;
+}
+
+.header-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    font-weight: 300;
+    margin-top: 10px;
+}
+
+/* ป้ายนับจำนวนรายการแจ้งเตือน */
+.count-badge {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(5px);
+    padding: 5px 15px;
+    border-radius: 30px;
+    font-weight: bold;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    display: inline-block;
+}
+
+/* ==========================================================================
+   3. BOX CONTAINER (กล่องรายการแจ้งเตือน)
+   ========================================================================== */
+.premium-box {
+    background: white;
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05); /* เงานุ่มๆ */
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.premium-box-header {
+    background: white;
+    padding: 20px 25px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+}
+
+/* กล่องไอคอนใน Header ของ Box */
+.header-icon-box {
+    width: 45px;
+    height: 45px;
+    background: #eef2ff; /* สีพื้นหลังไอคอนจางๆ */
+    color: #0061ff;       /* สีไอคอน */
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-right: 15px;
+    box-shadow: 0 4px 10px rgba(0, 97, 255, 0.1);
+}
+
+.box-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+}
+
+/* ==========================================================================
+   4. LIST ITEMS (รายการแจ้งเตือน)
+   ========================================================================== */
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #f9f9f9;
+    padding: 20px 25px;
+    transition: background 0.2s;
+}
+
+.list-group-item:hover {
+    background-color: #fafbff;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+/* Badge สถานะในรายการ */
+.badge {
+    padding: 8px 12px;
+    font-weight: 600;
+    border-radius: 50rem !important;
+}
+
+/* ==========================================================================
+   5. UTILITIES & ANIMATIONS
+   ========================================================================== */
+.toast-container {
+    z-index: 9999;
+}
+
+/* Animation: Zoom In */
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-zoom {
+    animation: zoomIn 0.4s ease-out;
+}

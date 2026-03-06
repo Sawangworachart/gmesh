@@ -1,5 +1,8 @@
 <?php
-// หน้า dashboard ของ user
+// =========================================
+// หน้า Dashboard (User) - user_dashboard.php
+// =========================================
+
 session_start();
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
@@ -10,9 +13,9 @@ date_default_timezone_set('Asia/Bangkok');
 $today = date('Y-m-d');
 $next_week = date('Y-m-d', strtotime('+7 days'));
 
-// =========================================================================================
-// 1. AJAX API HANDLER (ดึงข้อมูลตามปี)
-// =========================================================================================
+// --------------------------------------------------------------------------
+//  1. AJAX API HANDLER (ดึงข้อมูลกราฟ)
+// --------------------------------------------------------------------------
 if (isset($_GET['ajax_action']) && $_GET['ajax_action'] == 'get_chart_data') {
     if (ob_get_length()) ob_clean();
     header('Content-Type: application/json');
@@ -72,9 +75,9 @@ if (isset($_GET['ajax_action']) && $_GET['ajax_action'] == 'get_chart_data') {
     exit;
 }
 
-// =========================================================================================
-// 2. PHP PAGE LOAD LOGIC
-// =========================================================================================
+// --------------------------------------------------------------------------
+//  2. PHP PAGE LOAD LOGIC (ข้อมูลสถิติและการ์ด)
+// --------------------------------------------------------------------------
 $pm_total = 0; $service_active = 0; $group_total = 0; $product_total = 0; 
 
 if(isset($conn) && $conn) {
@@ -105,22 +108,35 @@ for ($i = 0; $i < 10; $i++) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แดชบอร์ด - Mesh Intelligence</title>
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    
+    <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="CSS/user_dashboard.css">
     
+    <!-- JS Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/user_dashboard.css?v=<?php echo time(); ?>">
 </head>
+
 <body>
+    
     <?php include 'sidebar_user.php'; ?>
     
     <div class="main-content">
+        
+        <!-- Header -->
         <div class="dash-header-card">
             <h2>Dashboard</h2>
             <small style="color:#64748b;"><i class="far fa-calendar-alt"></i> ข้อมูลอัปเดตล่าสุด ณ วันที่ <?= $current_date_display; ?></small>
         </div>
 
+        <!-- Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card" style="background: linear-gradient(135deg, #1e40af, #3b82f6);" onclick="location.href='pmproject_user.php'">
                 <div><div class="stat-label">Preventive Maintenance</div><div class="stat-val"><?= number_format($pm_total); ?></div></div>
@@ -140,11 +156,15 @@ for ($i = 0; $i < 10; $i++) {
             </div>
         </div>
 
+        <!-- Charts & Timeline -->
         <div class="grid-split">
+            <!-- Charts Column -->
             <div style="display: flex; flex-direction: column; gap: 20px; min-width: 0;">
+                
+                <!-- Main PM Chart -->
                 <div class="white-card" style="border-top: 5px solid #fbc531;">
                     <div class="card-header-flex">
-                        <h3><i class="fas fa-chart-pie" style="color:#fbc531"></i> สถานะโครงการ (Preventive Maintenance)</h3>
+                        <h3><i class="fas fa-chart-pie" style="color:#fbc531"></i> สถานะโครงการ (PM)</h3>
                         <select class="year-select" onchange="updateChart('pm', this.value)">
                             <?= $year_options; ?>
                         </select>
@@ -154,10 +174,11 @@ for ($i = 0; $i < 10; $i++) {
                     </div>
                 </div>
                 
-                <div class="chart-inner-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Sub Charts -->
+                <div class="chart-inner-grid">
                     <div class="white-card" style="border-top: 5px solid #3b82f6;">
                         <div class="card-header-flex">
-                            <h3><i class="fas fa-tools" style="color:#3b82f6"></i> สถานะบริการ (Service)</h3>
+                            <h3><i class="fas fa-tools" style="color:#3b82f6"></i> สถานะบริการ</h3>
                             <select class="year-select" id="serviceYearFilter" onchange="updateChart('service', this.value)">
                                 <?= $year_options; ?>
                             </select>
@@ -167,7 +188,7 @@ for ($i = 0; $i < 10; $i++) {
 
                     <div class="white-card" style="border-top: 5px solid #22c55e;">
                         <div class="card-header-flex">
-                            <h3><i class="fas fa-microchip" style="color:#22c55e"></i> สถานะซ่อมบำรุง (Product Claim)</h3>
+                            <h3><i class="fas fa-microchip" style="color:#22c55e"></i> สถานะซ่อมบำรุง</h3>
                             <select class="year-select" onchange="updateChart('product', this.value)">
                                 <?= $year_options; ?>
                             </select>
@@ -177,16 +198,17 @@ for ($i = 0; $i < 10; $i++) {
                 </div>
             </div>
 
+            <!-- Timeline Column -->
             <div class="white-card" style="border-top: 5px solid #dc3545;">
                 <h3 style="font-size: 1.2rem; margin-bottom: 15px;"><i class="fas fa-bell" style="color:#dc3545"></i> กำหนดการ PM เร็วๆ นี้</h3>
-                <div class="timeline-box">
+                <div class="timeline-box custom-scroll">
                     <?php if($result_ma_soon && $result_ma_soon->num_rows > 0): ?>
                         <?php while($row = $result_ma_soon->fetch_assoc()): $ts = strtotime($row['ma_date']); ?>
                         <div class="tl-item">
                             <div class="tl-date"><strong><?= date('d', $ts); ?></strong><span><?= date('M', $ts); ?></span></div>
                             <div class="tl-info" style="min-width: 0;">
-                                <strong style="display:block; color:#1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.95rem;"><?= $row['project_name']; ?></strong>
-                                <small style="color:#64748b;"><i class="fas fa-user-tie"></i> <?= $row['customers_name']; ?></small>
+                                <strong style="display:block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $row['project_name']; ?></strong>
+                                <small><i class="fas fa-user-tie"></i> <?= $row['customers_name']; ?></small>
                             </div>
                         </div>
                         <?php endwhile; ?>
@@ -200,6 +222,7 @@ for ($i = 0; $i < 10; $i++) {
             </div>
         </div>
 
+        <!-- Recent Projects Table -->
         <div class="white-card table-section" style="border-top: 5px solid #9b59b6;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                 <h3 style="margin:0; font-size: 1.25rem;"><i class="fas fa-list-alt" style="color:#9b59b6"></i> รายการโครงการล่าสุด</h3>
@@ -225,7 +248,7 @@ for ($i = 0; $i < 10; $i++) {
                             else { $st_th = 'อื่นๆ'; $cls = 'st-default'; }
                         ?>
                         <tr>
-                            <td style="font-weight: 600; color: #1e293b; font-size: 0.95rem;"><?= mb_strimwidth($row['project_name'], 0, 60, "..."); ?></td>
+                            <td style="font-weight: 600; color: #1e293b;"><?= mb_strimwidth($row['project_name'], 0, 60, "..."); ?></td>
                             <td><?= $row['customers_name']; ?></td>
                             <td style="white-space:nowrap;"><i class="far fa-calendar-alt" style="color:#94a3b8"></i> <?= date('d/m/Y', strtotime($row['deliver_work_date'])); ?></td>
                             <td><span class="pill-status <?= $cls; ?>"><?= $st_th; ?></span></td>
@@ -236,6 +259,8 @@ for ($i = 0; $i < 10; $i++) {
             </div>
         </div>
     </div>
-    <script src="js/user_dashboard.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/user_dashboard.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

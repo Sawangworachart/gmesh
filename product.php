@@ -1,23 +1,33 @@
 <?php
-// หน้า product ของ admin
-session_start();
-require_once 'db.php';
+// =========================================
+// หน้าจัดการสินค้า (Admin) - Product Management
+// =========================================
 
+session_start(); // เริ่มต้น Session
+error_reporting(E_ALL); // เปิดการแสดงข้อผิดพลาดทั้งหมด
+ini_set('display_errors', 0); // ปิดการแสดงข้อผิดพลาดบนหน้าเว็บ (ควรเปิดใน Environment Dev)
+
+require_once 'db.php'; // เชื่อมต่อฐานข้อมูล
+
+// สร้างโฟลเดอร์สำหรับเก็บไฟล์อัปโหลดหากยังไม่มี
 $upload_dir = 'uploads/';
 if (!file_exists($upload_dir)) {
-    mkdir($upload_dir, 0777, true);
+    mkdir($upload_dir, 0777, true); // สร้างโฟลเดอร์และกำหนดสิทธิ์
 }
 
 // --------------------------------------------------------------------------
-//  API HANDLER
+//  API HANDLER (จัดการคำขอ AJAX)
 // --------------------------------------------------------------------------
 if (isset($_GET['api']) && $_GET['api'] == 'true') {
-    header('Content-Type: application/json');
-    $action = $_POST['action'] ?? $_GET['action'] ?? '';
+    ob_clean(); // ล้าง Output Buffer
+    header('Content-Type: application/json'); // กำหนด Header เป็น JSON
+
+    $action = $_POST['action'] ?? $_GET['action'] ?? ''; // รับค่า Action
 
     try {
+        // 1. ดึงสถิติ (Get Statistics)
         if ($action == 'get_stats') {
-            // คำนวณสถิติแยกตาม tinyint 1, 2, 3, 4 จากฐานข้อมูล
+            // Query เพื่อนับจำนวนสถานะต่างๆ
             $sql = "SELECT 
                         COUNT(*) as total,
                         SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) as s1,
@@ -27,6 +37,8 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
                     FROM product";
             $res = mysqli_query($conn, $sql);
             $stats = mysqli_fetch_assoc($res);
+
+            // ส่งคืนข้อมูล JSON
             echo json_encode([
                 'success' => true,
                 'stats' => [
@@ -40,62 +52,76 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             exit;
         }
 
+        // 2. ดึงข้อมูลทั้งหมด (Fetch All)
         if ($action == 'fetch_all') {
+            // Query ข้อมูลสินค้าพร้อมข้อมูลลูกค้า
             $sql = "SELECT p.*, c.customers_name, c.agency, c.phone as c_phone 
                     FROM product p 
                     LEFT JOIN customers c ON p.customers_id = c.customers_id 
                     ORDER BY p.product_id DESC";
             $result = mysqli_query($conn, $sql);
+            
             $data = [];
             while ($row = mysqli_fetch_assoc($result)) {
-                $data[] = $row;
+                $data[] = $row; // เก็บข้อมูลลง Array
             }
+            
             echo json_encode(['success' => true, 'data' => $data]);
             exit;
         }
 
+        // 3. ดึงข้อมูลรายการเดียว (Fetch Single)
         if ($action == 'fetch_single') {
-            $id = intval($_GET['id']);
+            $id = intval($_GET['id']); // แปลง ID เป็นตัวเลข
             $sql = "SELECT p.*, c.customers_name, c.agency, c.phone, c.address 
                     FROM product p 
                     LEFT JOIN customers c ON p.customers_id = c.customers_id 
                     WHERE p.product_id = $id";
             $res = mysqli_query($conn, $sql);
             $data = mysqli_fetch_assoc($res);
+            
             echo json_encode(['success' => true, 'data' => $data]);
             exit;
         }
 
+        // 4. บันทึกข้อมูล (Save - Insert/Update)
         if ($action == 'save') {
-            $id = intval($_POST['product_id']);
+            $id = intval($_POST['product_id']); // รับ ID (ถ้าเป็น 0 คือเพิ่มใหม่)
             $customers_id = intval($_POST['customers_id']);
             $device_name = mysqli_real_escape_string($conn, $_POST['device_name']);
             $serial_number = mysqli_real_escape_string($conn, $_POST['serial_number']);
             $repair_details = mysqli_real_escape_string($conn, $_POST['repair_details']);
-            $status = intval($_POST['status']); // รับค่าเป็น Integer ตาม DB
+            $status = intval($_POST['status']);
             $status_remark = mysqli_real_escape_string($conn, $_POST['status_remark'] ?? '');
 
+            // จัดการวันที่ (ถ้าว่างให้เป็น NULL)
             $start_date = !empty($_POST['start_date']) ? "'" . mysqli_real_escape_string($conn, $_POST['start_date']) . "'" : "NULL";
             $end_date = !empty($_POST['end_date']) ? "'" . mysqli_real_escape_string($conn, $_POST['end_date']) . "'" : "NULL";
 
-            $file_path = $_POST['existing_file_path'] ?? '';
+            $file_path = $_POST['existing_file_path'] ?? ''; // ใช้ไฟล์เดิมเป็นค่าเริ่มต้น
 
+            // จัดการอัปโหลดไฟล์
             if (isset($_FILES['file_upload']) && $_FILES['file_upload']['error'] == 0) {
-                $ext = pathinfo($_FILES['file_upload']['name'], PATHINFO_EXTENSION);
-                $new_name = 'prod_' . time() . '.' . $ext;
-                $target = $upload_dir . $new_name;
+                $ext = pathinfo($_FILES['file_upload']['name'], PATHINFO_EXTENSION); // นามสกุลไฟล์
+                $new_name = 'prod_' . time() . '.' . $ext; // ตั้งชื่อไฟล์ใหม่
+                $target = $upload_dir . $new_name; // path ปลายทาง
+                
                 if (move_uploaded_file($_FILES['file_upload']['tmp_name'], $target)) {
+                    // ลบไฟล์เดิมถ้ามี
                     if (!empty($file_path) && file_exists($file_path)) {
                         @unlink($file_path);
                     }
-                    $file_path = $target;
+                    $file_path = $target; // อัปเดต path ไฟล์ใหม่
                 }
             }
 
+            // ตรวจสอบว่าเป็น Insert หรือ Update
             if ($id == 0) {
+                // เพิ่มข้อมูลใหม่
                 $sql = "INSERT INTO product (customers_id, device_name, serial_number, repair_details, file_path, status, status_remark, start_date, end_date)
                         VALUES ($customers_id, '$device_name', '$serial_number', '$repair_details', '$file_path', $status, '$status_remark', $start_date, $end_date)";
             } else {
+                // แก้ไขข้อมูลเดิม
                 $sql = "UPDATE product SET 
                         customers_id=$customers_id, 
                         device_name='$device_name',
@@ -109,6 +135,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
                         WHERE product_id=$id";
             }
 
+            // ประมวลผลคำสั่ง SQL
             if (mysqli_query($conn, $sql)) {
                 echo json_encode(['success' => true, 'message' => 'บันทึกข้อมูลเรียบร้อย']);
             } else {
@@ -117,8 +144,10 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             exit;
         }
 
+        // 5. ลบข้อมูล (Delete)
         if ($action == 'delete') {
             $id = intval($_POST['id']);
+            // ลบไฟล์แนบก่อน (ถ้าต้องการ) - ในที่นี้ข้ามไป
             $sql = "DELETE FROM product WHERE product_id = $id";
             if (mysqli_query($conn, $sql)) {
                 echo json_encode(['success' => true]);
@@ -127,7 +156,9 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             }
             exit;
         }
+
     } catch (Exception $e) {
+        // จัดการข้อผิดพลาดทั่วไป
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         exit;
     }
@@ -136,36 +167,45 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
 
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MaintDash</title>
+    <title>MaintDash - Product Claim</title>
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Libraries -->
+    <link rel="stylesheet" href="assets/css/product.css?v=<?php echo time(); ?>"> <!-- Custom CSS -->
+    
+    <!-- JS Libraries -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="CSS/product.css?v=<?php echo time(); ?>">
 </head>
 
 <body>
 
-    <?php include 'sidebar.php'; ?>
+    <?php include 'sidebar.php'; ?> <!-- เมนูด้านข้าง -->
 
     <div class="main-content">
+        
+        <!-- ส่วนหัว (Banner) -->
         <div class="header-banner-custom">
             <div class="header-left-content">
                 <div class="header-icon-circle"><i class="fas fa-boxes"></i></div>
                 <div class="header-text-group">
                     <h2 class="header-main-title">Product Claim</h2>
-                    <p class="header-sub-desc">ระบบจัดการและติดตามสถานะงานซ่อม ตั้งแต่รับอุปกรณ์จนถึงส่งคืนลูกค้า</p>
+                    <p class="header-sub-desc">ระบบจัดการและติดตามสถานะงานซ่อม/เคลมสินค้า</p>
                 </div>
             </div>
 
             <div class="header-right-action" style="display:flex; gap:10px; align-items:center;">
                 <button class="btn-pill-excel" onclick="exportExcel()">
-                    <i class="fas fa-file-excel"></i>Excel
+                    <i class="fas fa-file-excel"></i> Excel
                 </button>
                 <button class="btn-pill-primary" onclick="openModal('create')">
                     <i class="fas fa-plus"></i> เพิ่มข้อมูล
@@ -173,37 +213,38 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             </div>
         </div>
 
-        <div class="stats-row" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px;">
+        <!-- การ์ดสถานะ (Stats Cards) -->
+        <div class="stats-row">
             <div class="stat-card card-all active" onclick="filterByStatus('all', this)">
-                <div class="stat-icon-box bg-light-gray"><i class="fas fa-layer-group"></i></div>
+                <div class="stat-icon-box"><i class="fas fa-layer-group"></i></div>
                 <div class="stat-info">
                     <p>ทั้งหมด</p>
                     <h3 id="stat_all">0</h3>
                 </div>
             </div>
-            <div class="stat-card" onclick="filterByStatus('รอสินค้าจากลูกค้า', this)">
-                <div class="stat-icon-box bg-light-blue"><i class="fas fa-clock"></i></div>
+            <div class="stat-card card-s1" onclick="filterByStatus('รอสินค้าจากลูกค้า', this)">
+                <div class="stat-icon-box"><i class="fas fa-clock"></i></div>
                 <div class="stat-info">
                     <p>รอสินค้าจากลูกค้า</p>
                     <h3 id="stat_s1">0</h3>
                 </div>
             </div>
-            <div class="stat-card" onclick="filterByStatus('ตรวจสอบ', this)">
-                <div class="stat-icon-box bg-light-purple"><i class="fas fa-search"></i></div>
+            <div class="stat-card card-s2" onclick="filterByStatus('ตรวจสอบ', this)">
+                <div class="stat-icon-box"><i class="fas fa-search"></i></div>
                 <div class="stat-info">
                     <p>ตรวจสอบ</p>
                     <h3 id="stat_s2">0</h3>
                 </div>
             </div>
-            <div class="stat-card" onclick="filterByStatus('รอสินค้าจากsupplier', this)">
-                <div class="stat-icon-box bg-light-orange"><i class="fas fa-users"></i></div>
+            <div class="stat-card card-s3" onclick="filterByStatus('รอสินค้าจาก Supplier', this)">
+                <div class="stat-icon-box"><i class="fas fa-truck"></i></div>
                 <div class="stat-info">
-                    <p>รอสินค้าจาก supplier </p>
+                    <p>รอ Supplier</p>
                     <h3 id="stat_s3">0</h3>
                 </div>
             </div>
-            <div class="stat-card" onclick="filterByStatus('ส่งคืนลูกค้า', this)">
-                <div class="stat-icon-box bg-light-green" style="background:rgba(34,197,94,0.1); color:#16a34a;"><i class="fas fa-check-double"></i></div>
+            <div class="stat-card card-s4" onclick="filterByStatus('ส่งคืนลูกค้า', this)">
+                <div class="stat-icon-box"><i class="fas fa-check-double"></i></div>
                 <div class="stat-info">
                     <p>ส่งคืนลูกค้า</p>
                     <h3 id="stat_s4">0</h3>
@@ -211,6 +252,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             </div>
         </div>
 
+        <!-- เครื่องมือค้นหา (Toolbar) -->
         <div class="table-toolbar">
             <div class="search-container-custom">
                 <i class="fas fa-search"></i>
@@ -218,38 +260,46 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             </div>
         </div>
 
+        <!-- ตารางข้อมูล (Table) -->
         <div class="card-table">
             <table class="table-custom">
-                <table class="table-custom">
-                    <thead>
-                        <tr>
-                            <th style="width: 50px; text-align:center;">ลำดับ</th>
-                            <th style="width: 20%;">ลูกค้า / แผนก</th>
-                            <th style="width: 15%;">อุปกรณ์</th>
-                            <th style="width: 15%;">S/N</th>
-                            <th style="width: 10%; text-align:center;">สถานะ</th>
-                            <th style="width: 20%;">วันที่เริ่ม / วันที่สิ้นสุด</th>
-                            <th style="width: 10%; text-align:center;">จัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
-                <tbody id="tableBody"></tbody>
+                <thead>
+                    <tr>
+                        <th width="5%" class="text-center">#</th>
+                        <th width="20%">ลูกค้า / แผนก</th>
+                        <th width="20%">อุปกรณ์</th>
+                        <th width="15%">S/N</th>
+                        <th width="15%" class="text-center">สถานะ</th>
+                        <th width="15%">วันที่เริ่ม / สิ้นสุด</th>
+                        <th width="10%" class="text-center">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- ข้อมูลจะถูกโหลดผ่าน JS -->
+                </tbody>
             </table>
-            <div id="loading" style="text-align:center; padding:30px; display:none;"><i class="fas fa-spinner fa-spin text-primary"></i> กำลังโหลด...</div>
-            <div id="noData" style="text-align:center; padding:30px; display:none; color:#999;">ไม่พบข้อมูล</div>
+            
+            <!-- Loading State -->
+            <div id="loading" style="text-align:center; padding:40px; color:#64748b;">
+                <i class="fas fa-spinner fa-spin fa-2x"></i><br>กำลังโหลดข้อมูล...
+            </div>
+            
+            <!-- No Data State -->
+            <div id="noData" style="text-align:center; padding:40px; display:none; color:#94a3b8;">
+                <i class="far fa-folder-open fa-3x" style="margin-bottom:10px;"></i><br>ไม่พบข้อมูล
+            </div>
         </div>
     </div>
 
+    <!-- Modal: เพิ่ม/แก้ไขข้อมูล -->
     <div id="productModal" class="modal-overlay">
-        <div class="modal-box custom-modal-style" style="max-width: 800px;">
-
+        <div class="modal-box">
             <div class="modal-header-custom">
                 <div class="header-left">
-                    <div class="header-icon-box icon-bg-orange"><i class="fas fa-pen"></i></div>
+                    <div class="upload-icon-bg"><i class="fas fa-pen"></i></div>
                     <div class="header-titles">
                         <h3 id="modalTitle">เพิ่มงานบริการใหม่</h3>
-                        <p class="header-subtitle">จัดการรายละเอียดข้อมูลอุปกรณ์และอาการเสีย</p>
+                        <p>จัดการรายละเอียดข้อมูลอุปกรณ์และสถานะ</p>
                     </div>
                 </div>
                 <button class="close-btn-custom" onclick="closeModal()"><i class="fas fa-times"></i></button>
@@ -260,17 +310,11 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
                 <input type="hidden" id="existing_file_path" name="existing_file_path">
 
                 <div class="modal-body custom-scroll">
-
-                    <div class="section-header">
-                        <div class="section-indicator"></div>
-                        <i class="fas fa-user-circle section-icon"></i>
-                        <span>ข้อมูลลูกค้า</span>
-                    </div>
-
-                    <div class="form-group form-full">
+                    
+                    <div class="form-group">
                         <label class="form-label">ลูกค้า <span style="color:red">*</span></label>
                         <div class="input-icon-wrapper">
-                            <i class="fas fa-user-tie input-icon"></i>
+                            <i class="fas fa-user-tie"></i>
                             <select id="customers_id" name="customers_id" class="form-control-custom" required>
                                 <option value="">-- เลือกลูกค้า --</option>
                                 <?php
@@ -287,195 +331,142 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
                         </div>
                     </div>
 
-                    <div class="section-header mt-4">
-                        <div class="section-indicator"></div>
-                        <i class="fas fa-tools section-icon"></i>
-                        <span>รายละเอียดอุปกรณ์</span>
-                    </div>
-
                     <div class="form-grid">
                         <div class="form-group">
-                            <label class="form-label">อุปกรณ์ (Equipment)</label>
+                            <label class="form-label">ชื่ออุปกรณ์</label>
                             <div class="input-icon-wrapper">
-                                <i class="fas fa-microchip input-icon"></i>
+                                <i class="fas fa-microchip"></i>
                                 <input type="text" id="device_name" name="device_name" class="form-control-custom" required placeholder="ระบุชื่ออุปกรณ์">
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">S/N (Serial Number)</label>
                             <div class="input-icon-wrapper">
-                                <i class="fas fa-barcode input-icon"></i>
+                                <i class="fas fa-barcode"></i>
                                 <input type="text" id="serial_number" name="serial_number" class="form-control-custom" placeholder="ระบุ S/N">
                             </div>
                         </div>
-                        <div class="form-group form-full">
-                            <label class="form-label">อาการเสีย / สิ่งที่พบ</label>
-                            <div class="input-icon-wrapper">
-                                <i class="fas fa-exclamation-triangle input-icon"></i>
-                                <textarea id="repair_details" name="repair_details" class="form-control-custom" rows="3" placeholder="รายละเอียดอาการเสีย..." style="padding-left: 45px;"></textarea>
-                            </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">อาการเสีย / รายละเอียด</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fas fa-exclamation-triangle" style="top:20px;"></i>
+                            <textarea id="repair_details" name="repair_details" class="form-control-custom" rows="3" placeholder="รายละเอียดอาการเสีย..."></textarea>
                         </div>
                     </div>
 
-                    <div class="section-header mt-4">
-                        <div class="section-indicator"></div>
-                        <i class="fas fa-clipboard-list section-icon"></i>
-                        <span>สถานะการดำเนินงาน</span>
-                    </div>
-
-                    <div class="row-grid-3">
+                    <div class="form-grid">
                         <div class="form-group">
-                            <label class="form-label-clean">สถานะ</label>
-                            <div class="input-wrapper-pill">
-                                <div class="icon-circle gray">
-                                    <i class="fas fa-info"></i>
-                                </div>
-                                <select id="status" name="status" class="form-control-pill">
+                            <label class="form-label">สถานะ</label>
+                            <div class="input-icon-wrapper">
+                                <i class="fas fa-info-circle"></i>
+                                <select id="status" name="status" class="form-control-custom">
                                     <option value="1">รอสินค้าจากลูกค้า</option>
                                     <option value="2">ตรวจสอบ</option>
-                                    <option value="3">รอสินค้าจากsupplier</option>
+                                    <option value="3">รอสินค้าจาก Supplier</option>
                                     <option value="4">ส่งคืนลูกค้า</option>
                                 </select>
                             </div>
                         </div>
-
                         <div class="form-group">
-                            <label class="form-label-clean">วันที่เริ่ม</label>
-                            <div class="input-wrapper-pill">
-                                <div class="icon-circle gray">
-                                    <i class="far fa-calendar-alt"></i>
-                                </div>
-                                <input type="date" id="start_date" name="start_date" class="form-control-pill" value="<?php echo date('Y-m-d'); ?>">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label-clean">วันที่สิ้นสุด</label>
-                            <div class="input-wrapper-pill">
-                                <div class="icon-circle blue-gray">
-                                    <i class="far fa-calendar-check"></i>
-                                </div>
-                                <input type="date" id="end_date" name="end_date" class="form-control-pill">
+                            <label class="form-label">วันที่เริ่ม</label>
+                            <div class="input-icon-wrapper">
+                                <i class="far fa-calendar-alt"></i>
+                                <input type="date" id="start_date" name="start_date" class="form-control-custom">
                             </div>
                         </div>
                     </div>
 
-                    <div class="upload-section mt-4">
-                        <label for="file_upload" class="upload-box-dashed">
-                            <div class="upload-content">
-                                <div class="upload-icon-bg">
-                                    <i class="fas fa-file-upload"></i>
-                                </div>
-                                <span class="upload-text">แนบรูปภาพหรือไฟล์ PDF</span>
-                                <span id="file-name-display" class="file-selected-text"></span>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">วันที่สิ้นสุด</label>
+                            <div class="input-icon-wrapper">
+                                <i class="far fa-calendar-check"></i>
+                                <input type="date" id="end_date" name="end_date" class="form-control-custom">
                             </div>
-                            <input type="file" id="file_upload" name="file_upload" accept=".jpg,.jpeg,.png,.pdf" onchange="showFileName(this)">
+                        </div>
+                        <div class="form-group">
+                            <!-- Placeholder for layout balance -->
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top:20px;">
+                        <label for="file_upload" class="upload-box-dashed">
+                            <div class="upload-icon-bg"><i class="fas fa-cloud-upload-alt"></i></div>
+                            <span style="font-weight:500; color:#64748b;">คลิกเพื่อแนบรูปภาพหรือไฟล์ PDF</span>
+                            <span id="file-name-display" style="font-size:0.9rem;"></span>
+                            <input type="file" id="file_upload" name="file_upload" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="showFileName(this)">
                         </label>
-                        <div id="existing_file_container" class="mt-2 text-center text-primary"></div>
+                        <div id="existing_file_container" style="text-align:center; margin-top:10px;"></div>
                     </div>
 
                 </div>
                 <div class="modal-footer-custom">
-                    <button type="submit" id="saveBtn" class="btn-save-custom"><i class="fas fa-check-circle"></i> บันทึกข้อมูล</button>
+                    <button type="submit" class="btn-save-custom"><i class="fas fa-save"></i> บันทึกข้อมูล</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Modal: ดูรายละเอียด (View) -->
     <div id="viewModal" class="modal-overlay">
-        <div class="modal-box custom-modal-style" style="max-width: 900px;">
-
+        <div class="modal-box">
             <div class="modal-header-custom">
-                <div style="flex-grow: 1;"></div>
+                <div style="flex-grow:1;"></div>
                 <button class="close-btn-custom" onclick="closeModal()"><i class="fas fa-times"></i></button>
             </div>
 
-            <div class="modal-body custom-scroll" style="padding: 0 40px 40px 40px;">
-
-                <div class="modal-view-header">
-                    <div class="view-icon-large">
-                        <i class="fas fa-eye"></i>
-                    </div>
-                    <div class="view-title-group">
-                        <h2 id="view_customer">-</h2>
-                        <p>Ticket ID: <span id="view_ticket_id">#WAITING_DB</span></p>
+            <div class="modal-body custom-scroll">
+                
+                <div class="view-header">
+                    <div class="view-icon-large"><i class="fas fa-eye"></i></div>
+                    <div>
+                        <h2 id="view_customer" style="margin:0; font-size:1.4rem; color:#1e293b;">-</h2>
+                        <p id="view_ticket_id" style="margin:5px 0 0; color:#64748b;">-</p>
                     </div>
                 </div>
 
                 <div class="info-card-grid">
-
-                    <div class="info-card card-blue">
-                        <span class="card-label">รูปแบบบริการ</span>
-                        <div class="card-value">
-                            <i class="fas fa-building" style="color:#3b82f6;"></i>
-                            <span id="view_status_text">On-site</span>
-                        </div>
+                    <div class="info-card">
+                        <div class="info-card-title">สถานะ</div>
+                        <div class="info-card-value" id="view_status_text">-</div>
                     </div>
-
-                    <div class="info-card card-green">
-                        <span class="card-label">ช่วงเวลาดำเนินการ</span>
-                        <div class="card-value">
-                            <span id="view_start_date" style="font-size:0.95rem;">-</span>
-                        </div>
-                        <div class="card-sub-value">
-                            ถึง <span id="view_end_date">-</span>
-                        </div>
+                    <div class="info-card">
+                        <div class="info-card-title">อุปกรณ์</div>
+                        <div class="info-card-value" id="view_device_name">-</div>
                     </div>
-
-                    <div class="info-card card-orange">
-                        <span class="card-label">อุปกรณ์หลัก / SN</span>
-                        <div class="card-value" id="view_device_name">-</div>
-                        <div class="card-sub-value">
-                            SN: <span id="view_sn">-</span>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="detail-section theme-red">
-                    <div class="detail-header">
-                        <div class="detail-icon"><i class="fas fa-exclamation"></i></div>
-                        <span>อาการเสีย / สิ่งที่พบ / รายละเอียด</span>
-                    </div>
-                    <div class="detail-body">
-                        <div id="view_details">-</div>
+                    <div class="info-card">
+                        <div class="info-card-title">S/N</div>
+                        <div class="info-card-value" id="view_sn">-</div>
                     </div>
                 </div>
 
-                <div id="view_file_section" style="display:none; margin-top: 25px; padding: 15px 5px; border-top: 1px solid #f1f5f9; align-items: center; justify-content: space-between;">
+                <div class="detail-section">
+                    <div class="detail-title"><i class="fas fa-calendar-alt" style="color:#3b82f6;"></i> ระยะเวลาดำเนินการ</div>
+                    <div style="display:flex; gap:20px; font-size:0.95rem;">
+                        <div><strong style="color:#10b981;">เริ่ม:</strong> <span id="view_start_date">-</span></div>
+                        <div><strong style="color:#ef4444;">สิ้นสุด:</strong> <span id="view_end_date">-</span></div>
+                    </div>
+                </div>
 
-                    <label style="font-size: 1rem; color: #64748b; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-paperclip" style="color: #94a3b8;"></i> ไฟล์แนบ / หลักฐาน
-                    </label>
+                <div class="detail-section">
+                    <div class="detail-title"><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> อาการเสีย / รายละเอียด</div>
+                    <div id="view_details" style="line-height:1.6; color:#334155;">-</div>
+                </div>
 
-                    <a id="btn_open_file" href="#" target="_blank" class="btn-view-file" style="display: inline-flex; align-items: center; gap: 8px; background-color: #4361ee; color: #ffffff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: 0.2s; box-shadow: 0 4px 10px rgba(67, 97, 238, 0.2);">
-                        <i class="fas fa-file-pdf"></i> เปิดดูไฟล์แนบ
+                <div id="view_file_section" class="detail-section" style="display:none; text-align:center;">
+                    <a id="btn_open_file" href="#" target="_blank" class="btn-pill-primary" style="display:inline-flex; text-decoration:none;">
+                        <i class="fas fa-file-download"></i> ดูไฟล์แนบ
                     </a>
-
                 </div>
-            </div>
 
+            </div>
         </div>
     </div>
-    </div>
 
-    <script src="js/product.js?v=<?php echo time(); ?>"></script>
-    <script>
-        function exportExcel() {
-            window.open('product_export.php', '_blank');
-        }
-
-        function showFileName(input) {
-            const display = document.getElementById('file-name-display');
-            if (input.files && input.files.length > 0) {
-                display.textContent = "ไฟล์ที่เลือก: " + input.files[0].name;
-                display.style.color = "#16a34a"; // สีเขียว
-            } else {
-                display.textContent = "";
-            }
-        }
-    </script>
+    <!-- Custom JS -->
+    <script src="assets/js/product.js?v=<?php echo time(); ?>"></script>
 
 </body>
-
 </html>
