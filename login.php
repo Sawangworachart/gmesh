@@ -203,7 +203,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         /* --- ลบส่วนนี้ออกเพื่อปิดแสงสีเหลืองรอบกล่อง --- */
-       
+        .login-card-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            /* ความหนาของกรอบ */
+            background: linear-gradient(45deg, #f39c12, #1a2a44, #f39c12, #2c3e50);
+            background-size: 400% 400%;
+            z-index: -1;
+            border-radius: 18px;
+            /* ใหญ่กว่า inner เล็กน้อย */
+            filter: blur(5px);
+            /* ทำให้แสงฟุ้ง */
+            animation: gradientMove 5s ease infinite alternate;
+        }
+
+        /* --- ปรับปรุง Login Card (กรอบเคลื่อนไหว) --- */
+        .login-card-wrapper {
+            position: relative;
+            width: 90%;
+            max-width: 380px;
+            z-index: 10;
+
+            /* เรียกใช้ slideInLeft นาน 0.8 วินาที */
+            animation: slideInLeft 2.8s cubic-bezier(0.215, 0.610, 0.355, 1.000) both;
+        }
+
+        /* เนื้อหาข้างในการ์ด (พื้นหลังสีขาว) */
+        .login-card-inner {
+            background: #ffffff;
+            /* <--- สีขาวทึบ */
+            border-radius: 15px;
+            padding: 40px 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            height: 100%;
+            width: 100%;
+        }
 
         @keyframes gradientMove {
             0% {
