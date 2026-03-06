@@ -203,29 +203,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         /* --- ลบส่วนนี้ออกเพื่อปิดแสงสีเหลืองรอบกล่อง --- */
-    
-
-        /* --- ปรับปรุง Login Card (กรอบเคลื่อนไหว) --- */
-        .login-card-wrapper {
-            position: relative;
-            width: 90%;
-            max-width: 380px;
-            z-index: 10;
-
-            /* เรียกใช้ slideInLeft นาน 0.8 วินาที */
-            animation: slideInLeft 2.8s cubic-bezier(0.215, 0.610, 0.355, 1.000) both;
-        }
-
-        /* เนื้อหาข้างในการ์ด (พื้นหลังสีขาว) */
-        .login-card-inner {
-            background: #ffffff;
-            /* <--- สีขาวทึบ */
-            border-radius: 15px;
-            padding: 40px 30px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-            height: 100%;
-            width: 100%;
-        }
+       
 
         @keyframes gradientMove {
             0% {
