@@ -1,109 +1,74 @@
-<?php
-//หน้าเข้าสู่ระบบ (login.php) 
-session_start();
-require_once 'db.php';
+<?php // หน้าเข้าสู่ระบบ (login.php) — ย่อและอธิบายไทยต่อบรรทัด
+session_start(); // เริ่ม Session สำหรับเก็บสถานะผู้ใช้
+require_once 'db.php'; // นำเข้าการเชื่อมต่อฐานข้อมูล
 
-$error_msg = "";
+$error_msg = ""; // เก็บข้อความผิดพลาดไว้แสดงผล
 
-/* ================= AUTO LOGIN FROM COOKIE ================= */
-if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_token'])) {
-    $rawToken = $_COOKIE['remember_token'];
-    $tokenHash = hash('sha256', $rawToken);
-
-    $stmt = $conn->prepare("SELECT id, username, role 
-                            FROM user 
-                            WHERE remember_token_hash=? 
-                            AND remember_expires > NOW() 
-                            AND status=1");
-    $stmt->bind_param("s", $tokenHash);
-    $stmt->execute();
-    $res = $stmt->get_result();
-
-    if ($res->num_rows === 1) {
-        $u = $res->fetch_assoc();
-
-        $_SESSION['user_id']  = $u['id'];
-        $_SESSION['username'] = $u['username'];
-        $_SESSION['user_role'] = $u['role'];
-
-        if ($u['role'] === 'superadmin' || $u['role'] === 'admin') {
-            header("Location: dashboard.php");
-        } else {
-            header("Location: user_dashboard.php");
-        }
-        exit();
+// ===== Auto Login จาก Cookie =====
+if (empty($_SESSION['user_id']) && !empty($_COOKIE['remember_token'])) { // ถ้ายังไม่ล็อกอินแต่มีโทเคนจำการใช้งาน
+    $tokenHash = hash('sha256', $_COOKIE['remember_token']); // แฮชโทเคนจากคุกกี้เพื่อเทียบกับฐานข้อมูลแบบปลอดภัย
+    $stmt = $conn->prepare("SELECT id, username, role FROM user WHERE remember_token_hash=? AND remember_expires > NOW() AND status=1"); // เตรียมคำสั่งค้นหาผู้ใช้ที่โทเคนยังไม่หมดอายุและยังใช้งานได้
+    $stmt->bind_param("s", $tokenHash); // ผูกพารามิเตอร์ชนิดสตริง
+    $stmt->execute(); // รันคำสั่ง SQL
+    $res = $stmt->get_result(); // ดึงผลลัพธ์จากคำสั่งที่รัน
+    if ($res->num_rows === 1) { // ถ้าพบผู้ใช้ตรง 1 รายการ
+        $u = $res->fetch_assoc(); // ดึงข้อมูลเป็นแอสโซซิเอทีฟอาเรย์
+        $_SESSION['user_id'] = $u['id']; // บันทึกไอดีผู้ใช้ลง Session
+        $_SESSION['username'] = $u['username']; // บันทึกชื่อผู้ใช้ลง Session
+        $_SESSION['user_role'] = $u['role']; // บันทึกบทบาทผู้ใช้ลง Session
+        header("Location: " . (($u['role'] === 'superadmin' || $u['role'] === 'admin') ? 'dashboard.php' : 'user_dashboard.php')); // ไปหน้าที่เหมาะกับบทบาท
+        exit(); // จบการทำงานทันทีหลังเปลี่ยนเส้นทาง
     }
 }
 
-/* ================= LOGIN PROCESS ================= */
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+// ===== ดำเนินการล็อกอินแบบส่งฟอร์ม =====
+if ($_SERVER['REQUEST_METHOD'] === 'POST') { // ทำงานเมื่อมีการส่งฟอร์ม POST
+    $username = trim($_POST['username'] ?? ''); // รับชื่อผู้ใช้และตัดช่องว่างหัวท้าย
+    $password = $_POST['password'] ?? ''; // รับรหัสผ่านตามที่กรอก
 
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    $stmt = $conn->prepare("SELECT id, username, password, role, status FROM user WHERE username=?"); // เตรียมคำสั่งค้นหาผู้ใช้ตามชื่อ
+    $stmt->bind_param("s", $username); // ผูกพารามิเตอร์ชื่อผู้ใช้
+    $stmt->execute(); // รันคำสั่ง SQL
+    $result = $stmt->get_result(); // รับผลลัพธ์การค้นหา
 
-    $stmt = $conn->prepare("SELECT id, username, password, role, status 
-                            FROM user WHERE username=?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    if ($result->num_rows === 1) { // ถ้าพบชื่อผู้ใช้
+        $row = $result->fetch_assoc(); // ดึงข้อมูลผู้ใช้
+        $valid = password_verify($password, $row['password']); // ตรวจรหัสผ่านด้วย password_verify
 
-    if ($result->num_rows === 1) {
-        $row = $result->fetch_assoc();
+        if ($valid) { // ถ้ารหัสผ่านถูกต้อง
+            if ((int)$row['status'] === 1) { // อนุญาตเฉพาะบัญชีที่เปิดใช้งาน
+                $_SESSION['user_id'] = $row['id']; // เก็บไอดีผู้ใช้
+                $_SESSION['username'] = $row['username']; // เก็บชื่อผู้ใช้
+                $_SESSION['user_role'] = $row['role']; // เก็บบทบาทผู้ใช้
 
-        $is_password_correct = false;
+                if (!empty($_POST['remember'])) { // ถ้าติ๊กจำการใช้งาน
+                    $rawToken = bin2hex(random_bytes(32)); // สร้างโทเคนแบบสุ่มความปลอดภัยสูง
+                    $tokenHash = hash('sha256', $rawToken); // แฮชโทเคนก่อนจัดเก็บในฐานข้อมูล
+                    $expireDate = date('Y-m-d H:i:s', strtotime('+30 days')); // กำหนดวันหมดอายุอีก 30 วัน
 
-        if (password_verify($password, $row['password'])) {
-            $is_password_correct = true;
-        }
+                    $stmt2 = $conn->prepare("UPDATE user SET remember_token_hash=?, remember_expires=? WHERE id=?"); // คำสั่งอัปเดตโทเคนลงฐานข้อมูล
+                    $stmt2->bind_param("ssi", $tokenHash, $expireDate, $row['id']); // ผูกพารามิเตอร์แฮช วันหมดอายุ และไอดีผู้ใช้
+                    $stmt2->execute(); // รันคำสั่งอัปเดต
 
-        if ($is_password_correct) {
-            if ($row['status'] == 1) {
-
-                $_SESSION['user_id']  = $row['id'];
-                $_SESSION['username'] = $row['username'];
-                $_SESSION['user_role'] = $row['role'];
-
-                /* ========= REMEMBER ME (ปลอดภัยจริง) ========= */
-                if (isset($_POST['remember'])) {
-
-                    $rawToken = bin2hex(random_bytes(32));
-                    $tokenHash = hash('sha256', $rawToken);
-                    $expireDate = date('Y-m-d H:i:s', strtotime('+30 days'));
-
-                    $stmt2 = $conn->prepare("UPDATE user 
-                                             SET remember_token_hash=?, 
-                                                 remember_expires=? 
-                                             WHERE id=?");
-                    $stmt2->bind_param("ssi", $tokenHash, $expireDate, $row['id']);
-                    $stmt2->execute();
-
-                    setcookie(
-                        "remember_token",
-                        $rawToken,
-                        [
-                            'expires'  => time() + (86400 * 30),
-                            'path'     => '/',
-                            'secure'   => false,      // ถ้าเป็น https ค่อย true
-                            'httponly' => true,
-                            'samesite' => 'Lax'      // ⭐ ตัวนี้สำคัญ
-                        ]
-                    );
+                    setcookie('remember_token', $rawToken, [ // ตั้งค่าคุกกี้ฝั่งลูกข่าย
+                        'expires' => time() + (86400 * 30), // อายุคุกกี้ 30 วัน
+                        'path' => '/', // ส่งทุกเส้นทางของโดเมน
+                        'secure' => false, // ควรตั้ง true เมื่อใช้งานผ่าน HTTPS
+                        'httponly' => true, // ป้องกัน JS เข้าถึงคุกกี้
+                        'samesite' => 'Lax' // ลดความเสี่ยง CSRF ระดับหนึ่ง
+                    ]);
                 }
 
-                if ($row['role'] === 'superadmin' || $row['role'] === 'admin') {
-                    header("Location: dashboard.php");
-                } else {
-                    header("Location: user_dashboard.php");
-                }
-                exit();
+                header("Location: " . (($row['role'] === 'superadmin' || $row['role'] === 'admin') ? 'dashboard.php' : 'user_dashboard.php')); // เปลี่ยนเส้นทางตามบทบาท
+                exit(); // จบการทำงานหลังเปลี่ยนเส้นทาง
             } else {
-                $error_msg = "บัญชีของคุณถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ";
+                $error_msg = "บัญชีของคุณถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ"; // แจ้งเตือนเมื่อบัญชีถูกปิด
             }
         } else {
-            $error_msg = "รหัสผ่านไม่ถูกต้อง";
+            $error_msg = "รหัสผ่านไม่ถูกต้อง"; // แจ้งเตือนเมื่อรหัสผ่านไม่ถูกต้อง
         }
     } else {
-        $error_msg = "ไม่พบชื่อผู้ใช้งาน";
+        $error_msg = "ไม่พบชื่อผู้ใช้งาน"; // แจ้งเตือนเมื่อไม่มีชื่อผู้ใช้งานนี้
     }
 }
 ?>
@@ -131,7 +96,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         body {
             height: 100vh;
-            display: flex;
             display: flex;
             justify-content: center;
             align-items: center;
