@@ -203,20 +203,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         /* --- ลบส่วนนี้ออกเพื่อปิดแสงสีเหลืองรอบกล่อง --- */
-        .login-card-wrapper::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            /* ความหนาของกรอบ */
-            background: linear-gradient(45deg, #f39c12, #1a2a44, #f39c12, #2c3e50);
-            background-size: 400% 400%;
-            z-index: -1;
-            border-radius: 18px;
-            /* ใหญ่กว่า inner เล็กน้อย */
-            filter: blur(5px);
-            /* ทำให้แสงฟุ้ง */
-            animation: gradientMove 5s ease infinite alternate;
-        }
+    
 
         /* --- ปรับปรุง Login Card (กรอบเคลื่อนไหว) --- */
         .login-card-wrapper {
