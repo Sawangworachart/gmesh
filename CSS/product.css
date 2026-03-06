@@ -1,0 +1,1225 @@
+/* =========================================
+    css หน้า Product ของ admin
+   ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap');
+
+/* =========================================
+   1. Global Styles & Variables (Shared Theme)
+   ========================================= */
+:root {
+    --primary: #5599ff;
+    --primary-dark: #3a75c4;
+    --primary-light: #f0f7ff;
+    --primary-fade: rgba(85, 153, 255, 0.1);
+
+    --secondary: #6c757d;
+    --success: #2ecc71;
+    --danger: #e74c3c;
+    --warning: #f1c40f;
+
+    /* Modal Colors */
+    --modal-bg-header: #ffffff;
+    --modal-input-bg: #f8fafc;
+    --modal-border: #e2e8f0;
+    --icon-orange: #f59e0b;
+    --icon-orange-shadow: rgba(245, 158, 11, 0.3);
+    --text-dark: #1e293b;
+    --text-grey: #64748b;
+    --bg-input: #f8fafc;
+    /* พื้นหลัง Input สีเทาอ่อน */
+    --border-radius: 16px;
+    --input-radius: 12px;
+    --bg-body: #f4f6f9;
+    --bg-card: #ffffff;
+    --text-main: #333333;
+}
+
+body {
+    font-family: 'Sarabun', sans-serif;
+    background-color: var(--bg-body);
+    margin: 0;
+    color: var(--text-main);
+}
+
+.main-content {
+    margin-left: 250px;
+    padding: 30px;
+    min-height: 100vh;
+}
+
+/* =========================================
+   2. Header Banner & Stats
+   ========================================= */
+.header-banner-custom {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border-left: 5px solid #4f8cf6;
+}
+
+.header-left-content {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.header-icon-circle {
+    font-size: 2rem;
+    color: #334155;
+}
+
+.header-main-title {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.header-sub-desc {
+    margin: 4px 0 0 0;
+    font-size: 1rem;
+    color: #64748b;
+}
+
+.btn-pill-primary {
+    background: linear-gradient(135deg, #5c93ff 0%, #3b82f6 100%);
+    color: white;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    transition: all 0.3s;
+}
+
+.btn-pill-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);
+}
+
+/* Stats Cards */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s;
+    border: 1px solid #eee;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card.active {
+    background-color: #f0f7ff;
+    border: 2px solid #5599ff;
+    box-shadow: 0 4px 12px rgba(85, 153, 255, 0.2);
+}
+
+.stat-icon-box {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-right: 15px;
+}
+
+/* Stat Colors */
+.card-all {
+    border-left: 5px solid #28a745 !important;
+}
+
+.card-onsite {
+    border-left: 5px solid #007bff !important;
+}
+
+.card-remote {
+    border-left: 5px solid #a333c8 !important;
+}
+
+.card-sub {
+    border-left: 5px solid #ffc107 !important;
+}
+
+.bg-light-gray {
+    background: #f1f3f5;
+    color: #5d6d7e;
+}
+
+.bg-light-blue {
+    background: #e7f3ff;
+    color: #007bff;
+}
+
+.bg-light-purple {
+    background: #f3e8ff;
+    color: #7e22ce;
+}
+
+.bg-light-orange {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+.stat-info p {
+    margin: 0;
+    color: #8898aa;
+    font-size: 1.25rem;
+}
+
+.stat-info h3 {
+    margin: 5px 0 0;
+    font-size: 2rem;
+    color: #333;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* =========================================
+   3. Table & Toolbar
+   ========================================= */
+.table-toolbar {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.search-container-custom {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 50px;
+    padding: 5px 15px;
+    border: 1px solid #d1d5db;
+    width: 350px;
+}
+
+.search-container-custom i {
+    color: #94a3b8;
+    margin-right: 8px;
+}
+
+.search-container-custom input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.card-table {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
+/* --- Table Styles --- */
+.table-custom {
+    width: 100%;
+    border-collapse: separate;
+    /* แยกเซลล์เพื่อให้ทำมุมมนได้ */
+    border-spacing: 0 8px;
+    /* เว้นระยะห่างระหว่างแถว */
+    margin-top: 10px;
+}
+
+.table-custom thead th {
+    background-color: #f1f5f9;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    padding: 12px 15px;
+    border: none;
+    text-align: left;
+    /* จัดชิดซ้ายเป็นหลัก */
+}
+
+/* จัดหัวตารางตัวแรกและตัวสุดท้ายให้มน */
+.table-custom thead th:first-child {
+    border-radius: 10px 0 0 10px;
+}
+
+.table-custom thead th:last-child {
+    border-radius: 0 10px 10px 0;
+    text-align: center;
+}
+
+.table-custom tbody tr {
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    /* เงาบางๆ ให้แถวลอย */
+    transition: transform 0.2s;
+}
+
+.table-custom tbody tr:hover {
+    transform: translateY(-2px);
+    /* ขยับขึ้นเล็กน้อยเมื่อชี้ */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.table-custom td {
+    padding: 15px;
+    vertical-align: middle;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.95rem;
+    color: #334155;
+}
+
+.table-custom td:first-child {
+    border-left: 1px solid #f1f5f9;
+    border-radius: 10px 0 0 10px;
+}
+
+.table-custom td:last-child {
+    border-right: 1px solid #f1f5f9;
+    border-radius: 0 10px 10px 0;
+}
+
+/* --- Specific Column Styles --- */
+.user-info h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.user-info span {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.device-badge {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.sn-code {
+    font-family: 'Courier New', monospace;
+    color: #000000;
+    /* สีแดงเลือดหมู */
+    background: #cacac9be;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+/* --- Date Column Styling (ไฮไลท์สำคัญ) --- */
+.date-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.date-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+.date-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+}
+
+.date-start .date-icon {
+    background-color: #dbeafe;
+    color: #2563eb;
+}
+
+/* สีฟ้า */
+.date-end .date-icon {
+    background-color: #fce7f3;
+    color: #db2777;
+}
+
+/* สีชมพู */
+
+.date-text {
+    font-weight: 500;
+    color: #475569;
+}
+
+.date-empty {
+    color: #cbd5e1;
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+/* ปุ่มจัดการ */
+.action-btn-group {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-icon.view {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.btn-icon.view:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-icon.edit {
+    background: #fff7ed;
+    color: #f97316;
+}
+
+.btn-icon.edit:hover {
+    background: #f97316;
+    color: white;
+}
+
+.btn-icon:hover {
+    transform: scale(1.2);
+}
+
+/* Badges */
+.badge {
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.badge-onsite {
+    background: #e7f3ff;
+    color: #007bff;
+    border: 1px solid #cce3ff;
+}
+
+.badge-remote {
+    background: #f3e8ff;
+    color: #7e22ce;
+    border: 1px solid #d8b4fe;
+}
+
+.badge-sub {
+    background: #fff2e7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.badge-secondary {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+/* =========================================
+   4. MODAL STYLES (Modern Theme)
+   ========================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.3s;
+    display: flex;
+}
+
+.modal-overlay.show {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-box.custom-modal-style {
+    background: white;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+
+    /* Animation */
+    transform: translateY(-30px);
+    transition: transform 0.3s;
+
+    /* Flexbox Settings สำหรับจัด Layout */
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    /* ความสูงสูงสุด 90% ของหน้าจอ */
+    overflow: hidden;
+    /* ห้าม Scroll ที่กล่องนอก */
+}
+
+.modal-overlay.show .modal-box {
+    transform: translateY(0);
+}
+
+.modal-box {
+    background: #fff;
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    border: none;
+    overflow: hidden;
+    width: 100%;
+    margin: 20px;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header */
+.modal-header-custom {
+    padding: 20px 25px;
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #f1f5f9;
+    flex-shrink: 0;
+}
+
+.header-left {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.header-icon-box {
+    width: 48px;
+    height: 48px;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.icon-bg-orange {
+    background-color: #eef2ff;
+    color: #4f46e5;
+    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+}
+
+.icon-bg-blue {
+    background: #3b82f6;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
+.header-titles h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.header-subtitle {
+    margin: 4px 0 0;
+    font-size: 0.875rem;
+    color: var(--text-grey);
+}
+
+.close-btn-custom {
+    background: #fee2e2;
+    /* พื้นหลังแดงจางๆ */
+    color: #ef4444;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn-custom:hover {
+    background: #fecaca;
+    transform: scale(1.1);
+}
+
+/* Form & Body */
+#productForm {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    /* ยืดเต็มพื้นที่ */
+    overflow: hidden;
+    /* ห้าม Scroll ที่ Form */
+    min-height: 0;
+    /* สำคัญ! แก้บั๊ก Flexbox */
+}
+
+.modal-body {
+    padding: 20px 30px;
+    background: #fff;
+
+    /* คำสั่งให้ Scroll ได้ */
+    flex: 1;
+    /* ยืดเต็มพื้นที่ที่เหลือ */
+    overflow-y: auto;
+    /* Scroll แนวตั้ง */
+    min-height: 0;
+    /* สำคัญ! ช่วยให้ Scroll ทำงานใน viewModal */
+}
+
+/* Custom Scrollbar */
+.custom-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+/* ตกแต่ง Scrollbar ให้สวยงาม */
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Section Header */
+.section-header {
+    background: #eff6ff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+}
+
+.section-indicator {
+    width: 4px;
+    height: 20px;
+    background: #3b82f6;
+    border-radius: 2px;
+}
+
+.section-icon {
+    color: var(--primary-color);
+}
+
+/* Input Styles */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-full {
+    grid-column: span 2;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #334155;
+}
+
+.input-icon-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-icon-wrapper .input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.input-icon-wrapper select,
+.input-icon-wrapper input {
+    padding-left: 45px;
+    /* เว้นที่ให้ไอคอน */
+}
+
+/* File Upload - ทำให้เหมือนกล่องประด้านล่าง */
+input[type="file"].form-control-custom {
+    padding: 40px 20px;
+    text-align: center;
+    border: 2px dashed #cbd5e1;
+    background-color: #f8fafc;
+    cursor: pointer;
+    height: auto;
+}
+
+input[type="file"].form-control-custom:hover {
+    background-color: #eff6ff;
+    border-color: var(--primary-color);
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.form-control-custom {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: var(--bg-input);
+    border: 1px solid transparent;
+    /* ไม่มีขอบตอนปกติ */
+    border-radius: var(--input-radius);
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    transition: all 0.2s;
+    box-sizing: border-box;
+    /* สำคัญเพื่อไม่ให้ input ทะลุ */
+}
+
+.form-control-custom:focus {
+    background-color: #fff;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+    outline: none;
+}
+
+/* Footer */
+.modal-footer-custom {
+    padding: 20px 30px;
+    background: #fff;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.btn-cancel-custom {
+    background: transparent;
+    color: #64748b;
+    border: none;
+    padding: 10px 20px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.btn-save-custom {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-save-custom:hover {
+    background: #2563eb;
+}
+
+.btn-save-custom:active {
+    transform: scale(0.98);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .header-banner-custom {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 576px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-full {
+        grid-column: span 1;
+    }
+}
+
+/* Excel Button Theme - Emerald */
+.btn-pill-excel {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    transition: all 0.3s ease;
+}
+
+.btn-pill-excel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+}
+
+
+.btn-pill-excel i {
+    font-size: 1.1rem;
+}
+
+/* Layout 3 คอลัมน์ */
+.row-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* ป้ายกำกับเล็กๆ ด้านบน */
+.form-label-clean {
+    display: block;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+/* กรอบแคปซูล (Pill) */
+.input-wrapper-pill {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 99px;
+    /* ทำให้โค้งมนเป็นแคปซูล */
+    padding: 4px;
+    transition: all 0.2s;
+}
+
+.input-wrapper-pill:hover,
+.input-wrapper-pill:focus-within {
+    background-color: #fff;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+/* วงกลมไอคอน */
+.icon-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 2px;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.icon-circle.gray {
+    background-color: #94a3b8;
+    color: white;
+}
+
+.icon-circle.blue-gray {
+    background-color: #64748b;
+    color: white;
+}
+
+/* ตัว Input/Select ข้างใน (ไม่มีขอบ) */
+.form-control-pill {
+    border: none;
+    background: transparent;
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    outline: none;
+    cursor: pointer;
+    border-radius: 0 99px 99px 0;
+}
+
+/* Box อัปโหลดไฟล์ */
+/* 1. ซ่อนปุ่ม "เลือกไฟล์" แบบเก่าทิ้งไป (สำคัญมาก ใส่ !important กันเหนียว) */
+#file_upload {
+    display: none !important;
+}
+
+/* 2. ปรับกรอบให้เป็น Flexbox เพื่อจัดของข้างในให้อยู่กึ่งกลาง */
+.upload-box-dashed {
+    display: flex;
+    /* เปิดใช้ Flexbox */
+    justify-content: center;
+    /* จัดให้อยู่กึ่งกลางแนวนอน */
+    align-items: center;
+    /* จัดให้อยู่กึ่งกลางแนวตั้ง */
+
+    width: 100%;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    background-color: #f8fafc;
+    padding: 15px 0;
+    /* ความสูงของกล่อง */
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.upload-box-dashed:hover {
+    background-color: #eff6ff;
+    border-color: #4361ee;
+}
+
+/* 3. จัดกลุ่มไอคอนกับข้อความให้อยู่ด้วยกันสวยๆ */
+.upload-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    /* ระยะห่างระหว่างไอคอนกับข้อความ */
+}
+
+/* 4. แต่งไอคอน */
+.upload-icon-bg {
+    width: 32px;
+    height: 32px;
+    background-color: #e0e7ff;
+    color: #4361ee;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.upload-text {
+    font-size: 0.95rem;
+    color: #475569;
+    font-weight: 500;
+}
+
+/* สีชื่อไฟล์เมื่อเลือกแล้ว */
+.file-selected-text {
+    margin-left: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #16a34a;
+    /* สีเขียว */
+}
+
+/* --- View Modal Specific Styles --- */
+
+/* ส่วนหัวของ Modal ให้ดูคลีนๆ */
+.modal-view-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.view-icon-large {
+    width: 60px;
+    height: 60px;
+    background-color: #eff6ff;
+    color: #3b82f6;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.view-title-group h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.view-title-group p {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+/* --- 3 Cards Grid Layout (ตามรูปตัวอย่าง) --- */
+.info-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* แบ่ง 3 ช่องเท่ากัน */
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.info-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+/* เส้นสีด้านล่างการ์ด */
+.info-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+}
+
+.card-blue::after {
+    background-color: #3b82f6;
+}
+
+/* สีฟ้า */
+.card-green::after {
+    background-color: #10b981;
+}
+
+/* สีเขียว */
+.card-orange::after {
+    background-color: #f59e0b;
+}
+
+/* สีส้ม */
+
+.card-label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.card-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-sub-value {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* --- Section Styles (แดง/เขียว) --- */
+.detail-section {
+    margin-bottom: 25px;
+    background: #fff;
+    border: 1px solid #f1f5f9;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.detail-header {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+/* ธีมสีแดง (อาการเสีย) */
+.theme-red .detail-header {
+    background-color: #fef2f2;
+    color: #ef4444;
+}
+
+.theme-red .detail-icon {
+    background-color: #ef4444;
+    color: white;
+}
+
+/* ธีมสีเขียว (การแก้ไข) */
+.theme-green .detail-header {
+    background-color: #f0fdf4;
+    color: #16a34a;
+}
+
+.theme-green .detail-icon {
+    background-color: #16a34a;
+    color: white;
+}
+
+.detail-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.detail-body {
+    padding: 20px;
+    color: #334155;
+    line-height: 1.6;
+    background: #fff;
+    min-height: 60px;
+    /* ความสูงขั้นต่ำ */
+}
+
+/* Responsive มือถือ */
+@media (max-width: 768px) {
+    .info-card-grid {
+        grid-template-columns: 1fr;
+        /* เรียงเป็นแถวเดียว */
+    }
+}
+
+/* ปุ่มดูไฟล์แนบ (Blue Button Style) */
+.btn-view-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    /* ระยะห่างระหว่างไอคอนกับข้อความ */
+    background-color: #4361ee;
+    /* สีน้ำเงิน */
+    color: #ffffff !important;
+    /* บังคับตัวหนังสือสีขาว */
+    padding: 12px 24px;
+    border-radius: 12px;
+    /* ความมนของปุ่ม */
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    /* ตัดเส้นใต้ Link ออก */
+    box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+    /* เงาสีฟ้าจางๆ */
+    transition: all 0.2s ease;
+    border: none;
+    width: fit-content;
+    /* ความกว้างตามเนื้อหา */
+}
+
+/* เอฟเฟกต์ตอนเอาเมาส์ชี้ */
+.btn-view-file:hover {
+    background-color: #3751cc;
+    /* สีเข้มขึ้น */
+    transform: translateY(-2px);
+    /* ลอยขึ้นเล็กน้อย */
+    box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+}
+
+.btn-view-file i {
+    font-size: 1.2rem;
+    /* ขนาดไอคอน */
+}
