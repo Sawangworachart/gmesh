@@ -22,7 +22,7 @@ if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_token'])) {
     if ($res->num_rows === 1) {
         $u = $res->fetch_assoc();
 
-        $_SESSION['user_id']  = $u['id'];
+        $_SESSION['user_id'] = $u['id'];
         $_SESSION['username'] = $u['username'];
         $_SESSION['user_role'] = $u['role'];
 
@@ -59,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($is_password_correct) {
             if ($row['status'] == 1) {
 
-                $_SESSION['user_id']  = $row['id'];
+                $_SESSION['user_id'] = $row['id'];
                 $_SESSION['username'] = $row['username'];
                 $_SESSION['user_role'] = $row['role'];
 
@@ -81,9 +81,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         "remember_token",
                         $rawToken,
                         [
-                            'expires'  => time() + (86400 * 30),
-                            'path'     => '/',
-                            'secure'   => false,      // ถ้าเป็น https ค่อย true
+                            'expires' => time() + (86400 * 30),
+                            'path' => '/',
+                            'secure' => false,      // ถ้าเป็น https ค่อย true
                             'httponly' => true,
                             'samesite' => 'Lax'      // ⭐ ตัวนี้สำคัญ
                         ]
@@ -400,7 +400,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="input-group">
                     <label class="form-label">ชื่อผู้ใช้งาน</label>
                     <input type="text" name="username" class="input-field" placeholder="กรอกชื่อผู้ใช้งาน"
-                        value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>" required>
+                        value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>"
+                        required>
                 </div>
 
                 <div class="input-group">

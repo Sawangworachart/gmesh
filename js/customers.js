@@ -118,22 +118,22 @@ function filterTable() {
 function openModal(action, id = null) {
     $('#customerForm')[0].reset();
     $('#customers_id').val('');
-    
+
     // --- เพิ่มบรรทัดนี้เพื่อรีเซ็ตค่า action เป็น create ทุกครั้งที่เปิด ---
-    $('#form_action').val('create'); 
+    $('#form_action').val('create');
 
     $('#customerForm input, #customerForm select, #customerForm textarea').prop('disabled', false);
     $('#saveBtn').show();
 
     if (action === 'create') {
         $('#modalTitle').text('เพิ่มลูกค้าใหม่');
-        $('#customerModal').addClass('show'); 
+        $('#customerModal').addClass('show');
     } else if (action === 'edit' || action === 'view') {
-        
+
         if (action === 'edit') {
             $('#modalTitle').text('แก้ไขข้อมูลลูกค้า');
             // --- เพิ่มบรรทัดนี้: เปลี่ยน action เป็น update เมื่อกดปุ่มแก้ไข ---
-            $('#form_action').val('update'); 
+            $('#form_action').val('update');
         } else if (action === 'view') {
             $('#modalTitle').text('รายละเอียดข้อมูลลูกค้า');
             $('#customerForm input, #customerForm select, #customerForm textarea').prop('disabled', true);
@@ -149,7 +149,7 @@ function openModal(action, id = null) {
                 $('input[name="phone"]').val(data.phone);
                 $('#address').val(data.address);
                 $('input[name="province"]').val(data.province);
-                $('#customerModal').addClass('show'); 
+                $('#customerModal').addClass('show');
             }
         }, 'json');
     }
@@ -222,7 +222,7 @@ $(document).ready(function () {
 // =========================================================
 // จัดการแก้ไข/ลบกลุ่ม (แบบใหม่ แก้ปัญหากดไม่ติด)
 // =========================================================
-$(document).on('click', '.btn-edit-group', function(e) {
+$(document).on('click', '.btn-edit-group', function (e) {
     e.stopPropagation(); // ป้องกันการพับหน้าจอ
     let groupId = $(this).data('id');
     let oldName = $(this).data('name');
@@ -256,7 +256,7 @@ $(document).on('click', '.btn-edit-group', function(e) {
     });
 });
 
-$(document).on('click', '.btn-delete-group', function(e) {
+$(document).on('click', '.btn-delete-group', function (e) {
     e.stopPropagation(); // ป้องกันการพับหน้าจอ
     let groupId = $(this).data('id');
 
@@ -309,9 +309,9 @@ function editGroup(groupId, oldName) {
                     // ค้นหาแถวที่มีฟังก์ชัน editGroup ของ id นี้ แล้วเปลี่ยน text ใน .company-name
                     const newName = result.value;
                     Swal.fire({ icon: 'success', title: 'สำเร็จ', text: res.message, timer: 1000, showConfirmButton: false });
-                    
+
                     // เรียก loadTable เพื่อความถูกต้องของข้อมูลทั้งหมด (หรือจะเขียน logic เปลี่ยน text เฉพาะจุดก็ได้)
-                    loadTable(); 
+                    loadTable();
                 } else {
                     Swal.fire('Error', res.message, 'error');
                 }
@@ -332,7 +332,7 @@ function deleteGroup(groupId) {
         cancelButtonText: 'ยกเลิก'
     }).then((result) => {
         if (result.isConfirmed) {
-            $.post(API_URL, { action: 'delete_group', group_id: groupId }, function(res) {
+            $.post(API_URL, { action: 'delete_group', group_id: groupId }, function (res) {
                 if (res.status === 'success') {
                     Swal.fire({
                         icon: 'success',
