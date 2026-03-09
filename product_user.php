@@ -6,8 +6,8 @@
  */
 
 session_start();
-include_once 'auth.php'; 
-require_once 'db.php';
+include_once 'includes/auth.php'; 
+require_once 'includes/db.php';
 
 // --- 1. ดึงข้อมูลสถิติ (Stats) จากตาราง Product ---
 $stats = ['total' => 0, 's1' => 0, 's2' => 0, 's3' => 0, 's4' => 0];
@@ -94,7 +94,7 @@ if ($result) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Claim - MaintDash</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logomaintdash1.png">
     
     <!-- External Libs -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -105,7 +105,7 @@ if ($result) {
 </head>
 <body>
     <!-- Sidebar -->
-    <?php include 'sidebar_user.php'; ?>
+    <?php include 'includes/sidebar_user.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content">

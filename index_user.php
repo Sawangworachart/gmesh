@@ -6,8 +6,8 @@
  */
 
 session_start();
-include_once 'auth.php'; 
-require_once 'db.php';   
+include_once 'includes/auth.php'; 
+require_once 'includes/db.php';   
 
 // ตั้งค่าโซนเวลา
 date_default_timezone_set('Asia/Bangkok');
@@ -81,7 +81,7 @@ $js_notifications = json_encode($all_notifications);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard - MaintDash</title>
     
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logomaintdash1.png">
     
     <!-- External Libraries -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
@@ -94,7 +94,7 @@ $js_notifications = json_encode($all_notifications);
 <body>
     
     <!-- Sidebar -->
-    <?php include 'sidebar_user.php'; ?>
+    <?php include 'includes/sidebar_user.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content">

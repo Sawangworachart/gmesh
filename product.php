@@ -7,7 +7,7 @@ session_start(); // เริ่มต้น Session
 error_reporting(E_ALL); // เปิดการแสดงข้อผิดพลาดทั้งหมด
 ini_set('display_errors', 0); // ปิดการแสดงข้อผิดพลาดบนหน้าเว็บ (ควรเปิดใน Environment Dev)
 
-require_once 'db.php'; // เชื่อมต่อฐานข้อมูล
+require_once 'includes/db.php'; // เชื่อมต่อฐานข้อมูล
 
 // สร้างโฟลเดอร์สำหรับเก็บไฟล์อัปโหลดหากยังไม่มี
 $upload_dir = 'uploads/';
@@ -173,7 +173,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
     <title>MaintDash - Product Claim</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logomaintdash1.png">
     
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -189,7 +189,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
 
 <body>
 
-    <?php include 'sidebar.php'; ?> <!-- เมนูด้านข้าง -->
+    <?php include 'includes/sidebar.php'; ?> <!-- เมนูด้านข้าง -->
 
     <div class="main-content">
         

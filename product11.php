@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 // 1. เชื่อมต่อฐานข้อมูล (ดึงการเชื่อมต่อ PDO จากไฟล์ db.php)
 // สมมติว่าไฟล์ db.php มีการเชื่อมต่อ PDO ในตัวแปร $pdo
 // *** กรุณาตรวจสอบให้แน่ใจว่าไฟล์ db.php มีอยู่และตั้งค่าการเชื่อมต่อถูกต้องแล้ว ***
-require_once 'db.php'; 
+require_once 'includes/db.php'; 
 
 $message = '';
 $searchQuery = '';

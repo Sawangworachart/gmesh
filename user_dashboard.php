@@ -7,7 +7,7 @@ session_start();
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-include_once 'db.php'; 
+include_once 'includes/db.php'; 
 
 date_default_timezone_set('Asia/Bangkok');
 $today = date('Y-m-d');
@@ -110,7 +110,7 @@ for ($i = 0; $i < 10; $i++) {
     <title>แดชบอร์ด - Mesh Intelligence</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logomaintdash1.png">
     
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -126,7 +126,7 @@ for ($i = 0; $i < 10; $i++) {
 
 <body>
     
-    <?php include 'sidebar_user.php'; ?>
+    <?php include 'includes/sidebar_user.php'; ?>
     
     <div class="main-content">
         

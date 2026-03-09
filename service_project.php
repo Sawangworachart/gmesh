@@ -7,8 +7,8 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
-include_once 'auth.php'; // ตรวจสอบสิทธิ์การเข้าถึง
-include_once 'db.php';   // เชื่อมต่อฐานข้อมูล
+include_once 'includes/auth.php'; // ตรวจสอบสิทธิ์การเข้าถึง
+include_once 'includes/db.php';   // เชื่อมต่อฐานข้อมูล
 
 // สร้างโฟลเดอร์สำหรับเก็บไฟล์อัปโหลดหากยังไม่มี
 if (!file_exists('uploads')) {
@@ -232,7 +232,7 @@ if ($c_res) {
     <title>MaintDash - Service Project</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logomaintdash1.png">
     
     <!-- CSS Libraries -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -248,7 +248,7 @@ if ($c_res) {
 
 <body>
 
-    <?php include 'sidebar.php'; ?>
+    <?php include 'includes/sidebar.php'; ?>
 
     <div class="main-content">
 

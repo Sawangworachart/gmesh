@@ -7,8 +7,8 @@ ob_start();
 session_start();
 date_default_timezone_set('Asia/Bangkok');
 
-require_once 'auth.php';
-require_once 'db.php';
+require_once 'includes/auth.php';
+require_once 'includes/db.php';
 
 error_reporting(E_ALL);
 ini_set('display_errors', 0); // ปิดการแสดง error หน้าเว็บ (ควรดู log แทน)
@@ -221,7 +221,7 @@ $urgent_dates_json = json_encode(array_values(array_unique($urgent_dates)));
     <title>MaintDash - Alarms</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logomaintdash1.png">
     
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -245,7 +245,7 @@ $urgent_dates_json = json_encode(array_values(array_unique($urgent_dates)));
     <div class="layout">
         
         <div class="sidebar-space"></div> <!-- Placeholder for sidebar -->
-        <?php include 'sidebar.php'; ?>
+        <?php include 'includes/sidebar.php'; ?>
 
         <div class="main-content">
 
@@ -405,7 +405,7 @@ $urgent_dates_json = json_encode(array_values(array_unique($urgent_dates)));
     <div id="modalDetail" class="modal-overlay" onclick="closeModals(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div style="display: flex; align-items: center; gap: 12px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px;">
-                <img src="images/logomaintdash1.png" alt="Logo" style="height: 40px; width: auto;">
+                <img src="assets/images/logomaintdash1.png" alt="Logo" style="height: 40px; width: auto;">
                 <h3 style="margin: 0; color: #1e293b; font-size: 1.2rem;">รายละเอียดงาน</h3>
             </div>
             <div id="detailBody"></div>

@@ -6,8 +6,8 @@
  */
 
 session_start();
-include_once 'auth.php';
-require_once 'db.php';
+include_once 'includes/auth.php';
+require_once 'includes/db.php';
 
 /* 🔐 ตรวจสอบสิทธิ์: เฉพาะ Super Admin เท่านั้น */
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'superadmin') {
@@ -143,7 +143,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit User (Super Admin) - MaintDash</title>
 
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logomaintdash1.png">
     
     <!-- External Libs -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -157,7 +157,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
 <body>
 
     <!-- Sidebar -->
-    <?php include 'sidebar.php'; ?>
+    <?php include 'includes/sidebar.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content">

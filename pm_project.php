@@ -4,7 +4,7 @@
 // =========================================
 
 session_start(); // เริ่มต้น Session
-require_once 'db.php'; // เรียกใช้ไฟล์เชื่อมต่อฐานข้อมูล
+require_once 'includes/db.php'; // เรียกใช้ไฟล์เชื่อมต่อฐานข้อมูล
 
 // ตั้งค่า Header เพื่อป้องกันการแคช (Cache) ของเบราว์เซอร์
 header('Content-Type: text/html; charset=utf-8');
@@ -214,7 +214,7 @@ function processMAData($conn, $id)
     <title>MaintDash - Preventive Maintenance</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logomaintdash1.png">
     
     <!-- CSS Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -233,7 +233,7 @@ function processMAData($conn, $id)
 
 <body>
     <!-- Sidebar -->
-    <?php include 'sidebar.php'; ?>
+    <?php include 'includes/sidebar.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content">

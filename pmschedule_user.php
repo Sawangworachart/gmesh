@@ -4,7 +4,7 @@
 // =========================================
 
 session_start();
-require_once 'db.php'; // เชื่อมต่อฐานข้อมูล
+require_once 'includes/db.php'; // เชื่อมต่อฐานข้อมูล
 
 // ดึงข้อมูล Schedule จาก Database
 $schedules = [];
@@ -71,7 +71,7 @@ if ($result) {
     <title>MaintDash - PM Schedule</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logomaintdash1.png">
     
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -86,7 +86,7 @@ if ($result) {
 
 <body>
     
-    <?php include 'sidebar_user.php'; ?> <!-- เมนูด้านข้าง -->
+    <?php include 'includes/sidebar_user.php'; ?> <!-- เมนูด้านข้าง -->
 
     <div class="main-content">
         

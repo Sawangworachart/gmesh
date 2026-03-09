@@ -6,8 +6,8 @@
  */
 
 session_start();
-include_once 'auth.php';
-include_once 'db.php'; 
+include_once 'includes/auth.php';
+include_once 'includes/db.php'; 
 
 // ตรวจสอบ ID
 if (!isset($_GET['id']) || empty($_GET['id'])) {
@@ -34,7 +34,7 @@ $project = $project_res->fetch_assoc();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Details - <?= htmlspecialchars($project['project_name']) ?></title>
     
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logomaintdash1.png">
     
     <!-- External Libraries -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">

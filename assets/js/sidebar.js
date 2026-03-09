@@ -88,7 +88,7 @@ if (typeof jQuery == 'undefined') {
         });
 
         $('#modal-logout-btn').click(function() {
-            window.location.href = 'logout.php';
+            window.location.href = 'includes/logout.php';
         });
 
         $('#custom-logout-modal').click(function(e) {

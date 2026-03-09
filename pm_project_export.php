@@ -1,5 +1,5 @@
 <?php
-require_once 'db.php';
+require_once 'includes/db.php';
 
 header("Content-Type: application/vnd.ms-excel; charset=utf-8");
 header("Content-Disposition: attachment; filename=Preventive_Maintenance.xls");

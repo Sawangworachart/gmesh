@@ -21,7 +21,7 @@ body {
     position: relative;
     overflow: hidden;
     perspective: 1000px; /* เพิ่มมิติ 3D */
-    background: url('../../images/information.png') center/cover no-repeat; /* รูปพื้นหลัง */
+    background: url('../images/information.png') center/cover no-repeat; /* รูปพื้นหลัง */
 }
 
 /* --- Effect เมาส์เรืองแสง (Mouse Glow Effect) --- */

@@ -121,7 +121,7 @@ function getChartOptions(type) {
  */
 async function loadChart(type, year, chart) {
     try {
-        const res = await fetch(`dashboard_chart_data.php?type=${type}&year=${year}`);
+        const res = await fetch(`includes/dashboard_chart_data.php?type=${type}&year=${year}`);
         const data = await res.json();
         chart.data.labels = data.labels;
         chart.data.datasets[0].data = data.data;

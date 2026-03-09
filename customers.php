@@ -6,8 +6,8 @@
  */
 
 // เริ่มต้น Session และเชื่อมต่อฐานข้อมูล
-include_once 'auth.php';
-include_once 'db.php';
+include_once 'includes/auth.php';
+include_once 'includes/db.php';
 
 // --------------------------------------------------------------------------------
 // 1. PHP BACKEND LOGIC (AJAX REQUESTS)
@@ -235,7 +235,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
 <head>
     <meta charset="UTF-8">
     <title>Customers Management - MaintDash</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logomaintdash1.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- External Libraries -->
@@ -249,7 +249,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
 </head>
 <body>
     <!-- Sidebar -->
-    <?php include 'sidebar.php'; ?>
+    <?php include 'includes/sidebar.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content">

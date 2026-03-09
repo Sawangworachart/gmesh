@@ -3,7 +3,7 @@
 // หน้าจัดการตาราง PM (Admin) - PM Schedule Management
 // =========================================
 
-require_once 'db.php'; // เชื่อมต่อฐานข้อมูล
+require_once 'includes/db.php'; // เชื่อมต่อฐานข้อมูล
 
 // ตั้งค่าการแสดงผล Error (ควรปิดเมื่อใช้งานจริง)
 ini_set('display_errors', 0);
@@ -148,7 +148,7 @@ if ($result && mysqli_num_rows($result) > 0) {
     <title>MaintDash - PM Schedule</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logomaintdash1.png">
     
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -164,7 +164,7 @@ if ($result && mysqli_num_rows($result) > 0) {
 
 <body>
     
-    <?php include 'sidebar.php'; ?> <!-- เมนูด้านข้าง -->
+    <?php include 'includes/sidebar.php'; ?> <!-- เมนูด้านข้าง -->
 
     <div class="main-content">
         

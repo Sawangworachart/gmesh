@@ -6,8 +6,8 @@
  */
 
 session_start();
-include_once 'auth.php'; 
-require_once 'db.php';
+include_once 'includes/auth.php'; 
+require_once 'includes/db.php';
 
 // --------------------------------------------------------------------------
 //  API HANDLER (Backend Logic)
@@ -130,7 +130,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
 <body>
 
     <!-- Sidebar -->
-    <?php include 'sidebar_user.php'; ?>
+    <?php include 'includes/sidebar_user.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content">

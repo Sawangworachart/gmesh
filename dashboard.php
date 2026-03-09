@@ -4,8 +4,8 @@
 // =========================================
 
 session_start();
-include_once 'auth.php'; // ตรวจสอบการล็อกอิน
-require_once 'db.php';   // เชื่อมต่อฐานข้อมูล
+include_once 'includes/auth.php'; // ตรวจสอบการล็อกอิน
+require_once 'includes/db.php';   // เชื่อมต่อฐานข้อมูล
 
 // --- 1. รับค่าปีที่เลือกสำหรับกราฟ (ถ้าไม่มีให้เป็นค่าว่าง) ---
 $year_pm      = $_GET['year_pm'] ?? '';
@@ -108,7 +108,7 @@ if ($res_product_chart) {
     <title>MaintDash - Dashboard</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logomaintdash1.png">
     
     <!-- Libraries -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -122,7 +122,7 @@ if ($res_product_chart) {
 
 <body>
     <!-- Sidebar -->
-    <?php include 'sidebar.php'; ?>
+    <?php include 'includes/sidebar.php'; ?>
 
     <div class="main-content">
         <div class="dashboard-content-wrapper">
