@@ -410,7 +410,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </form>
 
             <div class="login-footer">
-                © <?php echo date('Y'); ?> Mesh Intelligence Co.,Ltd.<br>All rights reserved.
+                © <?php echo date('Y'); ?> บริษัท โกลบอล เมช จำกัด Global Mesh Co.,Ltd.<br>
             </div>
         </div>
     </div>
