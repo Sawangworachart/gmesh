@@ -2,14 +2,15 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-include_once 'includes/db.php';
+include_once 'db.php';
 
 header("Content-Type: application/vnd.ms-excel; charset=utf-8");
 header("Content-Disposition: attachment; filename=Service.xls");
 echo "<meta charset='utf-8'>";
 
 // --- 1. เพิ่มฟังก์ชันแปลงวันที่เป็น พ.ศ. ตรงนี้ครับ ---
-function dateToThai($date) {
+function dateToThai($date)
+{
     if ($date == "" || $date == "0000-00-00" || $date == null) {
         return "ไม่ได้ระบุ"; // หรือจะใช้ "-" ก็ได้ครับ
     }
@@ -17,7 +18,7 @@ function dateToThai($date) {
     $year = date("Y", $timestamp) + 543;
     $month = date("m", $timestamp);
     $day = date("d", $timestamp);
-    
+
     return "$day/$month/$year";
 }
 // ------------------------------------------------
@@ -73,15 +74,15 @@ $sql = "SELECT
 FROM service_project_new s
 LEFT JOIN service_project_detail d ON s.service_id = d.service_id
 LEFT JOIN customers c ON d.customers_id = c.customers_id
-ORDER BY s.project_name ASC, d.start_date DESC"; 
+ORDER BY s.project_name ASC, d.start_date DESC";
 
 $result = $conn->query($sql) or die($conn->error);
 
-$current_project = null; 
-$count_per_group = 0;    
+$current_project = null;
+$count_per_group = 0;
 
 while ($row = $result->fetch_assoc()) {
-    
+
     // --- เรียกใช้ฟังก์ชันแปลงวันที่ตรงนี้ครับ ---
     $start_date_thai = dateToThai($row['start_date']);
     $end_date_thai = dateToThai($row['end_date']);
@@ -89,7 +90,7 @@ while ($row = $result->fetch_assoc()) {
 
     // 5. Logic การจัดกลุ่ม
     if ($current_project !== $row['project_name']) {
-        
+
         // 5.1 สรุปยอดกลุ่มเก่า
         if ($current_project !== null) {
             echo "<tr>
@@ -101,7 +102,7 @@ while ($row = $result->fetch_assoc()) {
 
         // 5.2 เริ่มกลุ่มใหม่
         $current_project = $row['project_name'];
-        $count_per_group = 0; 
+        $count_per_group = 0;
 
         echo "<tr>
                 <td colspan='9' style='background-color: #d9edf7; border: 1px solid #000; text-align: left; font-weight: bold;'>
@@ -121,7 +122,7 @@ while ($row = $result->fetch_assoc()) {
             <td>{$row['action_taken']}</td>
           </tr>";
 
-    $count_per_group++; 
+    $count_per_group++;
 }
 
 // 7. สรุปยอดกลุ่มสุดท้าย

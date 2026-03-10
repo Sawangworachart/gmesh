@@ -1,0 +1,561 @@
+/* =========================================
+    css หน้า Edit User ของ superadmin
+   ========================================= */
+:root {
+    --primary: #8b5cf6;
+    /* ธีมสีม่วงสำหรับ Admin */
+    --primary-dark: #7c3aed;
+    --primary-light: #f5f3ff;
+
+    --bg-body: #f4f6f9;
+    --text-main: #333333;
+    --border-color: #e2e8f0;
+
+    /* Modal Theme */
+    --modal-bg-header: #ffffff;
+    --modal-input-bg: #f8fafc;
+    --modal-border: #e2e8f0;
+}
+
+body {
+    font-family: 'Sarabun', sans-serif;
+    background-color: var(--bg-body);
+    margin: 0;
+    color: var(--text-main);
+}
+
+.main-content {
+    margin-left: 250px;
+    padding: 30px;
+    min-height: 100vh;
+}
+
+/* =========================================
+   2. Header Banner & Stats
+   ========================================= */
+.header-banner-custom {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border-left: 5px solid #8b5cf6;
+}
+
+.header-left-content {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.header-icon-circle {
+    font-size: 2rem;
+}
+
+.icon-bg-purple-light {
+    color: #8b5cf6;
+}
+
+.header-main-title {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.header-sub-desc {
+    margin: 4px 0 0 0;
+    font-size: 1rem;
+    color: #64748b;
+}
+
+/* Button Pill */
+.btn-pill-primary {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    color: white;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    transition: all 0.3s;
+}
+
+.btn-pill-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(139, 92, 246, 0.4);
+}
+
+/* Stats Cards */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s;
+    border: 1px solid #eee;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card.active {
+    background-color: #f5f3ff;
+    border: 2px solid #8b5cf6;
+}
+
+.stat-icon-box {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-right: 15px;
+}
+
+.bg-light-purple {
+    background: #f3e8ff;
+    color: #7e22ce;
+}
+
+.bg-light-green {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.bg-light-red {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.stat-info p {
+    margin: 0;
+    color: #8898aa;
+    font-size: 1.25rem;
+}
+
+.stat-info h3 {
+    margin: 5px 0 0;
+    font-size: 2rem;
+    color: #333;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.card-all {
+    border-left: 5px solid #7e22ce !important;
+}
+
+.card-active {
+    border-left: 5px solid #22c55e !important;
+}
+
+.card-inactive {
+    border-left: 5px solid #ef4444 !important;
+}
+
+/* =========================================
+   3. Table & Toolbar
+   ========================================= */
+.table-toolbar {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.search-container-custom {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 50px;
+    padding: 5px 15px;
+    border: 1px solid #d1d5db;
+    width: 350px;
+}
+
+.search-container-custom i {
+    color: #94a3b8;
+    margin-right: 8px;
+}
+
+.search-container-custom input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.card-table {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
+.table-custom {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-custom th {
+    background: #f8fafc;
+    padding: 15px;
+    text-align: left;
+    color: #64748b;
+    font-size: 0.85rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.table-custom td {
+    padding: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: #334155;
+}
+
+/* User Avatar in Table */
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    color: #4f46e5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+/* Badges */
+.badge {
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.badge-active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-admin {
+    background: #f3e8ff;
+    color: #6b21a8;
+    border: 1px solid #d8b4fe;
+}
+
+.badge-user {
+    background: #e0f2fe;
+    color: #075985;
+    border: 1px solid #bae6fd;
+}
+
+.btn-icon {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: 0.2s;
+}
+
+.btn-icon:hover {
+    transform: scale(1.2);
+}
+
+/* =========================================
+   4. MODAL STYLES (Modern Purple Theme)
+   ========================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 99999 !important;
+}
+
+.modal-overlay.show {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-box.custom-modal-style {
+    background: white;
+    width: 90%;
+    max-width: 650px;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    transform: translateY(-30px);
+    transition: transform 0.3s;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+.modal-overlay.show .modal-box {
+    transform: translateY(0);
+}
+
+/* Header */
+.modal-header-custom {
+    padding: 20px 25px;
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+}
+
+.header-left {
+    display: flex;
+    gap: 15px;
+}
+
+.header-icon-box {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.icon-bg-purple {
+    background: #8b5cf6;
+    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
+}
+
+.header-titles h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.header-subtitle {
+    margin: 4px 0 0;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.close-btn-custom {
+    background: #fee2e2;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: #ef4444;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn-custom:hover {
+    transform: scale(1.1);
+}
+
+/* Body & Form */
+#userForm {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.modal-body {
+    padding: 20px 30px;
+    background: #fff;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+/* Section Header */
+.section-header {
+    background: #f5f3ff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #8b5cf6;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+}
+
+.section-indicator {
+    width: 4px;
+    height: 20px;
+    background: #8b5cf6;
+    border-radius: 2px;
+}
+
+/* Inputs */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 15px;
+}
+
+.form-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #475569;
+}
+
+.input-icon-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.form-control-custom {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    color: #334155;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+.form-control-custom:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* Footer */
+.modal-footer-custom {
+    padding: 20px 30px;
+    background: #fff;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.btn-cancel-custom {
+    background: transparent;
+    color: #64748b;
+    border: none;
+    padding: 10px 20px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.btn-save-custom {
+    background: #8b5cf6;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-save-custom:hover {
+    background: #7c3aed;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .header-banner-custom {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 576px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================================
+   FIX: Z-Index for SweetAlert
+   ========================================= */
+.swal2-container {
+    z-index: 99999 !important;
+    /* ค่าสูงกว่า Modal แน่นอน */
+}
