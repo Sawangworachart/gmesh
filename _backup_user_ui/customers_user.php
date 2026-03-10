@@ -41,11 +41,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'fetch_data') {
             $has_data = true;
     ?>
         <tr class="group-header" onclick="toggleGroup('group-<?= $gid ?>', this)" data-group-id="group-<?= $gid ?>">
-            <td colspan="7">
+            <td colspan="6">
                 <div class="header-content">
                     <div class="company-info">
-                        <span class="folder-icon"><i class="fas fa-folder"></i></span>
-                        <span class="company-name"><?= htmlspecialchars($gname) ?> <span class="text-muted">(<?= $count ?>)</span></span>
+                        <div class="folder-icon"><i class="fas fa-folder"></i></div>
+                        <span><?= htmlspecialchars($gname) ?> <span style="color:#94a3b8; font-weight:400; font-size:0.9rem;">(<?= $count ?>)</span></span>
                     </div>
                     <div class="header-actions">
                         <i class="fas fa-chevron-down arrow-icon"></i>
@@ -61,16 +61,20 @@ if (isset($_GET['action']) && $_GET['action'] === 'fetch_data') {
                     <div class="tree-line-indicator"></div>
                 </td>
                 <td>
-                    <span class="fw-bold"><?= htmlspecialchars($row['customers_name']) ?></span><br>
+                    <span style="font-weight:600; color:#1e293b;"><?= htmlspecialchars($row['customers_name']) ?></span><br>
                     <?php if(!empty($row['agency'])): ?>
-                        <small class="badge-agency"><?= htmlspecialchars($row['agency']) ?></small>
+                        <span class="badge-agency"><i class="fas fa-briefcase"></i> <?= htmlspecialchars($row['agency']) ?></span>
                     <?php endif; ?>
                 </td>
                 <td>
-                    <?= htmlspecialchars($row['contact_name']) ?>
+                    <div class="contact-info">
+                        <i class="fas fa-user-circle"></i> <?= htmlspecialchars($row['contact_name']) ?>
+                    </div>
                 </td>
                 <td>
-                    <?= htmlspecialchars($row['phone']) ?>
+                    <a href="tel:<?= htmlspecialchars($row['phone']) ?>" class="phone-link">
+                        <i class="fas fa-phone"></i> <?= htmlspecialchars($row['phone']) ?>
+                    </a>
                 </td>
                 <td>
                     <span class="address-text"><?= htmlspecialchars($row['address']) ?></span>
@@ -78,13 +82,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'fetch_data') {
                 <td>
                     <span class="province-tag"><?= htmlspecialchars($row['province']) ?></span>
                 </td>
-                <td></td> <!-- Empty column for actions -->
             </tr>
             <?php endforeach; ?>
         <?php else: ?>
             <tr class="group-item group-<?= $gid ?>" style="display:none;">
                 <td class="tree-line-cell"><div class="tree-line-indicator"></div></td>
-                <td colspan="6" style="color:#94a3b8; font-style:italic; padding:15px;">ไม่มีข้อมูลในกลุ่มนี้</td>
+                <td colspan="5" style="color:#94a3b8; font-style:italic; padding:15px;">ไม่มีข้อมูลในกลุ่มนี้</td>
             </tr>
         <?php endif; ?>
 
@@ -93,17 +96,18 @@ if (isset($_GET['action']) && $_GET['action'] === 'fetch_data') {
     } // จบ if res_groups
 
     // --- ส่วนลูกค้าที่ไม่มีกลุ่ม (Uncategorized) ---
+    // หมายเหตุ: ส่วนนี้จะไม่ถูกนับรวมในตัวเลข Total ด้านบน เพื่อให้ตรงกับตาราง customer_groups
     if (isset($customers_by_group['uncategorized']) && count($customers_by_group['uncategorized']) > 0) {
         $uncat_list = $customers_by_group['uncategorized'];
         $u_count = count($uncat_list);
         $has_data = true;
     ?>
         <tr class="group-header" onclick="toggleGroup('group-uncat', this)" data-group-id="group-uncat">
-            <td colspan="7">
+            <td colspan="6">
                 <div class="header-content">
                     <div class="company-info">
-                        <span class="folder-icon"><i class="fas fa-question-circle"></i></span>
-                        <span class="company-name">ลูกค้ารอจัดกลุ่ม <span class="text-muted">(<?= $u_count ?>)</span></span>
+                        <div class="folder-icon" style="background:#f1f5f9; color:#64748b;"><i class="fas fa-folder-open"></i></div>
+                        <span>ไม่ระบุกลุ่ม <span style="color:#94a3b8; font-weight:400; font-size:0.9rem;">(<?= $u_count ?>)</span></span>
                     </div>
                     <div class="header-actions"><i class="fas fa-chevron-down arrow-icon"></i></div>
                 </div>
@@ -113,20 +117,19 @@ if (isset($_GET['action']) && $_GET['action'] === 'fetch_data') {
             <tr class="group-item group-uncat customer-row" style="display:none;">
                 <td class="tree-line-cell"><div class="tree-line-indicator"></div></td>
                 <td>
-                    <span class="fw-bold"><?= htmlspecialchars($row['customers_name']) ?></span><br>
-                    <small class="badge-agency"><?= htmlspecialchars($row['agency']) ?></small>
+                    <span style="font-weight:600; color:#1e293b;"><?= htmlspecialchars($row['customers_name']) ?></span><br>
+                    <span class="badge-agency"><?= htmlspecialchars($row['agency']) ?></span>
                 </td>
-                <td><?= htmlspecialchars($row['contact_name']) ?></td>
-                <td><?= htmlspecialchars($row['phone']) ?></td>
+                <td><div class="contact-info"><i class="fas fa-user-circle"></i> <?= htmlspecialchars($row['contact_name']) ?></div></td>
+                <td><span class="phone-link"><i class="fas fa-phone"></i> <?= htmlspecialchars($row['phone']) ?></span></td>
                 <td><span class="address-text"><?= htmlspecialchars($row['address']) ?></span></td>
                 <td><span class="province-tag"><?= htmlspecialchars($row['province']) ?></span></td>
-                <td></td>
             </tr>
         <?php endforeach; ?>
     <?php } ?>
 
     <?php if (!$has_data): ?>
-        <tr><td colspan="7" class="text-center" style="padding:40px;">ไม่พบข้อมูลลูกค้า</td></tr>
+        <tr><td colspan="6" class="text-center" style="padding:40px;">ไม่พบข้อมูลลูกค้า</td></tr>
     <?php endif; ?>
 
     <?php
@@ -137,7 +140,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'fetch_data') {
 // ส่วนที่ 2: หน้าจอแสดงผล (HTML Main Page)
 // ===========================================================================
 
-// นับจำนวนจากตาราง customer_groups
+// [แก้ไขจุดที่ 1] นับจำนวนจากตาราง customer_groups แทน customers
 $total_groups = 0;
 $count_res = mysqli_query($conn, "SELECT COUNT(*) as total FROM customer_groups");
 if($count_row = mysqli_fetch_assoc($count_res)) {
@@ -149,86 +152,67 @@ if($count_row = mysqli_fetch_assoc($count_res)) {
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>MaintDash - Customers</title>
+    <title>MaintDash</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap">
-    <!-- ใช้ CSS ตัวเดียวกับ Admin -->
-    <link rel="stylesheet" href="CSS/customers.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
-    <style>
-        /* CSS เพิ่มเติมสำหรับหน้า User เพื่อซ่อนปุ่มจัดการ */
-        .action-btn { display: none !important; }
-        /* ปรับแต่ง Header Banner ให้เหมือน Admin แต่ซ่อนปุ่มเพิ่ม */
-        .header-banner-custom {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            padding: 20px 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            margin-bottom: 25px;
-            position: relative;
-            overflow: hidden;
-        }
-    </style>
+    <link rel="stylesheet" href="CSS/customers_user.css">
+
 </head>
 <body>
     <?php include 'sidebar_user.php'; ?>
-    
+
     <div class="main-content">
-        <div class="header-banner-custom">
-            <div class="header-left-content">
-                <div class="header-icon-circle"><i class="fas fa-users-cog"></i></div>
-                <div class="header-text-group">
-                    <h2 class="header-main-title">Customers</h2>
-                    <p class="header-sub-desc">ข้อมูลลูกค้า แผนก และการติดต่อแยกตามกลุ่มองค์กร</p>
-                </div>
+        
+        <div class="page-header-card animate-zoom">
+            <div class="header-title-group">
+                <h1>Customers</h1>
+                <div class="header-subtitle">จัดการข้อมูลลูกค้า แผนก และข้อมูลการติดต่อแยกตามกลุ่มองค์กร
+
+
+
+</div>
             </div>
-            <!-- ไม่มีปุ่มจัดการสำหรับ User -->
         </div>
 
-        <div class="table-toolbar">
-            <div class="search-container-custom">
+        <div class="hero-card animate-zoom">
+            <div class="hero-info">
+                <h3 id="totalCountDisplay"><?= number_format($total_groups); ?></h3>
+                <span>กลุ่มลูกค้าทั้งหมด (Total Groups)</span>
+            </div>
+            <i class="fas fa-users hero-icon"></i>
+        </div>
+        
+        <div class="toolbar animate-zoom">
+           
+            <div class="search-box">
                 <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="ค้นหาชื่อลูกค้า, แผนก, หรือเบอร์โทร..." onkeyup="filterTable()">
+                <input type="text" id="searchInput" placeholder="ค้นหาชื่อ, เบอร์โทร..." onkeyup="filterTable()">
             </div>
         </div>
 
-        <div class="card">
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 50px;"></th>
-                            <th>ชื่อองค์กร / แผนก</th>
-                            <th>ชื่อผู้ติดต่อ</th>
-                            <th>เบอร์โทรศัพท์</th>
-                            <th>ที่อยู่</th>
-                            <th>จังหวัด</th>
-                            <th style="width: 50px;"></th> <!-- Empty column instead of Actions -->
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr><td colspan="7" class="text-center" style="padding:20px;">กำลังโหลดข้อมูล...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="table-responsive animate-zoom">
+            <table class="grouped-table">
+                <thead>
+    <tr>
+        <th style="width: 50px;"></th> 
+        <th style="width: 35%;">ชื่อองค์กร / แผนก</th> 
+        <th style="width: 15%;">ผู้ติดต่อ</th> <th style="width: 15%;">เบอร์โทรศัพท์</th>
+        <th style="width: 25%;">ที่อยู่</th>
+        <th style="width: 10%;">จังหวัด</th>
+    </tr>
+</thead>
+                <tbody id="tableBody">
+                     <tr><td colspan="6" class="text-center" style="padding:20px;">กำลังโหลดข้อมูล...</td></tr>
+                </tbody>
+            </table>
         </div>
+
     </div>
     
     <script src="js/customers_user.js"></script>
-    <script>
-        // Override ฟังก์ชัน toggleGroup จาก customers.css/js เพื่อให้ทำงานได้
-        function toggleGroup(groupClass, headerElement) {
-            const icon = $(headerElement).find('.arrow-icon');
-            icon.toggleClass('rotated');
-            $('.' + groupClass).slideToggle(200);
-        }
-    </script>
 
 </body>
 </html>

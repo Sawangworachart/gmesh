@@ -1,291 +1,221 @@
 <?php
-// หน้า Preventive Maintenance ของ user
+// หน้า Preventive Maintenance ของ user (ปรับ UI ให้เหมือน Admin)
 session_start();
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
-
 include_once 'auth.php'; 
 require_once 'db.php';
 
-// --- API SECTION (สำหรับดึงข้อมูลตาราง MA ผ่าน AJAX) ---
-if (isset($_GET['action']) && $_GET['action'] == 'get_ma_detail') {
-    while (ob_get_level()) ob_end_clean(); 
+// API Logic (เฉพาะส่วนที่ User ต้องใช้ เช่น ดึงข้อมูล View Detail)
+if (isset($_GET['api']) && $_GET['api'] == 'true') {
     header('Content-Type: application/json');
-    
-    if (!isset($_GET['id'])) {
-        echo json_encode(['success' => false, 'message' => 'Missing ID']);
+    $action = $_POST['action'] ?? $_GET['action'] ?? '';
+
+    if ($action == 'fetch_all') {
+        $sql = "SELECT p.*, c.customers_name FROM pm_project p LEFT JOIN customers c ON p.customers_id = c.customers_id ORDER BY p.pmproject_id DESC";
+        $result = mysqli_query($conn, $sql);
+        $data = [];
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $data[] = $row;
+            }
+        }
+        echo json_encode(['success' => true, 'data' => $data]);
         exit;
     }
 
-    $id = intval($_GET['id']);
-    
-    $maSql = "SELECT * FROM ma_schedule WHERE pmproject_id = $id ORDER BY ma_date ASC";
-    $maResult = mysqli_query($conn, $maSql);
-    
-    $schedule = [];
-    if ($maResult) {
-        while($row = mysqli_fetch_assoc($maResult)) {
-            $dateObj = date_create($row['ma_date']);
-            $y = date_format($dateObj, 'Y') + 543;
-            $row['formatted_date'] = date_format($dateObj, 'd/m/') . $y;
-            $row['has_file'] = (!empty($row['file_path']) && file_exists($row['file_path'])) ? true : false;
-            $schedule[] = $row;
-        }
+    if ($action == 'fetch_single') {
+        $id = intval($_GET['id']);
+        $projectResult = mysqli_query($conn, "SELECT p.*, c.customers_name FROM pm_project p LEFT JOIN customers c ON p.customers_id = c.customers_id WHERE p.pmproject_id = $id");
+        $project = mysqli_fetch_assoc($projectResult);
+        $maResult = mysqli_query($conn, "SELECT * FROM ma_schedule WHERE pmproject_id = $id ORDER BY ma_date ASC");
+        $maSchedule = [];
+        while ($row = mysqli_fetch_assoc($maResult))
+            $maSchedule[] = $row;
+        echo json_encode(['success' => true, 'data' => $project, 'ma' => $maSchedule]);
+        exit;
     }
-    
-    echo json_encode(['success' => true, 'schedule' => $schedule]);
-    exit;
-}
-
-// --- ดึงข้อมูล Main Project ---
-$projects = [];
-$sql = "SELECT p.*, c.customers_name 
-        FROM pm_project p 
-        LEFT JOIN customers c ON p.customers_id = c.customers_id 
-        ORDER BY p.pmproject_id DESC";
-$result = mysqli_query($conn, $sql);
-
-if ($result) {
-    while($row = mysqli_fetch_assoc($result)) {
-        $rawStatus = trim($row['status']);
-        $displayStatus = $rawStatus;
-        
-        if ($rawStatus == '2' || strcasecmp($rawStatus, 'กำลังดำเนินการ') == 0 || strcasecmp($rawStatus, 'In Progress') == 0) {
-            $displayStatus = 'กำลังดำเนินการ';
-        } elseif ($rawStatus == '3' || strcasecmp($rawStatus, 'ดำเนินการเสร็จสิ้น') == 0 || strcasecmp($rawStatus, 'Completed') == 0) {
-            $displayStatus = 'ดำเนินการเสร็จสิ้น';
-        } elseif ($rawStatus == '1' || strcasecmp($rawStatus, 'รอการตรวจสอบ') == 0 || strcasecmp($rawStatus, 'Pending') == 0) {
-            $displayStatus = 'รอการตรวจสอบ';
-        } else {
-            $displayStatus = 'รอการตรวจสอบ'; 
-        }
-
-        $projects[] = [
-            'id' => $row['pmproject_id'],
-            'display_id' => $row['number'] ? $row['number'] : 'ID:'.$row['pmproject_id'],
-            'project_no' => $row['number'],
-            'name' => $row['project_name'],
-            'customer' => $row['customers_name'],
-            'responsible' => $row['responsible_person'],
-            'status' => $displayStatus,
-            'contract_period' => $row['contract_period'],
-            'ma_detail' => $row['going_ma'],
-            'start_date' => $row['deliver_work_date'],
-            'end_date' => $row['end_date'],
-            'file_path' => $row['file_path']
-        ];
-    }
-}
-
-$stats = ['total' => count($projects), 'pending' => 0, 'doing' => 0, 'done' => 0];
-foreach ($projects as $p) {
-    $st = $p['status'];
-    if ($st == 'รอการตรวจสอบ') {
-        $stats['pending']++;
-    } elseif ($st == 'กำลังดำเนินการ') {
-        $stats['doing']++;
-    } elseif ($st == 'ดำเนินการเสร็จสิ้น') {
-        $stats['done']++;
-    }
-}
-
-function formatDate($date) {
-    if (!$date || $date == '0000-00-00') return '-';
-    $y = date('Y', strtotime($date)) + 543;
-    return date('d/m/', strtotime($date)) . $y;
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Management - Mesh Intelligence</title>
+    <meta charset="UTF-8">
+    <title>MaintDash - PM Project</title>
     <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="CSS/pmproject_user.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- ใช้ CSS ตัวเดียวกับ Admin -->
+    <link rel="stylesheet" href="CSS/pm_project.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        /* ซ่อนปุ่ม Action ที่ User ไม่ควรเห็น */
+        .col-action, .btn-pill-primary, .btn-action-group, .btn-edit, .btn-delete, .btn-add-ma {
+            display: none !important;
+        }
+        /* แต่ปุ่ม View ต้องเห็น */
+        .btn-view { display: inline-block !important; }
+        
+        /* ปรับ Header */
+        .header-right-action { display: none !important; }
+    </style>
 </head>
+
 <body>
-
     <?php include 'sidebar_user.php'; ?>
-
     <div class="main-content">
-        <div class="page-header-card animate-zoom">
-            <div class="header-title-group">
-                <h1>Preventive Maintenance</h1>
-                <div class="header-subtitle">บริหารจัดการโครงการและแผนการบำรุงรักษา (PM/MA)</div>
+        <div class="header-banner-custom">
+            <div class="header-left-content">
+                <div class="header-icon-circle"><i class="fas fa-project-diagram"></i></div>
+                <div class="header-text-group">
+                    <h2 class="header-main-title">Preventive Maintenance</h2>
+                    <p class="header-sub-desc">บริหารจัดการโครงการและแผนการบำรุงรักษา (PM/MA)</p>
+                </div>
+            </div>
+            <!-- User ไม่มีปุ่มเพิ่ม/Export -->
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card total">
+                <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+                <div class="stat-info"><label>ทั้งหมด</label><span id="stat_total">0</span></div>
+            </div>
+            <div class="stat-card pending">
+                <div class="stat-icon"><i class="fas fa-clipboard-check"></i></div>
+                <div class="stat-info"><label>รอการตรวจสอบ</label><span id="stat_pending">0</span></div>
+            </div>
+            <div class="stat-card processing">
+                <div class="stat-icon"><i class="fas fa-spinner fa-spin-hover"></i></div>
+                <div class="stat-info"><label>กำลังดำเนินการ</label><span id="stat_processing">0</span></div>
+            </div>
+            <div class="stat-card completed">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info"><label>ดำเนินการเสร็จสิ้น</label><span id="stat_completed">0</span></div>
             </div>
         </div>
 
-        <div class="stats-grid animate-zoom">
-            <div class="stat-card grad-blue">
-                <div><div class="stat-label">โครงการทั้งหมด</div><div class="stat-val"><?= $stats['total'] ?></div></div>
-                <i class="fas fa-layer-group stat-icon-bg"></i>
-            </div>
-            
-            <div class="stat-card grad-green">
-                <div><div class="stat-label">รอการตรวจสอบ</div><div class="stat-val"><?= $stats['pending'] ?></div></div>
-                <i class="fas fa-hourglass-half stat-icon-bg"></i>
-            </div>
-            
-            <div class="stat-card grad-purple">
-                <div><div class="stat-label">กำลังดำเนินการ</div><div class="stat-val"><?= $stats['doing'] ?></div></div>
-                <i class="fas fa-spinner stat-icon-bg"></i>
-            </div>
-            
-            <div class="stat-card grad-orange">
-                <div><div class="stat-label">ดำเนินการเสร็จสิ้น</div><div class="stat-val"><?= $stats['done'] ?></div></div>
-                <i class="fas fa-check-circle stat-icon-bg"></i>
-            </div>
-        </div>
-
-        <div class="toolbar-container animate-zoom">
-            <div style="font-size: 1.2rem; font-weight: 700;"><i class="fas fa-list-ul"></i> รายการโครงการ</div>
-            <div class="search-pill">
+        <div class="table-toolbar">
+            <div class="search-container-custom">
                 <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="ค้นหาชื่อโครงการ, รหัส, ลูกค้า..." onkeyup="searchTable('projectTable', 'searchInput')">
+                <input type="text" id="searchInput" placeholder="ค้นหาชื่อโครงการ, ลูกค้า...">
             </div>
         </div>
 
-        <div class="table-responsive animate-zoom">
-            <table class="bordered-table" id="projectTable">
+        <div class="card-table">
+            <table class="table-custom">
                 <thead>
                     <tr>
-                        <th width="8%">เลขที่โครงการ</th>
-                        <th width="12%">ชื่อโครงการ</th> 
-                        <th width="15%">รายละเอียด (MA)</th> 
-                        <th width="14%">ลูกค้า</th>
-                        <th width="10%">ผู้รับผิดชอบ</th>
-                        <th width="8%">สถานะ</th>
-                        <th width="9%">สัญญา</th>
-                        <th width="10%">วันที่เริ่ม / วันที่สิ้นสุด</th>
-                        <th width="5%" class="text-center">จัดการ</th>
+                        <th class="col-id">เลขที่โครงการ</th>
+                        <th class="col-name">ชื่อโครงการ</th>
+                        <th class="col-customer">ลูกค้า</th>
+                        <th class="col-status">สถานะ</th>
+                        <th class="col-contract">สัญญา</th>
+                        <th class="col-contract" style="width: 150px;">เริ่มประกัน / สิ้นสุดประกัน</th>
+                        <th class="col-action text-center" style="display:table-cell !important;">ดูข้อมูล</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <?php if(empty($projects)): ?>
-                        <tr><td colspan="9" class="text-center" style="padding:50px; color:#bdc3c7;">
-                            <i class="fas fa-folder-open fa-3x mb-3 opacity-50"></i><br>ไม่พบข้อมูลโครงการ
-                        </td></tr>
-                    <?php else: ?>
-                        <?php foreach ($projects as $index => $row): 
-                            $statusText = $row['status'];
-                            $badgeClass = 'st-default';
-
-                            if($statusText == 'กำลังดำเนินการ') { 
-                                $badgeClass = 'st-progress'; 
-                            } elseif($statusText == 'ดำเนินการเสร็จสิ้น') { 
-                                $badgeClass = 'st-completed'; 
-                            } elseif($statusText == 'รอการตรวจสอบ') { 
-                                $badgeClass = 'st-pending'; 
-                            }
-                            
-                            $resName = $row['responsible'] ? $row['responsible'] : '-';
-                        ?>
-                        <tr>
-                            <td><span style="font-weight:700; color:#4e73df; font-size:0.85rem;"><?= htmlspecialchars($row['project_no']) ?></span></td>
-                            <td title="<?= htmlspecialchars($row['name']) ?>"><span class="proj-name"><?= htmlspecialchars($row['name']) ?></span></td>
-                            
-                            <td title="<?= htmlspecialchars($row['ma_detail']) ?>">
-                                <div class="ma-detail-cell"><?= $row['ma_detail'] ? htmlspecialchars($row['ma_detail']) : '-' ?></div>
-                            </td>
-                            
-                            <td><span style="font-size:0.9rem;"><?= htmlspecialchars($row['customer']) ?></span></td>
-                            <td><span style="font-size:0.9rem;"><?= htmlspecialchars($resName) ?></span></td>
-                            
-                            <td><span class="status-pill <?= $badgeClass ?>"><?= htmlspecialchars($statusText) ?></span></td>
-                            
-                            <td style="font-size:0.9rem;"><?= htmlspecialchars($row['contract_period']) ?></td>
-                            <td>
-                                <div style="font-size:0.8rem;">
-                                    <div style="color:#2980b9;"><i class="fas fa-play"></i> <?= formatDate($row['start_date']) ?></div>
-                                    <div style="color:#c0392b;"><i class="fas fa-flag"></i> <?= formatDate($row['end_date']) ?></div>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <button type="button" class="btn-action" 
-                                    onclick="viewDetail(this)"
-                                    data-id="<?= $row['id'] ?>"
-                                    data-no="<?= htmlspecialchars($row['project_no']) ?>"
-                                    data-name="<?= htmlspecialchars($row['name']) ?>"
-                                    data-customer="<?= htmlspecialchars($row['customer']) ?>"
-                                    data-responsible="<?= htmlspecialchars($resName) ?>"
-                                    data-status="<?= htmlspecialchars($statusText) ?>"
-                                    data-contract="<?= htmlspecialchars($row['contract_period']) ?>"
-                                    data-ma="<?= htmlspecialchars($row['ma_detail']) ?>"
-                                    data-start="<?= formatDate($row['start_date']) ?>"
-                                    data-end="<?= formatDate($row['end_date']) ?>"
-                                    title="ดูรายละเอียด">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
+                <tbody id="tableBody"></tbody>
             </table>
         </div>
-    </div>
-    
-    <div class="modal-overlay" id="viewModal">
-        <div class="modal-box">
-            <div class="modal-header-blue">
-                <div style="display:flex; flex-direction:column;">
-                    <span id="view_no" style="font-size:0.85rem; opacity:0.8; margin-bottom:2px;">-</span>
-                    <h2 id="view_name">รายละเอียดโครงการ</h2>
-                </div>
-                <button class="close-modal-white" onclick="closeViewModal()">&times;</button>
-            </div>
-            
-            <div class="modal-body">
-                <div class="info-grid">
-                    <div class="info-item" style="border-left-color: #4e73df;">
-                        <label>ลูกค้า / Customer</label><span id="view_customer">-</span>
+
+        <!-- View Project Modal (Copy from Admin but read-only) -->
+        <div id="viewProjectModal" class="modal-overlay">
+            <div class="modal-box view-project-custom" style="max-width: 900px; width: 95%; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+                <div class="modal-header-custom" style="background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); color: white; padding: 25px; border: none;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="background: rgba(255,255,255,0.25); padding: 12px; border-radius: 12px; font-size: 1.6rem; backdrop-filter: blur(4px);">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div>
+                            <h3 id="view_project_name" style="margin:0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em;">ชื่อโครงการ</h3>
+                            <p style="margin: 4px 0 0 0; opacity: 0.9; font-size: 0.95rem; font-weight: 400;">
+                                <i class="fas fa-hashtag"></i> <span id="view_number" style="font-weight: 600;">-</span> | ข้อมูลสรุปและสถานะปัจจุบัน
+                            </p>
+                        </div>
                     </div>
-                    <div class="info-item" style="border-left-color: #1cc88a;">
-                        <label>ผู้รับผิดชอบ</label><span id="view_responsible">-</span>
-                    </div>
-                    <div class="info-item" style="border-left-color: #9b59b6;">
-                        <label>สถานะโครงการ</label><span id="view_status_badge">-</span>
-                    </div>
-                    <div class="info-item" style="border-left-color: #36b9cc;">
-                        <label>วันส่งมอบงาน</label><span id="view_start">-</span>
-                    </div>
-                    <div class="info-item" style="border-left-color: #f6c23e;">
-                        <label>วันสิ้นสุดสัญญา</label><span id="view_end">-</span>
-                    </div>
+                    <button onclick="closeViewModal()" style="background: #ff4d4d; border: none; color: white; cursor: pointer; font-size: 1rem; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: 20px; right: 20px; transition: 0.3s; box-shadow: 0 2px 10px rgba(240, 67, 67, 0.97);">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
 
-                <div style="margin-bottom:20px;">
-                    <div class="section-head"><i class="fas fa-info-circle"></i> รายละเอียดโครงการ</div>
-                    <div class="content-box ma-text-box" id="view_ma">-</div>
-                </div>
-
-                <div>
-                    <div class="section-head">
-                        <i class="fas fa-history"></i> ประวัติ/แผนการบำรุงรักษา(MA): <span id="view_contract" style="color:#555; font-weight:500;">-</span>
+                <div class="modal-body custom-scroll" style="padding: 30px; background: #ffffff;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                        <div style="background:#f8faff; padding: 18px; border-radius: 14px; border: 1px solid #e0e8ff; border-left: 5px solid #3b82f6;">
+                            <label style="display:block; font-size: 0.75rem; color: #64748b; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">สถานะโครงการ</label>
+                            <div id="view_status_container"></div>
+                        </div>
+                        <div style="background:#f8fffb; padding: 18px; border-radius: 14px; border: 1px solid #e0f5e9; border-left: 5px solid #10b981;">
+                            <label style="display:block; font-size: 0.75rem; color: #64748b; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">ระยะเวลาสัญญา</label>
+                            <span id="view_contract_period_display" style="font-weight: 700; color: #1e293b; font-size: 1.1rem;">-</span>
+                        </div>
+                        <div style="background:#f9f8ff; padding: 18px; border-radius: 14px; border: 1px solid #eeeaff; border-left: 5px solid #6366f1;">
+                            <label style="display:block; font-size: 0.75rem; color: #64748b; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">ผู้รับผิดชอบ</label>
+                            <span id="view_responsible" style="font-weight: 700; color: #1e293b; font-size: 1.1rem;">-</span>
+                        </div>
                     </div>
-                    <div class="content-box" style="padding:0; border:none;">
-                        <div class="ma-table-wrapper">
-                            <table class="ma-table">
-                                <thead>
-                                    <tr>
-                                        <th width="5%">#</th>
-                                        <th width="15%">วันที่</th>
-                                        <th width="35%">รายละเอียด (Note)</th> <th width="35%">หมายเหตุ (Remark)</th> <th width="10%" class="text-center">ไฟล์</th> </tr>
-                                </thead>
-                                <tbody id="ma_table_body">
-                                    <tr><td colspan="5" class="text-center">กำลังโหลดข้อมูล...</td></tr>
-                                </tbody>
-                            </table>
+
+                    <div style="display: grid; grid-template-columns: 1.8fr 1fr; gap: 25px;">
+                        <div style="display: flex; flex-direction: column; gap: 25px;">
+                            <div style="background:white; padding: 25px; border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                                <h4 style="margin-top:0; border-bottom: 2px solid #f8faff; padding-bottom: 15px; color: #334155; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-info-circle" style="color:#3b82f6;"></i> รายละเอียด / ขอบเขตงาน
+                                </h4>
+                                <div id="view_going_ma" style="line-height: 1.7; color: #475569; font-size: 0.95rem; padding-top: 10px;">-</div>
+                            </div>
+
+                            <div style="background:white; padding: 25px; border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                                <h4 style="margin-top:0; border-bottom: 2px solid #f8faff; padding-bottom: 15px; color: #334155; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-history" style="color:#3b82f6;"></i> แผนบำรุงรักษา (MA Schedule)
+                                </h4>
+                                <div class="view-table-wrapper" style="overflow-x: auto; margin-top: 10px;">
+                                    <table class="view-table" id="view_ma_table" style="width:100%; border-collapse: separate; border-spacing: 0 8px;">
+                                        <thead>
+                                            <tr style="text-align: left; font-size: 0.8rem; color: #94a3b8; text-transform: uppercase;">
+                                                <th style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: center;">ครั้งที่</th>
+                                                <th style="padding: 12px; border-bottom: 1px solid #f1f5f9;">วันที่กำหนด</th>
+                                                <th style="padding: 12px; border-bottom: 1px solid #f1f5f9;">ผลการดำเนินงาน</th>
+                                                <th style="padding: 12px; border-bottom: 1px solid #f1f5f9;">หมายเหตุ</th>
+                                                <th style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: center;">ไฟล์</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="view_ma_table_body" style="font-size: 0.9rem;"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <div style="background: linear-gradient(to right bottom, #fffbeb, #fffde0); padding: 25px; border-radius: 16px; border: 1px solid #fef3c7;">
+                                <h4 style="margin-top:0; color: #92400e; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                    <i class="fas fa-id-card"></i> ข้อมูลลูกค้า
+                                </h4>
+                                <p id="view_customer_name" style="margin: 10px 0 0 0; font-weight: 700; color: #1e293b; font-size: 1.1rem; line-height: 1.4;">-</p>
+                            </div>
+
+                            <div style="background:white; padding: 25px; border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                                <div style="margin-bottom: 20px;">
+                                    <label style="display:block; font-size: 0.75rem; color: #94a3b8; font-weight: 600; text-transform: uppercase;">วันเริ่มรับประกัน</label>
+                                    <p id="view_deliver_date" style="margin: 5px 0; font-weight: 700; color: #10b981; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+                                        <i class="far fa-calendar-check" style="font-size: 1rem;"></i> -
+                                    </p>
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size: 0.75rem; color: #94a3b8; font-weight: 600; text-transform: uppercase;">วันสิ้นสุดรับประกัน</label>
+                                    <p id="view_end_date" style="margin: 5px 0; font-weight: 700; color: #ef4444; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+                                        <i class="far fa-calendar-times" style="font-size: 1rem;"></i> -
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-<script src="js/pmproject_user.js"></script>
+    
+    <!-- ใช้ JS ตัวเดียวกับ Admin แต่จะมี CSS ซ่อนปุ่ม Action ไว้ -->
+    <script src="js/pm_project.js"></script>
 </body>
 </html>

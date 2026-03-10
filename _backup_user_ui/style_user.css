@@ -1,0 +1,209 @@
+/* css/style_user.css */
+:root {
+    --primary-color: #3b82f6;
+    --sidebar-width: 250px;
+    --bg-color: #f3f4f6;
+    --text-color: #1f2937;
+    --blue-header: #2563eb;
+}
+
+body {
+    font-family: 'Sarabun', sans-serif;
+    background-color: var(--bg-color);
+    margin: 0;
+    display: flex;
+    /* transition เพื่อให้เนื้อหาขยับตามนุ่มนวล */
+    transition: all 0.3s ease;
+}
+
+/* Sidebar */
+.sidebar {
+    width: var(--sidebar-width);
+    background: #fff;
+    height: 100vh;
+    position: fixed;
+    top: 0; left: 0;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    transition: margin-left 0.3s ease;
+}
+
+.sidebar-header {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* จัดโลโก้กึ่งกลาง */
+    border-bottom: 1px solid #f0f0f0;
+    height: 70px; /* กำหนดความสูงให้แน่นอน */
+    box-sizing: border-box;
+}
+
+.nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.nav-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #4b5563;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.3s;
+    gap: 10px;
+}
+
+.nav-menu li a:hover, .nav-menu li.active > a {
+    background-color: #eff6ff;
+    color: var(--blue-header);
+    border-right: 3px solid var(--blue-header);
+}
+
+.nav-menu li a i { width: 20px; text-align: center; }
+
+/* Dropdown */
+.submenu {
+    list-style: none;
+    padding: 0;
+    background: #f9fafb;
+    display: none;
+}
+.submenu.show { display: block; }
+.submenu li a { padding-left: 50px; font-size: 0.9rem; }
+.submenu li.sub-active a { color: var(--blue-header); font-weight: 600; }
+
+.caret-icon { transition: transform 0.3s; }
+.dropdown.active .caret-icon { transform: rotate(180deg); }
+
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+.logout-link { color: #dc2626; text-decoration: none; display: block; margin-bottom: 10px; font-weight: 500; }
+.status-bar { font-size: 0.8rem; color: #6b7280; background: #f3f4f6; padding: 8px; border-radius: 6px; text-align: center; }
+
+/* Main Content */
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 30px;
+    width: 100%;
+    min-height: 100vh;
+    transition: margin-left 0.3s ease, width 0.3s ease;
+    padding-top: 80px; /* เว้นที่ด้านบนให้ปุ่มเมนู */
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Cards & Tables */
+.content-card, .table-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.search-wrapper {
+    position: relative;
+    max-width: 300px;
+}
+.search-wrapper input {
+    width: 100%;
+    padding: 8px 10px 8px 35px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    outline: none;
+}
+.search-wrapper i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+}
+
+.table-responsive { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.table th { background: #f9fafb; padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb; }
+.table td { padding: 12px; border-bottom: 1px solid #e5e7eb; color: #1f2937; vertical-align: middle; }
+
+/* Buttons & Badges */
+.btn-view {
+    background: #e0f2fe; color: #0ea5e9; border: none;
+    width: 32px; height: 32px; border-radius: 6px; cursor: pointer; transition: 0.2s;
+}
+.btn-view:hover { background: #0ea5e9; color: #fff; }
+
+.badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+.bg-info { background-color: #e0f2fe; color: #0284c7; }
+.bg-success { background-color: #d1fae5; color: #059669; }
+.bg-warning { background-color: #fef3c7; color: #d97706; }
+.bg-purple { background-color: #f3e8ff; color: #9333ea; }
+.bg-secondary { background-color: #f3f4f6; color: #4b5563; }
+
+/* ================================================== */
+/* HAMBURGER MENU & TOGGLE STYLES */
+/* ================================================== */
+
+/* ปุ่ม Hamburger ลอย */
+.menu-toggle-btn {
+    position: fixed;
+    top: 15px;
+    left: 265px; /* ปกติอยู่ข้าง Sidebar (250 + 15) */
+    z-index: 1100;
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #555;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: left 0.3s ease, background 0.2s;
+    padding: 8px 12px;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.menu-toggle-btn:hover {
+    background-color: #f9fafb;
+    color: var(--primary-color);
+}
+
+/* เมื่อ Sidebar หุบ (Collapsed) */
+.sidebar.collapsed {
+    margin-left: -250px;
+}
+
+/* เมื่อ Main Content ขยายเต็ม */
+.main-content.expanded {
+    margin-left: 0 !important;
+    width: 100%;
+}
+
+/* เมื่อ Sidebar ปิด -> ปุ่ม Hamburger วิ่งไปชิดซ้าย */
+body.sidebar-closed .menu-toggle-btn {
+    left: 20px;
+}
+
+/* Responsive มือถือ */
+@media (max-width: 768px) {
+    .sidebar { margin-left: -250px; }
+    .sidebar.active { margin-left: 0; }
+    
+    .main-content { margin-left: 0; padding-top: 70px; }
+    
+    .menu-toggle-btn { left: 20px; }
+    body.sidebar-open-mobile .menu-toggle-btn { left: 265px; }
+}
