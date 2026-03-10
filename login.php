@@ -115,9 +115,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MaintDash</title>
+    <title>MaintDash - Login</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
 
@@ -126,345 +127,316 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Kanit', sans-serif;
+            font-family: 'Sarabun', sans-serif;
         }
 
         body {
             height: 100vh;
             display: flex;
-            display: flex;
             justify-content: center;
             align-items: center;
-
+            background: url('images/login_bg_modern.jpg') center/cover no-repeat;
             position: relative;
             overflow: hidden;
-            perspective: 1000px;
-            background: url('images/information.png') center/cover no-repeat;
         }
 
-
-
-        /* --- Effect เมาส์เรืองแสง (คงเดิม) --- */
-        .mouse-glow {
-            position: fixed;
-            width: 60px;
-            height: 60px;
-            background: radial-gradient(circle, rgba(243, 156, 18, 0.8) 0%, rgba(243, 156, 18, 0) 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            z-index: 9999;
-            filter: blur(10px);
-            mix-blend-mode: screen;
-            opacity: 0.9;
-            transition: width 0.2s, height 0.2s, opacity 0.2s;
-        }
-
-        .mouse-glow.active {
-            width: 100px;
-            height: 100px;
-            opacity: 1;
-            background: radial-gradient(circle, rgba(243, 156, 18, 1) 0%, rgba(26, 42, 68, 0) 70%);
-        }
-
-        /* ---------------------------------- */
-
-        .orb {
+        /* Dark Overlay for better contrast */
+        body::before {
+            content: '';
             position: absolute;
-            border-radius: 50%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.65); /* Dark blue tint */
+            backdrop-filter: blur(8px);
             z-index: 1;
         }
 
-        .orb-blue {
-            background: #1a2a44;
-            width: 40px;
-            height: 40px;
-            top: 10%;
-            left: 15%;
-            opacity: 0.6;
-        }
-
-        .orb-orange {
-            background: #f39c12;
-            width: 60px;
-            height: 60px;
-            bottom: 15%;
-            left: 10%;
-            opacity: 0.7;
-        }
-
-        .orb-blue-lg {
-            background: #1a2a44;
-            width: 80px;
-            height: 80px;
-            bottom: 10%;
-            right: 10%;
-            opacity: 0.6;
-        }
-
-        /* --- ลบส่วนนี้ออกเพื่อปิดแสงสีเหลืองรอบกล่อง --- */
-        .login-card-wrapper::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            /* ความหนาของกรอบ */
-            background: linear-gradient(45deg, #f39c12, #1a2a44, #f39c12, #2c3e50);
-            background-size: 400% 400%;
-            z-index: -1;
-            border-radius: 18px;
-            /* ใหญ่กว่า inner เล็กน้อย */
-            filter: blur(5px);
-            /* ทำให้แสงฟุ้ง */
-            animation: gradientMove 5s ease infinite alternate;
-        }
-
-        /* --- ปรับปรุง Login Card (กรอบเคลื่อนไหว) --- */
+        /* --- Glassmorphism Card --- */
         .login-card-wrapper {
             position: relative;
-            width: 90%;
-            max-width: 380px;
             z-index: 10;
-
-            /* เรียกใช้ slideInLeft นาน 0.8 วินาที */
-            animation: slideInLeft 2.8s cubic-bezier(0.215, 0.610, 0.355, 1.000) both;
-        }
-
-        /* เนื้อหาข้างในการ์ด (พื้นหลังสีขาว) */
-        .login-card-inner {
-            background: #ffffff;
-            /* <--- สีขาวทึบ */
-            border-radius: 15px;
-            padding: 40px 30px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-            height: 100%;
             width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        @keyframes gradientMove {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        /* --- Animation: พุ่งมาจากซ้ายแล้วเด้ง --- */
-        @keyframes slideInLeft {
-            0% {
-                opacity: 0;
-                transform: translateX(-100vw);
-                /* เริ่มจากนอกจอทางซ้าย */
-            }
-
-            60% {
-                opacity: 1;
-                transform: translateX(30px);
-                /* วิ่งเลยจุดกึ่งกลางไปทางขวานิดหน่อย */
-            }
-
-            80% {
-                transform: translateX(-10px);
-                /* เด้งกลับมาทางซ้าย */
-            }
-
-            100% {
-                transform: translateX(0);
-                /* หยุดที่ตรงกลางเป๊ะ */
-            }
-        }
-
-        /* ---------------------------------- */
-
-        .login-header {
+        .login-card-inner {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px 35px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             text-align: center;
-            margin-bottom: 30px;
-            perspective: 1000px;
-            /* เพื่อให้โลโก้มีมิติ */
-        }
-
-        /* --- ปรับปรุง Logo (3D Tilt Effect) --- */
-        .login-logo {
-            width: 200px;
-            margin-bottom: 10px;
-            /* เพิ่มการรองรับ 3D */
             transform-style: preserve-3d;
             transition: transform 0.1s ease-out;
-            /* ให้ขยับตามเมาส์ได้นุ่มนวล */
-            /* เพิ่มเงาให้รู้สึกลอย */
-            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.2));
         }
 
-        /* ---------------------------------- */
-
-        .divider {
-            height: 1px;
-            background: #eee;
-            margin: 15px 0 25px 0;
+        .login-header {
+            margin-bottom: 30px;
         }
 
-        .form-label {
-            display: block;
-            color: #1a2a44;
-            font-size: 0.95rem;
-            margin-bottom: 8px;
-            font-weight: 500;
+        .login-logo {
+            width: 180px;
+            height: auto;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            transition: transform 0.3s ease;
+        }
+        
+        .login-logo:hover {
+            transform: scale(1.05);
         }
 
+        .login-title {
+            font-family: 'Prompt', sans-serif;
+            font-size: 1.5rem;
+            color: #1e293b;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .login-subtitle {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        /* --- Form Elements --- */
         .input-group {
             margin-bottom: 20px;
+            text-align: left;
+            position: relative;
+        }
+
+        .input-label {
+            font-size: 0.9rem;
+            color: #334155;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.1rem;
+            transition: color 0.3s;
         }
 
         .input-field {
             width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 0.9rem;
+            padding: 12px 15px 12px 45px; /* Space for icon */
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
             outline: none;
             transition: all 0.3s ease;
-            background: #f9f9f9;
-            /* ปรับพื้นหลัง input เล็กน้อยให้ดูมีมิติ */
+            background: #f8fafc;
+            color: #334155;
         }
 
         .input-field:focus {
-            border-color: #f39c12;
-            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.1);
+            border-color: #3b82f6;
             background: #fff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .input-field:focus + .input-icon {
+            color: #3b82f6;
         }
 
         .options-row {
             display: flex;
             align-items: center;
-            font-size: 0.85rem;
-            color: #666;
+            justify-content: space-between;
             margin-bottom: 25px;
+            font-size: 0.9rem;
         }
 
-        .options-row input {
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: #475569;
+        }
+
+        .checkbox-container input {
             margin-right: 8px;
+            width: 16px;
+            height: 16px;
+            accent-color: #3b82f6;
             cursor: pointer;
         }
 
+        /* --- Button --- */
         .login-button {
             width: 100%;
-            padding: 12px;
-            background: #1a2a44;
+            padding: 14px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 500;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: 'Prompt', sans-serif;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(26, 42, 68, 0.3);
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
         .login-button:hover {
-            background: #2c3e50;
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(26, 42, 68, 0.4);
+            box-shadow: 0 15px 25px -5px rgba(37, 99, 235, 0.5);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         }
 
-        /* สั่งปิด Animation ถ้าระบบเติม Class นี้เข้ามา */
-        .no-anim {
-            animation: none !important;
-            transform: translateX(0) !important;
-            /* บังคับให้อยู่ตรงกลางเลย */
+        .login-button:active {
+            transform: translateY(0);
         }
+
+        /* --- Footer --- */
+        .login-footer {
+            margin-top: 25px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Floating Orbs --- */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: 2;
+            opacity: 0.6;
+            animation: float 10s infinite ease-in-out;
+        }
+
+        .orb-1 {
+            width: 300px;
+            height: 300px;
+            background: #60a5fa;
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 250px;
+            height: 250px;
+            background: #8b5cf6;
+            bottom: -50px;
+            right: -50px;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, 50px); }
+        }
+
     </style>
 </head>
 
 <body>
-    <div class="mouse-glow" id="mouseGlow"></div>
 
-    <div class="orb orb-blue"></div>
-    <div class="orb orb-orange"></div>
-    <div class="orb orb-blue-lg"></div>
+    <!-- Floating Orbs for Ambience -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
 
-    <div class="login-card-wrapper <?php echo !empty($error_msg) ? 'no-anim' : ''; ?>" id="loginCard">
+    <div class="login-card-wrapper" id="loginCard">
         <div class="login-card-inner">
             <div class="login-header">
-                <img src="images/logomaintdash.png" alt="LogoMaintDash" class="login-logo" id="mainLogo">
-                <div class="divider"></div>
+                <img src="images/logomaintdash1.png" alt="LogoMaintDash" class="login-logo" id="mainLogo">
+                <h2 class="login-title">ยินดีต้อนรับ</h2>
+                <p class="login-subtitle">กรุณาเข้าสู่ระบบเพื่อดำเนินการต่อ</p>
             </div>
 
             <form action="" method="POST">
                 <div class="input-group">
-                    <label class="form-label">ชื่อผู้ใช้งาน</label>
-                    <input type="text" name="username" class="input-field" placeholder="กรอกชื่อผู้ใช้งาน"
-                        value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>"
-                        required>
+                    <label class="input-label">ชื่อผู้ใช้งาน</label>
+                    <div class="input-wrapper">
+                        <input type="text" name="username" class="input-field" placeholder="Username"
+                            value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>"
+                            required autocomplete="username">
+                        <i class="fas fa-user input-icon"></i>
+                    </div>
                 </div>
 
                 <div class="input-group">
-                    <label class="form-label">รหัสผ่าน</label>
-                    <input type="password" name="password" class="input-field" placeholder="กรอกรหัสผ่าน" required>
+                    <label class="input-label">รหัสผ่าน</label>
+                    <div class="input-wrapper">
+                        <input type="password" name="password" class="input-field" placeholder="Password" required autocomplete="current-password">
+                        <i class="fas fa-lock input-icon"></i>
+                    </div>
                 </div>
 
                 <div class="options-row">
-                    <input type="checkbox" name="remember" id="remember">
-                    <label for="remember" style="cursor: pointer;">จดจำการใช้งาน</label>
+                    <label class="checkbox-container">
+                        <input type="checkbox" name="remember" id="remember">
+                        <span>จดจำฉันไว้ในระบบ</span>
+                    </label>
                 </div>
 
-                <button type="submit" class="login-button">เข้าสู่ระบบ</button>
+                <button type="submit" class="login-button">
+                    เข้าสู่ระบบ <i class="fas fa-arrow-right"></i>
+                </button>
             </form>
+
+            <div class="login-footer">
+                © <?php echo date('Y'); ?> Mesh Intelligence Co.,Ltd.<br>All rights reserved.
+            </div>
         </div>
     </div>
 
     <script>
-        // --- Script สำหรับ Effect เมาส์เรืองแสง (คงเดิม) ---
-        const glow = document.getElementById('mouseGlow');
-        document.addEventListener('mousemove', (e) => {
-            glow.style.left = e.clientX + 'px';
-            glow.style.top = e.clientY + 'px';
-        });
-        const interactiveElements = document.querySelectorAll('button, input, a, label, .login-card-inner');
-        interactiveElements.forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                glow.classList.add('active');
-            });
-            el.addEventListener('mouseleave', () => {
-                glow.classList.remove('active');
-            });
-        });
-        // ----------------------------------
-
-        // --- Script สำหรับ Effect โลโก้ 3D Tilt ---
+        // --- 3D Tilt Effect ---
         const card = document.getElementById('loginCard');
-        const logo = document.getElementById('mainLogo');
+        const inner = document.querySelector('.login-card-inner');
 
-        // เมื่อขยับเมาส์บนการ์ด
-        card.addEventListener('mousemove', (e) => {
-            // หาจุดกึ่งกลางของการ์ด
-            const rect = card.getBoundingClientRect();
-            const cardCenterX = rect.left + rect.width / 2;
-            const cardCenterY = rect.top + rect.height / 2;
+        document.addEventListener('mousemove', (e) => {
+            if (window.innerWidth < 768) return; // Disable on mobile
 
-            // หาตำแหน่งเมาส์เทียบกับจุดกึ่งกลาง
-            const mouseX = e.clientX - cardCenterX;
-            const mouseY = e.clientY - cardCenterY;
+            const rect = inner.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
 
-            // คำนวณองศาการเอียง (ปรับตัวเลขหารเพื่อเพิ่ม/ลดความแรง)
-            const rotateY = mouseX / 15;
-            const rotateX = mouseY / 15 * -1; // คูณ -1 เพื่อให้เอียงตามธรรมชาติ
+            // Reduce effect strength
+            const rotateY = x / 25; 
+            const rotateX = y / -25;
 
-            // ใส่ค่า Transform ให้โลโก้
-            logo.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+            inner.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
         });
 
-        // เมื่อเมาส์ออกจากการ์ด ให้โลโก้กลับมาตรงเหมือนเดิม
-        card.addEventListener('mouseleave', () => {
-            logo.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+        document.addEventListener('mouseleave', () => {
+            inner.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
         });
-        // ----------------------------------
     </script>
 
     <?php if (!empty($error_msg)): ?>
@@ -473,8 +445,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 icon: 'error',
                 title: 'เข้าสู่ระบบไม่สำเร็จ',
                 text: '<?php echo htmlspecialchars($error_msg); ?>',
-                heightAuto: false,
-                confirmButtonColor: '#1a2a44'
+                confirmButtonColor: '#3b82f6',
+                confirmButtonText: 'ตกลง',
+                background: '#fff',
+                customClass: {
+                    popup: 'rounded-2xl'
+                }
             });
         </script>
     <?php endif; ?>
