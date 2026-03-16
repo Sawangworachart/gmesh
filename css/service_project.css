@@ -1140,3 +1140,39 @@ body {
     background: #eff6ff;
     color: #1d4ed8;
 }
+
+/* File Display in View Modal */
+.file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.file-item-link {
+    display: block;
+    text-decoration: none;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.file-item-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: #cbd5e1;
+}
+
+.file-item-icon {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.file-item-name {
+    font-size: 0.8rem;
+    color: #334155;
+    font-weight: 500;
+    word-break: break-all; /* Break long file names */
+}

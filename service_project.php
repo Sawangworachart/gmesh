@@ -154,6 +154,17 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
 
             if ($row) {
                 $row['status_val'] = getStatusText($row['service_type']);
+
+                // Fetch associated files
+                $files_stmt = $conn->prepare("SELECT file_path FROM service_project_files WHERE detail_id = ?");
+                $files_stmt->bind_param("i", $id);
+                $files_stmt->execute();
+                $files_result = $files_stmt->get_result();
+                $files = [];
+                while($file_row = $files_result->fetch_assoc()) {
+                    $files[] = $file_row['file_path'];
+                }
+                $row['files'] = $files;
             }
 
             echo json_encode(['success' => true, 'data' => $row]);
@@ -235,60 +246,12 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
                         symptom=?,
                         action_taken=?,
                         start_date=?,
-                        end_date=?";
-
-                    if ($filenameToSave) {
-                        $sql .= ", file_path=?";
-                    }
-
-                    $sql .= " WHERE detail_id=?";
+                        end_date=?
+                        WHERE detail_id=?";
 
                     $stmtD = $conn->prepare($sql);
-
-                    if ($filenameToSave) {
-                        $stmtD->bind_param(
-                            "iissssssssi",
-                            $customers_id,
-                            $serviceTypeInt,
-                            $equipment,
-                            $sn,
-                            $number,
-                            $symptom,
-                            $action_taken,
-                            $start_date,
-                            $end_date,
-                            $filenameToSave,
-                            $detail_id
-                        );
-                    } else {
-                        $stmtD->bind_param(
-                            "iisssssssi",
-                            $customers_id,
-                            $serviceTypeInt,
-                            $equipment,
-                            $sn,
-                            $number,
-                            $symptom,
-                            $action_taken,
-                            $start_date,
-                            $end_date,
-                            $detail_id
-                        );
-                    }
-
-                    $stmtD->execute();
-                } else {
-
-                    // INSERT
-                    $stmtD = $conn->prepare("
-                INSERT INTO service_project_detail
-                (service_id, customers_id, service_type, equipment, `s/n`, number, symptom, action_taken, start_date, end_date, file_path)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ");
-
                     $stmtD->bind_param(
-                        "iiissssssss",
-                        $service_id,
+                        "iisssssssi",
                         $customers_id,
                         $serviceTypeInt,
                         $equipment,
@@ -298,10 +261,45 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
                         $action_taken,
                         $start_date,
                         $end_date,
-                        $filenameToSave
+                        $detail_id
                     );
-
                     $stmtD->execute();
+                } else {
+
+                    // INSERT
+                    $stmtD = $conn->prepare("
+                        INSERT INTO service_project_detail
+                        (service_id, customers_id, service_type, equipment, `s/n`, number, symptom, action_taken, start_date, end_date)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ");
+
+                    $stmtD->bind_param(
+                        "iiisssssss",
+                        $service_id,
+                        $customers_id,
+                        $serviceTypeInt,
+                        $equipment,
+                        $sn,
+                        $number,
+                        $symptom,
+                        $action_taken,
+                        $start_date,
+                        $end_date
+                    );
+                    $stmtD->execute();
+                    $detail_id = $conn->insert_id; // Get the new detail_id
+                }
+
+                // ---------------- C. Save Files to the new table ----------------
+                if (!empty($uploaded_files)) {
+                    $stmtFiles = $conn->prepare("
+                        INSERT INTO service_project_files (detail_id, file_path)
+                        VALUES (?, ?)
+                    ");
+                    foreach ($uploaded_files as $file) {
+                        $stmtFiles->bind_param("is", $detail_id, $file);
+                        $stmtFiles->execute();
+                    }
                 }
 
                 $conn->commit();
@@ -710,10 +708,18 @@ if ($c_res) {
     <script src="js/service_project.js?v=<?php echo filemtime('js/service_project.js'); ?>"></script>
 
     <script>
-        // Inline script สำหรับ preview file อย่างง่าย
-        function previewFile(input) {
-            if (input.files && input.files[0]) {
-                $('#filePreview').html('<span style="color:#059669"><i class="fas fa-check"></i> เลือกไฟล์: ' + input.files[0].name + '</span>');
+        // Inline script สำหรับ preview file
+        function previewFiles(input) {
+            const preview = $('#filePreview');
+            preview.html(''); // Clear previous preview
+
+            if (input.files && input.files.length > 0) {
+                let fileListHtml = '<ul style="list-style-type: none; padding-left: 0; margin-top: 5px; text-align: left;">';
+                for (let i = 0; i < input.files.length; i++) {
+                    fileListHtml += '<li style="color:#059669; margin-bottom: 3px; font-size: 0.85rem;"><i class="fas fa-file-alt"></i> ' + input.files[i].name + '</li>';
+                }
+                fileListHtml += '</ul>';
+                preview.html(fileListHtml);
             }
         }
     </script>
