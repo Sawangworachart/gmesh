@@ -1,5 +1,5 @@
-// js/manage_users.js
-const API_URL = 'manage_users.php?api=true';
+// js/manage_admin.js
+const API_URL = 'manage_admin.php?api=true';
 
 $(document).ready(function() {
     loadData();
@@ -88,6 +88,7 @@ function loadData() {
 
 function getRoleBadge(role) {
     switch (role) {
+        case 'superadmin': return '<span class="badge badge-super"><i class="fas fa-crown"></i> Super Admin</span>';
         case 'admin': return '<span class="badge badge-admin"><i class="fas fa-user-shield"></i> Admin</span>';
         default: return '<span class="badge badge-user"><i class="fas fa-user"></i> User</span>';
     }
@@ -118,6 +119,8 @@ function openModal(mode) {
     if (mode === 'create') {
         $('#modalTitle').text('เพิ่มผู้ใช้งานใหม่');
         $('#saveBtn').html('<i class="fas fa-plus-circle"></i> สร้างผู้ใช้');
+    } else {
+        // This part is for editing, which will be handled by editUser function
     }
     $('#userModal').addClass('show');
 }

@@ -1,316 +1,265 @@
-// js หน้า Product ของ admin
-const API_URL = 'product.php?api=true';
+
+// js/product.js
+
+$(document).ready(function() {
+    fetchStats();
+    fetchAllData();
+    fetchCustomersForDropdown();
+
+    $('#productForm').on('submit', function(e) {
+        e.preventDefault();
+        saveData();
+    });
+});
+
+function fetchStats() {
+    $.get("product.php?api=true&action=get_stats", function(res) {
+        if (res.success) {
+            $('#stat_all').text(res.stats.all);
+            $('#stat_s1').text(res.stats.s1);
+            $('#stat_s2').text(res.stats.s2);
+            $('#stat_s3').text(res.stats.s3);
+            $('#stat_s4').text(res.stats.s4);
+        }
+    });
+}
+
+function fetchAllData() {
+    $.get("product.php?api=true&action=fetch_all", function(res) {
+        if (res.success) {
+            window.allData = res.data;
+            renderTable(res.data);
+        }
+    });
+}
+
+function fetchCustomersForDropdown() {
+    $.get("customers.php?api=true&action=fetch_for_dropdown", function(res) {
+        if (res.success) {
+            const select = $('#customers_id');
+            select.empty().append('<option value="">-- เลือกลูกค้า --</option>');
+            res.data.forEach(c => {
+                select.append(`<option value="${c.id}">${c.name}</option>`);
+            });
+        }
+    });
+}
+
+function renderTable(data) {
+    const tableBody = $('#tableBody');
+    tableBody.empty();
+    if (data.length === 0) {
+        tableBody.html('<tr><td colspan="6" class="text-center p-5 text-muted">ไม่พบข้อมูล</td></tr>');
+        return;
+    }
+
+    data.forEach((row, index) => {
+        const statusMap = {
+            1: { text: 'รอสินค้า', class: 'status-1' },
+            2: { text: 'ตรวจสอบ', class: 'status-2' },
+            3: { text: 'รออะไหล่', class: 'status-3' },
+            4: { text: 'ส่งคืน', class: 'status-4' }
+        };
+        const statusInfo = statusMap[row.status] || { text: 'N/A', class: '' };
+
+        const tr = `
+            <tr>
+                <td class="text-center">${index + 1}</td>
+                <td>
+                    <strong>${row.customers_name || 'N/A'}</strong><br>
+                    <small class="text-muted">${row.agency || ''}</small>
+                </td>
+                <td>
+                    <strong>${row.device_name}</strong><br>
+                    <small class="text-muted">S/N: ${row.serial_number || '-'}</small>
+                </td>
+                <td class="text-center">
+                    <span class="status-badge ${statusInfo.class}">${statusInfo.text}</span>
+                </td>
+                <td>
+                    <div><i class="fas fa-play-circle text-primary"></i> ${row.start_date || '-'}</div>
+                    <div><i class="fas fa-flag-checkered text-danger"></i> ${row.end_date || '-'}</div>
+                </td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-info" onclick="openModal('view', ${row.product_id})"><i class="far fa-eye"></i></button>
+                    <button class="btn btn-sm btn-warning" onclick="openModal('edit', ${row.product_id})"><i class="far fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteData(${row.product_id})"><i class="far fa-trash-alt"></i></button>
+                </td>
+            </tr>
+        `;
+        tableBody.append(tr);
+    });
+}
+
+function openModal(mode, id = 0) {
+    if (mode === 'create' || mode === 'edit') {
+        $('#productForm')[0].reset();
+        $('#product_id').val(0);
+        $('#existing_file_container').empty();
+        $('#modalTitle').text('เพิ่มข้อมูล Product Claim');
+
+        if (mode === 'edit') {
+            $('#modalTitle').text('แก้ไขข้อมูล Product Claim');
+            $.get(`product.php?api=true&action=fetch_single&id=${id}`, function(res) {
+                if (res.success) {
+                    const d = res.data;
+                    $('#product_id').val(d.product_id);
+                    $('#customers_id').val(d.customers_id);
+                    $('#device_name').val(d.device_name);
+                    $('#serial_number').val(d.serial_number);
+                    $('#repair_details').val(d.repair_details);
+                    $('#status').val(d.status);
+                    $('#status_remark').val(d.status_remark);
+                    $('#start_date').val(d.start_date);
+                    $('#end_date').val(d.end_date);
+                    $('#existing_file_path').val(d.file_path);
+                    if (d.file_path) {
+                        $('#existing_file_container').html(`<a href="${d.file_path}" target="_blank" class="file-link"><i class="fas fa-file-alt"></i> ดูไฟล์เดิม</a>`);
+                    }
+                }
+            });
+        }
+        $('#productModal').addClass('show');
+    } else if (mode === 'view') {
+        $.get(`product.php?api=true&action=fetch_single&id=${id}`, function(res) {
+            if (res.success) {
+                renderViewModal(res.data);
+                $('#viewModal').addClass('show');
+            }
+        });
+    }
+}
 
 function closeModal() {
     $('.modal-overlay').removeClass('show');
 }
 
-function openModal(mode) {
-    const modal = $('#productModal');
-    $('#productForm')[0].reset();
-    $('#product_id').val(0);
-    $('#existing_file_container').empty();
-    $('#file-name-display').text(''); // ล้างชื่อไฟล์ที่เลือกในกล่อง upload ใหม่
-
-    if (mode === 'create') {
-        $('#modalTitle').text('เพิ่มงานบริการใหม่');
-    }
-    modal.addClass('show');
-}
-
-function formatDate(dateStr) {
-    if (!dateStr || dateStr === '0000-00-00' || dateStr === 'null') return '-';
-
-    // แยกวันเดือนปีโดยไม่ผ่าน Timezone (ป้องกันวันที่เพี้ยน)
-    const parts = dateStr.split('-');
-    if (parts.length < 3) return '-';
-
-    const y = parseInt(parts[0]);
-    const m = parseInt(parts[1]);
-    const d = parseInt(parts[2]);
-
-    const thaiMonths = [
-        "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
-        "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."
-    ];
-
-    // คำนวณปีพ.ศ. แล้วตัดเอาแค่ 2 ตัวท้าย (slice -2)
-    const thaiYear = (y + 543).toString().slice(-2);
-    const monthName = thaiMonths[m - 1];
-
-    return `${d} ${monthName} ${thaiYear}`;
-}
-
-// Helper: แปลง Status ID เป็นข้อความ (สำหรับแสดงในการ์ดสีฟ้า)
-function getStatusName(statusId) {
-    let s = parseInt(statusId);
-    switch (s) {
-        case 1: return 'รอสินค้าจากลูกค้า';
-        case 2: return 'ตรวจสอบ';
-        case 3: return 'รอสินค้าจาก Supplier';
-        case 4: return 'ส่งคืนลูกค้า';
-        default: return '-';
-    }
-}
-
-// 1. ฟังก์ชันแสดง Badge ในตาราง (ต้องตรงกับข้อความที่ใช้กรอง)
-function getStatusBadge(statusId) {
-    let s = parseInt(statusId);
-    switch (s) {
-        case 1: return '<span class="badge" style="background:#dbeafe; color:#1e40af;"><i class="fas fa-clock"></i> รอสินค้าจากลูกค้า</span>';
-        case 2: return '<span class="badge" style="background:#f3e8ff; color:#6b21a8;"><i class="fas fa-search"></i> ตรวจสอบ</span>';
-        case 3: return '<span class="badge" style="background:#ffedd5; color:#9a3412;"><i class="fas fa-users"></i> รอสินค้าจากsupplier</span>';
-        case 4: return '<span class="badge" style="background:#dcfce7; color:#166534;"><i class="fas fa-check-double"></i> ส่งคืนลูกค้า</span>';
-        default: return `<span class="badge">${statusId}</span>`;
-    }
-}
-
-// 2. โหลดสถิติ
-// 2. โหลดสถิติ
-function loadStats() {
-    $.post(API_URL, { action: 'get_stats' }, function (res) {
-        if (res.success) {
-            // เปลี่ยนจาก .text() เป็น animateCount()
-            animateCount('#stat_all', res.stats.all);
-            animateCount('#stat_s1', res.stats.s1);
-            animateCount('#stat_s2', res.stats.s2);
-            animateCount('#stat_s3', res.stats.s3);
-            animateCount('#stat_s4', res.stats.s4);
-        }
-    }, 'json');
-}
-// ฟังก์ชันสำหรับทำให้ตัวเลขวิ่ง (Count Up Animation)
-function animateCount(elementId, targetValue) {
-    const $el = $(elementId);
-    let startValue = parseInt($el.text().replace(/,/g, ''));
-    if (isNaN(startValue)) startValue = 0;
-
-    $({ countNum: startValue }).animate({ countNum: targetValue }, {
-        duration: 800,
-        easing: 'swing',
-        step: function () {
-            $el.text(Math.floor(this.countNum).toLocaleString());
-        },
-        complete: function () {
-            $el.text(targetValue.toLocaleString());
-        }
-    });
-}
-
-// 3. โหลดตาราง
-// 3. โหลดตาราง
-// แก้ไขฟังก์ชัน loadTable ใน js/product.js
-function loadTable() {
-    $('#loading').show();
-    $('#tableBody').empty();
-    $('#noData').hide();
-
-    $.get(API_URL, { action: 'fetch_all' }, function (res) {
-        $('#loading').hide();
-        if (res.success && res.data.length > 0) {
-            let html = '';
-            let totalItems = res.data.length;
-
-            res.data.forEach((item, index) => {
-                let rowNumber = totalItems - index;
-
-                // --- ส่วนที่แก้ไข: เช็ควันที่มีข้อมูลไหม ---
-                let startDate = item.start_date ? formatDate(item.start_date) : '-';
-                let endDate = item.end_date ? formatDate(item.end_date) : '-';
-
-                html += `
-                <tr>
-                    <td style="text-align:center; color:#94a3b8; font-weight:600;">${rowNumber}</td>
-                    
-                    <td>
-                        <div class="user-info">
-                            <h4>${item.customers_name}</h4>
-                            <span><i class="fas fa-building"></i> ${item.agency || '-'}</span>
-                        </div>
-                    </td>
-
-                        <td>${item.device_name}</td>
-                        <td>${item.serial_number || '-'}</td>
-
-                    <td style="text-align:center;">${getStatusBadge(item.status)}</td>
-
-<td>
-    <div style="display: flex; flex-direction: column; gap: 4px;">
-        <div style="color: #16a34a; font-weight: 600; font-size: 0.9rem;">
-            <i class="fas fa-calendar-check" style="margin-right: 5px;"></i> 
-            ${(!startDate || startDate === '-') ? 'ไม่ได้ระบุ' : startDate}
-        </div>
-        
-        <div style="color: #dc2626; font-weight: 600; font-size: 0.9rem;">
-            <i class="fas fa-calendar-times" style="margin-right: 5px;"></i> 
-            ${(!endDate || endDate === '-') ? 'ไม่ได้ระบุ' : endDate}
-        </div>
-    </div>
-</td>
-
-                    <td>
-                        <div class="action-btn-group" style="display:flex; gap:5px;">
-                            <button class="btn-icon" onclick="viewDetails(${item.product_id})" title="ดูรายละเอียด" 
-                                    style="background: #eff6ff; color: #2563eb; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer;">
-                                <i class="fas fa-eye"></i>
-                            </button>
-
-                            <button class="btn-icon" onclick="editItem(${item.product_id})" title="แก้ไข" 
-                                    style="background: #fffbeb; color: #d97706; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer;">
-                                <i class="fas fa-pen"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>`;
-            });
-            $('#tableBody').html(html);
-        } else {
-            $('#noData').show();
-        }
-    }, 'json');
-}
-// js/product.js
-window.viewDetails = function (id) {
-    console.log("Opening ID:", id);
-
-    $.get(API_URL, { action: 'fetch_single', id: id }, function (res) {
-        if (res.success) {
-            const d = res.data;
-
-            // 1. ใส่ข้อมูล Text ทั่วไป
-            $('#view_customer').text(d.customers_name + (d.agency ? ` (${d.agency})` : ''));
-            $('#view_ticket_id').text('#PROD-' + d.product_id);
-            $('#view_status_text').text(getStatusName(d.status));
-            $('#view_start_date').text(formatDateTh(d.start_date));
-            $('#view_end_date').text(formatDateTh(d.end_date));
-            $('#view_device_name').text(d.device_name);
-            $('#view_sn').text(d.serial_number || '-');
-            $('#view_details').text(d.repair_details || '-');
-
-            if (d.file_path && d.file_path.trim() !== "") {
-                $('#btn_open_file').attr('href', d.file_path);
-                $('#view_file_section').css('display', 'flex'); // ใช้ flex แทน show() เพื่อให้จัดซ้ายขวาได้
+function saveData() {
+    const formData = new FormData($('#productForm')[0]);
+    $.ajax({
+        url: 'product.php?api=true&action=save',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(res) {
+            if (res.success) {
+                Swal.fire('สำเร็จ', 'บันทึกข้อมูลเรียบร้อย', 'success');
+                closeModal();
+                fetchStats();
+                fetchAllData();
             } else {
-                $('#view_file_section').hide();
-            }
-
-            // 3. เปิด Modal
-            $('#viewModal').addClass('show');
-
-        } else {
-            Swal.fire('Error', 'ไม่พบข้อมูล', 'error');
-        }
-    }, 'json');
-};
-// Helper: แปลงวันที่ (ตรวจสอบว่ามีฟังก์ชันนี้หรือยัง ถ้ามีแล้วไม่ต้องใส่ซ้ำ)
-function formatDateTh(dateStr) {
-    if (!dateStr || dateStr === '0000-00-00' || dateStr === 'null') return '-';
-    const date = new Date(dateStr);
-    if (isNaN(date)) return '-';
-    return date.toLocaleDateString('th-TH', {
-        year: '2-digit', month: 'short', day: 'numeric'
-    });
-}
-
-// 5. ฟังก์ชัน Edit Item
-function editItem(id) {
-    openModal('edit');
-    $('#modalTitle').text('แก้ไขข้อมูลอุปกรณ์');
-    $.get(API_URL, { action: 'fetch_single', id: id }, function (res) {
-        if (res.success) {
-            const d = res.data;
-            $('#product_id').val(d.product_id);
-            $('#customers_id').val(d.customers_id);
-            $('#device_name').val(d.device_name);
-            $('#serial_number').val(d.serial_number);
-            $('#repair_details').val(d.repair_details);
-            $('#status').val(d.status);
-            $('#start_date').val(d.start_date);
-            $('#end_date').val(d.end_date);
-
-            $('#existing_file_path').val(d.file_path || '');
-
-            // แสดงชื่อไฟล์เดิมในส่วนใต้กล่อง Upload
-            if (d.file_path) {
-                // ดึงเฉพาะชื่อไฟล์ออกมาแสดง
-                let fileName = d.file_path.split('/').pop();
-                $('#existing_file_container').html(`
-                    <div style="margin-top:5px; color:#3b82f6; font-size:0.9rem;">
-                        <i class="fas fa-check-circle"></i> มีไฟล์เดิม: <b>${fileName}</b>
-                    </div>
-                `);
-            } else {
-                $('#existing_file_container').empty();
+                Swal.fire('ผิดพลาด', res.message, 'error');
             }
         }
-    }, 'json');
-}
-
-// ฟังก์ชัน Filter
-function filterTable() {
-    let val = $('#searchInput').val().toLowerCase();
-    let visibleCount = 1;
-
-    $('#tableBody tr').each(function () {
-        let rowText = $(this).text().toLowerCase();
-        if (rowText.indexOf(val) > -1) {
-            $(this).show();
-            $(this).find('td:first-child span').text('(' + visibleCount + ')');
-            visibleCount++;
-        } else {
-            $(this).hide();
-        }
     });
 }
 
-function filterByStatus(statusName, el) {
-    $('.stat-card').removeClass('active');
-    $(el).addClass('active');
-
-    let visibleCount = 1;
-    $('#tableBody tr').each(function () {
-        // ดึง Text จาก Badge (ต้อง trim เพราะมี icon และ space)
-        let statusText = $(this).find('td:nth-child(5)').text().trim();
-
-        if (statusName === 'all' || statusText.includes(statusName)) {
-            $(this).show();
-            $(this).find('td:first-child span').text('(' + visibleCount + ')');
-            visibleCount++;
-        } else {
-            $(this).hide();
-        }
-    });
-}
-
-// Document Ready
-$(document).ready(function () {
-    loadTable();
-    loadStats();
-
-    // จัดการ Form Submit
-    $('#productForm').on('submit', function (e) {
-        e.preventDefault();
-        let fd = new FormData(this);
-        fd.append('action', 'save');
-        $.ajax({
-            url: API_URL, type: 'POST', data: fd,
-            contentType: false, processData: false, dataType: 'json',
-            success(res) {
+function deleteData(id) {
+    Swal.fire({
+        title: 'ยืนยันการลบ?',
+        text: "ข้อมูลจะถูกลบอย่างถาวร!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'ใช่, ลบเลย!',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post('product.php?api=true', { action: 'delete', id: id }, function(res) {
                 if (res.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'สำเร็จ',
-                        text: res.message,
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                    closeModal();
-                    loadTable();
-                    loadStats();
+                    Swal.fire('สำเร็จ', 'ข้อมูลถูกลบแล้ว', 'success');
+                    fetchStats();
+                    fetchAllData();
                 } else {
                     Swal.fire('ผิดพลาด', res.message, 'error');
                 }
-            }
-        });
+            });
+        }
     });
-});
+}
+
+function filterByStatus(status, element) {
+    $('.stat-card').removeClass('active');
+    $(element).addClass('active');
+    if (status === 'all') {
+        renderTable(window.allData);
+    } else {
+        const filteredData = window.allData.filter(row => row.status == status);
+        renderTable(filteredData);
+    }
+}
+
+function filterTable() {
+    const searchTerm = $('#searchInput').val().toLowerCase();
+    const filteredData = window.allData.filter(row => {
+        return (
+            row.customers_name?.toLowerCase().includes(searchTerm) ||
+            row.device_name?.toLowerCase().includes(searchTerm) ||
+            row.serial_number?.toLowerCase().includes(searchTerm)
+        );
+    });
+    renderTable(filteredData);
+}
+
+function renderViewModal(data) {
+    const statusMap = {
+        1: { text: 'รอสินค้า', class: 'status-1' },
+        2: { text: 'ตรวจสอบ', class: 'status-2' },
+        3: { text: 'รออะไหล่', class: 'status-3' },
+        4: { text: 'ส่งคืน', class: 'status-4' }
+    };
+    const statusInfo = statusMap[data.status] || { text: 'N/A', class: '' };
+
+    let fileHtml = '';
+    if (data.file_path) {
+        fileHtml = `<a href="${data.file_path}" target="_blank" class="file-link"><i class="fas fa-paperclip"></i> ดูไฟล์แนบ</a>`;
+    }
+
+    const content = `
+        <div class="view-grid">
+            <div class="detail-box">
+                <span class="detail-label">ลูกค้า</span>
+                <p class="detail-value">${data.customers_name || '-'}</p>
+            </div>
+            <div class="detail-box">
+                <span class="detail-label">แผนก</span>
+                <p class="detail-value">${data.agency || '-'}</p>
+            </div>
+            <div class="detail-box">
+                <span class="detail-label">อุปกรณ์</span>
+                <p class="detail-value">${data.device_name || '-'}</p>
+            </div>
+            <div class="detail-box">
+                <span class="detail-label">Serial Number</span>
+                <p class="detail-value">${data.serial_number || '-'}</p>
+            </div>
+            <div class="detail-box">
+                <span class="detail-label">วันที่เริ่ม</span>
+                <p class="detail-value">${data.start_date || '-'}</p>
+            </div>
+            <div class="detail-box">
+                <span class="detail-label">วันที่สิ้นสุด</span>
+                <p class="detail-value">${data.end_date || '-'}</p>
+            </div>
+            <div class="detail-box col-span-2">
+                <span class="detail-label">สถานะ</span>
+                <p class="detail-value"><span class="status-badge ${statusInfo.class}">${statusInfo.text}</span> ${data.status_remark || ''}</p>
+            </div>
+            <div class="detail-box col-span-2">
+                <span class="detail-label">อาการเสีย / สิ่งที่พบ</span>
+                <p class="detail-value">${data.repair_details || '-'}</p>
+            </div>
+            <div class="detail-box col-span-2">
+                <span class="detail-label">ไฟล์แนบ</span>
+                ${fileHtml || '<p class="detail-value text-muted">ไม่มีไฟล์แนบ</p>'}
+            </div>
+        </div>
+    `;
+    $('#viewModalBody').html(content);
+}
+
+function exportExcel() {
+    window.open('product_export.php', '_blank');
+}

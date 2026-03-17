@@ -78,81 +78,89 @@ if ($result) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MaintDash - Products</title>
+    <title>MaintDash - Product Claim</title>
     <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="CSS/product_user.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/product.css">
 </head>
 <body>
     <?php include 'sidebar_user.php'; ?>
 
     <div class="main-content">
-        <div class="page-header-card">
-            <h1 style="margin:0; font-size:1.8rem; color:#1e293b;">Product Claim</h1>
-            <p style="margin:5px 0 0; color:#64748b; font-size:1rem;">ระบบจัดการและติดตามสถานะงานซ่อม ตั้งแต่รับอุปกรณ์จนถึงส่งคืนลูกค้า</p>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card grad-all">
-                <div class="stat-label">ทั้งหมด</div><div class="stat-val"><?= number_format($stats['total']) ?></div>
-                <i class="fas fa-layer-group fa-bg"></i>
-            </div>
-            <div class="stat-card grad-s1">
-                <div class="stat-label">รอสินค้าจากลูกค้า</div><div class="stat-val"><?= number_format($stats['s1']) ?></div>
-                <i class="fas fa-clock fa-bg"></i>
-            </div>
-            <div class="stat-card grad-s2">
-                <div class="stat-label">ตรวจสอบ</div><div class="stat-val"><?= number_format($stats['s2']) ?></div>
-                <i class="fas fa-search fa-bg"></i>
-            </div>
-            <div class="stat-card grad-s3">
-                <div class="stat-label">รอสินค้าจาก supplier</div><div class="stat-val"><?= number_format($stats['s3']) ?></div>
-                <i class="fas fa-truck-loading fa-bg"></i>
-            </div>
-            <div class="stat-card grad-s4">
-                <div class="stat-label">ส่งคืนลูกค้า</div><div class="stat-val"><?= number_format($stats['s4']) ?></div>
-                <i class="fas fa-check-double fa-bg"></i>
+        <div class="page-header">
+            <div>
+                <h2 class="page-title">Product Claim</h2>
+                <p class="page-subtitle">ติดตามสถานะงานซ่อมของคุณ</p>
             </div>
         </div>
 
-        <div class="toolbar-container">
-            <div class="search-pill">
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon-box bg-all"><i class="fas fa-layer-group"></i></div>
+                <div class="stat-info"><p>ทั้งหมด</p><h3><?= number_format($stats['total']) ?></h3></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-box bg-s1"><i class="fas fa-clock"></i></div>
+                <div class="stat-info"><p>รอสินค้า</p><h3><?= number_format($stats['s1']) ?></h3></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-box bg-s2"><i class="fas fa-search"></i></div>
+                <div class="stat-info"><p>ตรวจสอบ</p><h3><?= number_format($stats['s2']) ?></h3></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-box bg-s3"><i class="fas fa-truck-loading"></i></div>
+                <div class="stat-info"><p>รออะไหล่</p><h3><?= number_format($stats['s3']) ?></h3></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-box bg-s4"><i class="fas fa-check-double"></i></div>
+                <div class="stat-info"><p>ส่งคืน</p><h3><?= number_format($stats['s4']) ?></h3></div>
+            </div>
+        </div>
+
+        <div class="table-toolbar">
+            <div class="search-container">
                 <i class="fas fa-search"></i>
                 <input type="text" id="searchInput" placeholder="ค้นหาอุปกรณ์, ลูกค้า, S/N..." onkeyup="filterTable()">
             </div>
         </div>
 
-        <div class="table-container">
-            <div class="scroll-area">
-                <table class="bordered-table" id="productTable">
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table" id="productTable">
                     <thead>
                         <tr>
-                            <th width="5%">ลำดับ</th>
-                            <th width="22%">ลูกค้า / เเผนก</th>
-                            <th width="8%">อุปกรณ์ / S/N</th> <th width="15%" style="text-align: center;">สถานะ</th>
-                            <th width="30%">รายละเอียดการซ่อม</th> <th width="15%">วันที่เริ่ม / วันที่สิ้นสุด</th>
-                            <th width="5%" class="text-center">จัดการ</th>
+                            <th class="text-center">#</th>
+                            <th>ลูกค้า / แผนก</th>
+                            <th>อุปกรณ์ / S/N</th>
+                            <th class="text-center">สถานะ</th>
+                            <th>รายละเอียด</th>
+                            <th>วันที่เริ่ม / สิ้นสุด</th>
+                            <th class="text-center">จัดการ</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if(empty($products)): ?>
-                            <tr><td colspan="7" style="text-align:center; padding:40px; color:#999;">ไม่พบข้อมูลอุปกรณ์ในระบบ</td></tr>
+                            <tr><td colspan="7" class="text-center p-5 text-muted">ไม่พบข้อมูล</td></tr>
                         <?php else: foreach ($products as $idx => $row): ?>
                         <tr>
-                            <td style="text-align: center; font-weight: bold;"><?= $idx + 1 ?></td>
-                            <td><strong><?= htmlspecialchars($row['customer']) ?></strong><br><small style="color:#94a3b8;"><?= htmlspecialchars($row['department']) ?></small></td>
-                            <td><strong style="color:var(--primary);"><?= htmlspecialchars($row['device_name']) ?></strong><br><small>S/N: <?= htmlspecialchars($row['sn'] ?: '-') ?></small></td>
-                            <td style="text-align: center;"><span class="status-pill <?= $row['badge_class'] ?>"><?= $row['status_th'] ?></span></td>
-                            <td style="color:#64748b;"><?= mb_strimwidth($row['symptom'], 0, 80, "...") ?></td>
+                            <td class="text-center"><?= $idx + 1 ?></td>
                             <td>
-                                <div class="date-info">
-                                    <span style="color:#2563eb;"><i class="fas fa-play-circle"></i> <?= $row['start_date'] ?></span><br>
-                                    <span style="color:#dc2626;"><i class="fas fa-flag-checkered"></i> <?= $row['end_date'] ?></span>
-                                </div>
+                                <strong><?= htmlspecialchars($row['customer']) ?></strong><br>
+                                <small class="text-muted"><?= htmlspecialchars($row['department']) ?></small>
                             </td>
                             <td>
-                                <button class="btn-view" onclick="viewDetail(<?= htmlspecialchars(json_encode($row)) ?>)">
+                                <strong><?= htmlspecialchars($row['device_name']) ?></strong><br>
+                                <small class="text-muted">S/N: <?= htmlspecialchars($row['sn'] ?: '-') ?></small>
+                            </td>
+                            <td class="text-center"><span class="status-badge <?= $row['badge_class'] ?>"><?= $row['status_th'] ?></span></td>
+                            <td><?= mb_strimwidth($row['symptom'], 0, 80, "...") ?></td>
+                            <td>
+                                <div><i class="fas fa-play-circle text-primary"></i> <?= $row['start_date'] ?></div>
+                                <div><i class="fas fa-flag-checkered text-danger"></i> <?= $row['end_date'] ?></div>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-primary" onclick='viewDetail(<?= htmlspecialchars(json_encode($row)) ?>)'>
                                     <i class="far fa-eye"></i>
                                 </button>
                             </td>
@@ -164,15 +172,16 @@ if ($result) {
         </div>
     </div>
 
-    <div class="modal-overlay" id="viewModal" onclick="if(event.target == this) closeModal()">
+    <div class="modal-overlay" id="viewModal">
         <div class="modal-box">
             <div class="modal-header">
-                <h3 style="margin:0;"><i class="fas fa-file-invoice"></i> รายละเอียดอุปกรณ์</h3>
-                <span style="cursor:pointer; font-size:1.8rem;" onclick="closeModal()">&times;</span>
+                <h3 class="modal-title">รายละเอียดอุปกรณ์</h3>
+                <button class="btn-close" onclick="closeModal()"></button>
             </div>
-            <div style="padding:25px;" id="v_content"></div>
+            <div class="modal-body" id="v_content"></div>
         </div>
     </div>
-<script src="js/product_user.js"></script>
+
+    <script src="js/product_user.js"></script>
 </body>
 </html>
