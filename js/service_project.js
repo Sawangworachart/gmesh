@@ -128,29 +128,30 @@ function viewData(id) {
             $('#view_symptom').text(data.symptom || '-');
             $('#view_action').text(data.action_taken || '-');
 
-            const fileContainer = $('#view_file_container');
-            fileContainer.html(''); // Clear previous content
-
-            if (data.files && data.files.length > 0) {
-                let filesHtml = '<div class="file-grid">';
-                data.files.forEach(file => {
-                    const fileUrl = `uploads/${file}`;
-                    const isPdf = file.toLowerCase().endsWith('.pdf');
-                    const iconClass = isPdf ? 'fas fa-file-pdf' : 'fas fa-image';
-
-                    filesHtml += `
-                        <a href="${fileUrl}" target="_blank" class="file-item-link">
-                            <div class="file-item-icon" style="color: ${isPdf ? '#D32F2F' : '#4CAF50'};">
-                                <i class="${iconClass}"></i>
-                            </div>
-                            <div class="file-item-name">${file}</div>
-                        </a>
-                    `;
-                });
-                filesHtml += '</div>';
-                fileContainer.html(filesHtml);
+            if (data.file_path) {
+                $('#view_file_container').html(`
+        <div style="display: flex; justify-content: flex-start;"> 
+            <a href="uploads/${data.file_path}" target="_blank" 
+               style="text-decoration:none; 
+                      display:inline-flex; 
+                      align-items:center; 
+                      gap:8px; 
+                      background:#4361ee; 
+                      padding:8px 16px; 
+                      border-radius:8px; 
+                      color:white; 
+                      font-weight:600; 
+                      font-size:0.9rem; 
+                      transition:0.3s;
+                      box-shadow: 0 2px 4px rgba(67, 97, 238, 0.2);"
+               onmouseover="this.style.background='#3651d1'" 
+               onmouseout="this.style.background='#4361ee'">
+                <i class="fas fa-file-pdf"></i> ดูไฟล์แนบ
+            </a>
+        </div>
+    `);
             } else {
-                fileContainer.html(`
+                $('#view_file_container').html(`
                     <div style="text-align: center; padding: 20px; border: 2px dashed #e2e8f0; border-radius: 12px; color: #cbd5e1;">
                         <i class="fas fa-file-alt" style="font-size: 2rem; margin-bottom: 10px;"></i>
                         <div style="font-size: 0.85rem; font-style: italic;">ไม่มีไฟล์แนบ</div>

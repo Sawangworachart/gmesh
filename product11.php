@@ -731,7 +731,7 @@ if (isset($_GET['msg']))
         </div>
     </div>
     
-    <script src="js/product11.js"></script> 
+    <script src="product.js"></script> 
 
 </body>
 
