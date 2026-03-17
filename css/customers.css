@@ -40,8 +40,14 @@ body {
 }
 
 /* =========================================
-   2. Layout (ใช้จาก sidebar.css)
+   2. Layout & Main Content
    ========================================= */
+.main-content {
+    margin-left: 250px;
+    padding: 30px;
+    min-height: 100vh;
+    transition: all 0.3s ease;
+}
 
 /* =========================================
    3. Custom Header Banner

@@ -16,7 +16,15 @@
     padding: 0;
     overflow-x: hidden; /* ป้องกันการเลื่อนซ้ายขวา */
 }
-        /* .main-content (ใช้จาก sidebar.css) */
+        .main-content { 
+    padding: 20px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 20px; 
+    width: auto; /* ให้กว้างตามพื้นที่ที่เหลือ */
+    min-width: 0; /* ป้องกัน Flex item ล้นขอบ */
+    transition: all 0.3s ease;
+}
         
         .dash-header-card { background: #fff; padding: 20px 25px; border-radius: var(--card-radius); box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 6px solid var(--btn-blue); }
         .dash-header-card h2 { margin: 0 0 5px 0; font-size: 2rem; font-weight: 700; color: #1e293b; }

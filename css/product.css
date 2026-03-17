@@ -41,7 +41,11 @@ body {
     color: var(--text-main);
 }
 
-/* .main-content (ใช้จาก sidebar.css) */
+.main-content {
+    margin-left: 250px;
+    padding: 30px;
+    min-height: 100vh;
+}
 
 /* =========================================
    2. Header Banner & Stats
