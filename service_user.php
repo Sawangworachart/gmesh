@@ -1,18 +1,20 @@
 <?php
+// หน้า service ของ user
 session_start();
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
-include_once 'auth.php';
-include_once 'db.php';
+include_once 'auth.php'; 
+include_once 'db.php'; 
 
 $services = [];
 $stats = ['total' => 0, 'onsite' => 0, 'remote' => 0, 'subcon' => 0];
 $project_filter_opt = [];
 
-if (isset($conn) && $conn) {
+if(isset($conn) && $conn) {
     try {
         $cnt_sql = "SELECT service_type, COUNT(*) as count FROM service_project_detail GROUP BY service_type";
         $cnt_query = mysqli_query($conn, $cnt_sql);
+        
         if ($cnt_query) {
             while ($row = mysqli_fetch_assoc($cnt_query)) {
                 $count = (int)$row['count'];
@@ -38,15 +40,16 @@ if (isset($conn) && $conn) {
                 LEFT JOIN service_project_detail d ON s.service_id = d.service_id
                 LEFT JOIN customers c ON d.customers_id = c.customers_id
                 ORDER BY d.start_date DESC, s.service_id DESC";
+
         $result = mysqli_query($conn, $sql);
         if ($result) {
-            while ($row = mysqli_fetch_assoc($result)) {
+            while($row = mysqli_fetch_assoc($result)) {
                 $st_type = (int)$row['service_type'];
                 $st_raw = ($st_type == 2) ? 'Remote' : (($st_type == 3) ? 'Subcontractor' : 'On-site');
                 $st_th = ($st_type == 2) ? 'Remote' : (($st_type == 3) ? 'แจ้ง Subcontractor' : 'On-site');
 
                 $services[] = [
-                    'id' => $row['service_id'],
+                    'id' => $row['service_id'], 
                     'start_date' => $row['start_date'] ? date('d/m/Y', strtotime($row['start_date'])) : '-',
                     'end_date' => $row['end_date'] ? date('d/m/Y', strtotime($row['end_date'])) : '-',
                     'customer' => $row['customers_name'] ?? 'ไม่ระบุ',
@@ -57,167 +60,134 @@ if (isset($conn) && $conn) {
                     'ref_number' => (!empty($row['number'])) ? htmlspecialchars($row['number']) : '-',
                     'symptom' => $row['symptom'] ?? '-',
                     'solution' => $row['action_taken'] ?? 'รอดำเนินการ',
-                    'file_path' => $row['file_path'] ?? '',
+                    'file_path' => $row['file_path'] ?? '', 
                     'status' => $st_raw,
                     'status_th' => $st_th
                 ];
             }
         }
-    } catch (Exception $e) {
-    }
+    } catch (Exception $e) { }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Project - G-Mesh</title>
-    <link rel="icon" type="image/png" href="images/logomaintdash1.png">
+    <title>Service Project - Mesh Intelligence</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/service_project.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="CSS/service_user.css">
 </head>
 <body>
     <?php include 'sidebar_user.php'; ?>
 
-    <main class="main-content">
-        <header class="page-header">
-            <h1 class="page-title">Service</h1>
-            <p class="page-description">ระบบบันทึกข้อมูลการแจ้งซ่อมและประวัติการเข้าบริการลูกค้า</p>
-        </header>
+    <div class="main-content">
+        <div class="page-header-card">
+            <h1 style="margin:0; font-size:1.8rem;">Service</h1>
+            <p style="margin:5px 0 0; color:#64748b;">ระบบบันทึกข้อมูลการแจ้งซ่อมและประวัติการเข้าบริการลูกค้า</p>
+        </div>
 
-        <div class="status-cards">
-            <div class="status-card card-total">
-                <div class="card-icon"><i class="fas fa-clipboard-list"></i></div>
-                <div class="card-info">
-                    <p>งานทั้งหมด</p>
-                    <span><?= $stats['total'] ?></span>
-                </div>
+        <div class="stats-grid">
+            <div class="stat-card grad-total">
+                <div class="stat-label">งานทั้งหมด</div>
+                <div class="stat-val"><?= $stats['total'] ?></div>
+                <i class="fas fa-clipboard-list" style="position:absolute; right:10px; bottom:-10px; font-size:5rem; opacity:0.15;"></i>
             </div>
-            <div class="status-card card-onsite">
-                <div class="card-icon"><i class="fas fa-car-side"></i></div>
-                <div class="card-info">
-                    <p>On-site</p>
-                    <span><?= $stats['onsite'] ?></span>
-                </div>
+            <div class="stat-card grad-onsite">
+                <div class="stat-label">On-site</div>
+                <div class="stat-val"><?= $stats['onsite'] ?></div>
+                <i class="fas fa-car-side" style="position:absolute; right:10px; bottom:-10px; font-size:5rem; opacity:0.15;"></i>
             </div>
-            <div class="status-card card-remote">
-                <div class="card-icon"><i class="fas fa-desktop"></i></div>
-                <div class="card-info">
-                    <p>Remote</p>
-                    <span><?= $stats['remote'] ?></span>
-                </div>
+            <div class="stat-card grad-remote">
+                <div class="stat-label">Remote</div>
+                <div class="stat-val"><?= $stats['remote'] ?></div>
+                <i class="fas fa-desktop" style="position:absolute; right:10px; bottom:-10px; font-size:5rem; opacity:0.15;"></i>
             </div>
-            <div class="status-card card-sub">
-                <div class="card-icon"><i class="fas fa-user-friends"></i></div>
-                <div class="card-info">
-                    <p>Subcontractor</p>
-                    <span><?= $stats['subcon'] ?></span>
-                </div>
+            <div class="stat-card grad-subcon">
+                <div class="stat-label">แจ้ง Subcontractor</div>
+                <div class="stat-val"><?= $stats['subcon'] ?></div>
+                <i class="fas fa-user-friends" style="position:absolute; right:10px; bottom:-10px; font-size:5rem; opacity:0.15;"></i>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h2>รายการแจ้งซ่อมทั้งหมด</h2>
-                <div class="card-toolbar">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="searchInput" placeholder="ค้นหา...">
-                    </div>
-                    <div class="filter-box">
-                        <i class="fas fa-filter"></i>
-                        <select id="projectFilter">
-                            <option value="">-- ทุกโครงการ --</option>
-                            <?php foreach ($project_filter_opt as $proj): ?>
-                                <option value="<?= htmlspecialchars($proj) ?>"><?= htmlspecialchars($proj) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
+        <div class="toolbar-container">
+            <div class="search-pill">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="ค้นหาข้อมูล..." onkeyup="filterUserTable()">
             </div>
-            <div class="table-wrapper">
-                <table class="table" id="serviceTable">
+            <div class="filter-pill">
+                <i class="fas fa-filter"></i>
+                <select id="projectFilter" onchange="filterUserTable()">
+                    <option value="">-- ดูทุกโครงการ --</option>
+                    <?php foreach ($project_filter_opt as $proj): ?>
+                        <option value="<?= htmlspecialchars($proj) ?>"><?= htmlspecialchars($proj) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="scroll-area">
+                <table class="bordered-table" id="serviceTable">
                     <thead>
                         <tr>
-                            <th>เลขที่โครงการ</th>
-                            <th>ชื่อโครงการ</th>
-                            <th>ลูกค้า</th>
-                            <th>อุปกรณ์ / S/N</th>
-                            <th class="text-center">สถานะ</th>
-                            <th>วันที่เริ่ม / สิ้นสุด</th>
-                            <th class="text-center">จัดการ</th>
+                            <th width="10%">เลขที่โครงการ</th> 
+                            <th width="18%">ชื่อโครงการ</th>
+                            <th width="15%">อาการเสีย</th>
+                            <th width="15%">ลูกค้า</th>
+                            <th width="12%">อุปกรณ์ / S/N</th>
+                            <th width="10%" style="text-align: center;">สถานะ</th>
+                            <th width="10%">สัญญา</th>
+                            <th width="12%">วันที่เริ่ม / วันที่สิ้นสุด</th>
+                            <th width="5%" class="text-center">จัดการ</th> 
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (empty($services)): ?>
-                            <tr>
-                                <td colspan="7" class="text-center">ไม่มีข้อมูล</td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach ($services as $row):
-                                $badgeClass = '';
-                                switch ($row['status']) {
-                                    case 'On-site': $badgeClass = 'badge-onsite'; break;
-                                    case 'Remote': $badgeClass = 'badge-remote'; break;
-                                    case 'Subcontractor': $badgeClass = 'badge-sub'; break;
-                                }
-                            ?>
-                            <tr>
-                                <td data-label="เลขที่โครงการ"><?= $row['ref_number'] ?></td>
-                                <td data-label="ชื่อโครงการ">
-                                    <div class="text-bold"><?= htmlspecialchars($row['project_name']) ?></div>
-                                    <div class="text-muted text-small" title="<?= htmlspecialchars($row['symptom']) ?>">
-                                        อาการ: <?= mb_strimwidth(htmlspecialchars($row['symptom']), 0, 40, "...") ?>
-                                    </div>
-                                </td>
-                                <td data-label="ลูกค้า">
-                                    <div class="text-bold"><?= htmlspecialchars($row['customer']) ?></div>
-                                    <div class="text-muted text-small"><?= htmlspecialchars($row['department']) ?></div>
-                                </td>
-                                <td data-label="อุปกรณ์ / S/N">
-                                    <div class="text-bold"><?= htmlspecialchars($row['device_model']) ?></div>
-                                    <div class="text-muted text-small">S/N: <?= htmlspecialchars($row['serial_number']) ?></div>
-                                </td>
-                                <td data-label="สถานะ" class="text-center">
-                                    <span class="badge-status <?= $badgeClass ?>"><?= $row['status_th'] ?></span>
-                                </td>
-                                <td data-label="วันที่เริ่ม / สิ้นสุด">
-                                    <div class="text-small">
-                                        <span class="text-success"><i class="fas fa-play-circle"></i> <?= $row['start_date'] ?></span>
-                                    </div>
-                                    <div class="text-small">
-                                        <span class="text-danger"><i class="fas fa-stop-circle"></i> <?= $row['end_date'] ?></span>
-                                    </div>
-                                </td>
-                                <td data-label="จัดการ" class="text-center">
-                                    <button class="btn btn-icon btn-view" onclick='viewDetail(<?= htmlspecialchars(json_encode($row), ENT_QUOTES, "UTF-8") ?>)'>
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+                        <?php foreach ($services as $row): 
+                            $badgeClass = ($row['status'] == 'Remote') ? 'st-remote' : (($row['status'] == 'Subcontractor') ? 'st-subcon' : 'st-onsite');
+                        ?>
+                        <tr>
+                            <td data-label="เลขที่โครงการ"><?= $row['ref_number'] ?></td>
+                            <td data-label="ชื่อโครงการ"><strong><?= htmlspecialchars($row['project_name']) ?></strong></td>
+                            <td data-label="อาการเสีย" style="color:#64748b; font-size:0.85rem;"><?= mb_strimwidth($row['symptom'], 0, 45, "...") ?></td>
+                            <td data-label="ลูกค้า"><?= htmlspecialchars($row['customer']) ?><br><small style="color:#94a3b8;"><?= htmlspecialchars($row['department']) ?></small></td>
+                            <td data-label="อุปกรณ์ / S/N">
+                                <div style="font-weight: 500;"><?= htmlspecialchars($row['device_model']) ?></div>
+                                <div style="font-size: 0.8rem; color: #64748b;">S/N: <?= htmlspecialchars($row['serial_number']) ?></div>
+                            </td>
+                            <td data-label="สถานะ" style="text-align: center;"><span class="status-pill <?= $badgeClass ?>"><?= $row['status_th'] ?></span></td>
+                            <td data-label="สัญญา">-</td>
+                            <td data-label="วันที่เริ่ม / สิ้นสุด">
+                                <div class="date-info">
+                                    <span style="color:#2563eb; font-size:0.9rem;"><i class="fas fa-play"></i> <?= $row['start_date'] ?></span><br>
+                                    <span style="color:#dc2626; font-size:0.9rem;"><i class="fas fa-flag"></i> <?= $row['end_date'] ?></span>
+                                </div>
+                            </td>
+                            <td data-label="จัดการ">
+                                <button class="btn-view" onclick="viewDetail(<?= htmlspecialchars(json_encode($row)) ?>)">
+                                    <i class="far fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
         </div>
-    </main>
-
-    <div class="modal-overlay" id="viewModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title"><i class="fas fa-info-circle"></i> รายละเอียดงานบริการ</h3>
-                <button class="modal-close" onclick="closeViewModal()">&times;</button>
-            </div>
-            <div class="modal-body" id="v_content">
-                <!-- Content will be injected by JavaScript -->
-            </div>
-        </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="js/service_user.js"></script>
+    <div class="modal-overlay" id="viewModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 style="margin:0;"><i class="fas fa-info-circle"></i> รายละเอียดงานบริการ</h3>
+                <span style="cursor:pointer; font-size:1.8rem;" onclick="closeViewModal()">&times;</span>
+            </div>
+            <div class="modal-body-scroll" id="v_content"></div>
+        </div>
+    </div>
+<script src="js/service_user.js"></script>
 </body>
 </html>

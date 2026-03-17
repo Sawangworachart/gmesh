@@ -1,84 +1,54 @@
-// js/manage_users.js
+// หน้า edit users ของ superadmin
 const API_URL = 'manage_users.php?api=true';
 
-$(document).ready(function() {
-    loadData();
-
-    $('#userForm').submit(function(e) {
-        e.preventDefault();
-        const formData = $(this).serialize();
-        const userId = $('#userId').val();
-        const password = $('#password').val();
-
-        if ((userId === '0' || password !== '') && password.length < 6) {
-            Swal.fire('รหัสผ่านไม่ถูกต้อง', 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร', 'warning');
-            return;
-        }
-
-        $.post(API_URL, formData, function(res) {
-            if (res.success) {
-                Swal.fire({ icon: 'success', title: 'สำเร็จ', text: res.message, timer: 1500, showConfirmButton: false });
-                closeModal();
-                loadData();
-            } else {
-                Swal.fire('เกิดข้อผิดพลาด', res.message, 'error');
-            }
-        }, 'json').fail(function() {
-            Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
-        });
-    });
-
-    $('#searchInput').on('keyup', function() {
-        const value = $(this).val().toLowerCase();
-        $("#tableBody tr").filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-        });
-    });
-
-    $(document).on('click', '.toggle-password', function() {
-        const input = $(this).prev('input');
-        const icon = $(this);
-        if (input.attr('type') === 'password') {
-            input.attr('type', 'text');
-            icon.removeClass('fa-eye').addClass('fa-eye-slash');
-        } else {
-            input.attr('type', 'password');
-            icon.removeClass('fa-eye-slash').addClass('fa-eye');
-        }
-    });
-});
+// -----------------------------------------------------
+// Core Functions (Global Scope - Callable from HTML)
+// -----------------------------------------------------
 
 function loadData() {
     $.post(API_URL, { action: 'fetch_all' }, function(res) {
         if (res.success) {
+            // Update Stats
             $('#statTotal').text(res.stats.total);
             $('#statActive').text(res.stats.active);
             $('#statInactive').text(res.stats.inactive);
 
+            // Render Table
             let html = '';
             if (res.data.length === 0) {
-                html = '<tr><td colspan="4" class="text-center">ไม่มีข้อมูลผู้ใช้งาน</td></tr>';
+                html = '<tr><td colspan="5" class="text-center" style="padding:30px; color:#999;">ไม่พบข้อมูลผู้ใช้งาน</td></tr>';
             } else {
                 res.data.forEach(user => {
-                    const avatarLetter = user.username.charAt(0).toUpperCase();
-                    const roleBadge = getRoleBadge(user.role);
-                    const statusBadge = getStatusBadge(user.status);
+                    // Status Badge
+                    let statusBadge = user.status == 1 
+                        ? '<span class="badge status-active"><i class="fas fa-check-circle"></i> Active</span>' 
+                        : '<span class="badge status-inactive"><i class="fas fa-times-circle"></i> Inactive</span>';
+                    
+                    // Role Badge
+                    let roleBadge = user.role === 'admin'
+                        ? '<span class="badge role-admin"><i class="fas fa-user-shield"></i> Admin</span>'
+                        : '<span class="badge role-user"><i class="fas fa-user"></i> User</span>';
 
+                    let avatarLetter = user.username.charAt(0).toUpperCase();
+
+                    // การเรียกใช้ editUser และ deleteUser ยังคงทำงานได้
                     html += `
-                        <tr data-status="${user.status}">
-                            <td data-label="ผู้ใช้งาน">
-                                <div class="user-info-cell">
+                        <tr>
+                            <td>#${user.id}</td>
+                            <td>
+                                <div class="user-row-flex">
                                     <div class="user-avatar">${avatarLetter}</div>
-                                    <div class="user-name">${user.username}</div>
+                                    <div style="font-weight:600; color:#333">${user.username}</div>
                                 </div>
                             </td>
-                            <td data-label="สิทธิ์" class="text-center">${roleBadge}</td>
-                            <td data-label="สถานะ" class="text-center">${statusBadge}</td>
-                            <td data-label="จัดการ" class="text-center">
-                                <button class="btn btn-icon btn-edit" onclick="editUser(${user.id})"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-icon btn-delete" onclick="deleteUser(${user.id})"><i class="fas fa-trash-alt"></i></button>
+                            <td>${roleBadge}</td>
+                            <td>${statusBadge}</td>
+                            <td class="text-center">
+                                <button class="action-btn btn-edit" onclick="editUser(${user.id})"><i class="fas fa-pencil-alt"></i></button>
+                                <button class="action-btn btn-delete" onclick="deleteUser(${user.id})"><i class="fas fa-trash-alt"></i></button>
                             </td>
-                        </tr>`;
+                        </tr>
+                    `;
                 });
             }
             $('#tableBody').html(html);
@@ -86,38 +56,20 @@ function loadData() {
     }, 'json');
 }
 
-function getRoleBadge(role) {
-    switch (role) {
-        case 'admin': return '<span class="badge badge-admin"><i class="fas fa-user-shield"></i> Admin</span>';
-        default: return '<span class="badge badge-user"><i class="fas fa-user"></i> User</span>';
-    }
-}
-
-function getStatusBadge(status) {
-    return status == 1
-        ? '<span class="badge badge-active"><i class="fas fa-check-circle"></i> Active</span>'
-        : '<span class="badge badge-inactive"><i class="fas fa-times-circle"></i> Inactive</span>';
-}
-
-function filterByStatus(status, el) {
-    $('.stat-card-item').removeClass('active');
-    $(el).addClass('active');
-    if (status === 'all') {
-        $('#tableBody tr').show();
-    } else {
-        $('#tableBody tr').hide().filter(`[data-status="${status}"]`).show();
-    }
-}
-
 function openModal(mode) {
     $('#userForm')[0].reset();
     $('#userId').val('0');
-    $('#password').attr('required', true);
+    $('#password').attr('required', true); // Create needs password
     $('#passwordHint').hide();
-
+    
+    // Reset password field type
+    $('#password').attr('type', 'password');
+    $('.toggle-password').removeClass('fa-eye-slash').addClass('fa-eye');
+    
     if (mode === 'create') {
-        $('#modalTitle').text('เพิ่มผู้ใช้งานใหม่');
-        $('#saveBtn').html('<i class="fas fa-plus-circle"></i> สร้างผู้ใช้');
+        $('#modalTitle').html('<i class="fas fa-user-plus"></i> เพิ่มผู้ใช้งานใหม่');
+        $('#saveBtn').html('<i class="fas fa-save"></i> บันทึก');
+        $('#role').val('user'); // Default role
     }
     $('#userModal').addClass('show');
 }
@@ -126,50 +78,82 @@ function closeModal() {
     $('#userModal').removeClass('show');
 }
 
+function togglePassword() {
+    const input = $('#password');
+    const icon = $('.toggle-password');
+    if (input.attr('type') === 'password') {
+        input.attr('type', 'text');
+        icon.removeClass('fa-eye').addClass('fa-eye-slash');
+    } else {
+        input.attr('type', 'password');
+        icon.removeClass('fa-eye-slash').addClass('fa-eye');
+    }
+}
+
 function editUser(id) {
     $.get(API_URL, { action: 'fetch_single', id: id }, function(res) {
         if (res.success) {
             const d = res.data;
             $('#userId').val(d.id);
             $('#username').val(d.username);
-            $('#role').val(d.role);
+            $('#role').val(d.role); // Set role
             $('#status').val(d.status);
+            
+            // Edit mode config
             $('#password').val('').removeAttr('required');
             $('#passwordHint').show();
-            $('#modalTitle').text('แก้ไขข้อมูลผู้ใช้: ' + d.username);
-            $('#saveBtn').html('<i class="fas fa-save"></i> อัปเดตข้อมูล');
+            
+            // Reset password field type
+            $('#password').attr('type', 'password');
+            $('.toggle-password').removeClass('fa-eye-slash').addClass('fa-eye');
+            
+            $('#modalTitle').html('<i class="fas fa-user-edit"></i> แก้ไขผู้ใช้งาน (ID: '+d.id+')');
+            $('#saveBtn').html('<i class="fas fa-save"></i> อัปเดต');
             $('#userModal').addClass('show');
         }
     }, 'json');
 }
 
+// [MODIFIED] ฟังก์ชันสำหรับเรียกใช้ global_delete.js
 function deleteUser(id) {
-    Swal.fire({
-        title: 'ยืนยันการลบ?',
-        text: "ข้อมูลผู้ใช้งานนี้จะถูกลบอย่างถาวร!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'ใช่, ลบเลย!',
-        cancelButtonText: 'ยกเลิก'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post(API_URL, { action: 'delete', id: id }, function(res) {
-                if (res.success) {
-                    Swal.fire('ลบแล้ว!', res.message, 'success');
-                    loadData();
-                } else {
-                    Swal.fire('ผิดพลาด', res.message, 'error');
-                }
-            }, 'json');
-        }
+    // เรียกฟังก์ชันกลาง: ส่ง ID, URL API ปัจจุบัน, และ Callback
+    confirmDelete(id, API_URL, function() {
+        // Callback: เมื่อลบสำเร็จ ให้โหลดตารางใหม่
+        loadData();
     });
 }
 
-// Close modal on outside click
-$(window).on('click', function(event) {
-    if ($(event.target).is('#userModal')) {
-        closeModal();
-    }
+function filterTable() {
+    var value = $('#searchInput').val().toLowerCase();
+    $("#tableBody tr").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+}
+
+// -----------------------------------------------------
+// Initialization and Event Handlers (Document Ready)
+// -----------------------------------------------------
+
+$(document).ready(function() {
+    loadData();
+
+    $('#userForm').submit(function(e) {
+        e.preventDefault();
+        const formData = $(this).serialize();
+        $.post(API_URL, formData, function(res) {
+            if (res.success) {
+                Swal.fire({ icon: 'success', title: 'สำเร็จ', text: res.message, timer: 1500, showConfirmButton: false });
+                closeModal();
+                loadData();
+            } else {
+                Swal.fire('Error', res.message, 'error');
+            }
+        }, 'json').fail(function() {
+            Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+        });
+    });
+
+    $(window).click(function(e) {
+        if ($(e.target).is('#userModal')) closeModal();
+    });
 });

@@ -1,71 +1,81 @@
-
-// js/pmproject_user.js
-
-function filterTable() {
-    const input = document.getElementById("searchInput");
-    const filter = input.value.toUpperCase();
-    const table = document.getElementById("projectTable");
-    const tr = table.getElementsByTagName("tr");
-
-    for (let i = 1; i < tr.length; i++) { // Start from 1 to skip header row
-        let rowText = tr[i].textContent || tr[i].innerText;
-        if (rowText.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-        } else {
-            tr[i].style.display = "none";
+// js หน้า Preventive Maintenance ของ user
+        function searchTable(tableId, inputId) {
+            var input = document.getElementById(inputId);
+            var filter = input.value.toUpperCase(); 
+            var table = document.getElementById(tableId);
+            var tbody = table.getElementsByTagName("tbody")[0]; 
+            var rows = tbody.getElementsByTagName("tr");
+            for (var i = 0; i < rows.length; i++) {
+                var cells = rows[i].getElementsByTagName("td");
+                var match = false;
+                for (var j = 0; j < cells.length; j++) {
+                    var cellText = cells[j].textContent || cells[j].innerText;
+                    if (cellText.toUpperCase().indexOf(filter) > -1) {
+                        match = true;
+                        break; 
+                    }
+                }
+                rows[i].style.display = match ? "" : "none";
+            }
         }
-    }
-}
 
-function openViewModal(data) {
-    document.getElementById('view_project_name').innerText = data.project_name;
-    
-    const statusMap = { 
-        1: { text: 'รอตรวจสอบ', class: 'status-1' }, 
-        2: { text: 'กำลังดำเนินการ', class: 'status-2' }, 
-        3: { text: 'เสร็จสิ้น', class: 'status-3' } 
-    };
-    const status = statusMap[data.status_id] || { text: 'N/A', class: '' };
+        function viewDetail(btn) {
+            const data = btn.dataset;
+            document.getElementById('view_no').innerText = data.no || '-';
+            document.getElementById('view_name').innerText = data.name;
+            document.getElementById('view_customer').innerText = data.customer;
+            document.getElementById('view_responsible').innerText = data.responsible;
+            document.getElementById('view_start').innerText = data.start;
+            document.getElementById('view_end').innerText = data.end;
+            document.getElementById('view_contract').innerText = data.contract || '-';
+            document.getElementById('view_ma').innerText = data.ma || '-';
+            
+            const statusEl = document.getElementById('view_status_badge');
+            let statusHtml = data.status;
+            if(data.status === 'กำลังดำเนินการ') statusHtml = `<span style="color:#7c3aed;">${data.status}</span>`;
+            if(data.status === 'ดำเนินการเสร็จสิ้น') statusHtml = `<span style="color:#d97706;">${data.status}</span>`;
+            if(data.status === 'รอการตรวจสอบ') statusHtml = `<span style="color:#059669;">${data.status}</span>`;
+            statusEl.innerHTML = statusHtml;
 
-    let maTableBody = '';
-    if (data.ma_schedule && data.ma_schedule.length > 0) {
-        data.ma_schedule.forEach((ma, i) => {
-            maTableBody += `
-                <tr>
-                    <td class="text-center">${i + 1}</td>
-                    <td>${ma.ma_date}</td>
-                    <td>${ma.ma_detail || '-'}</td>
-                    <td>${ma.ma_remark || '-'}</td>
-                    <td class="text-center">${ma.ma_status == 1 ? '<i class="fas fa-check-circle text-success"></i>' : '<i class="fas fa-times-circle text-danger"></i>'}</td>
-                </tr>
-            `;
-        });
-    } else {
-        maTableBody = '<tr><td colspan="5" class="text-center text-muted p-3">ไม่มีแผน MA</td></tr>';
-    }
+            const tbody = document.getElementById('ma_table_body');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">กำลังโหลด...</td></tr>';
 
-    const content = `
-        <div class="view-grid">
-            <div class="view-item"><label>ลูกค้า</label><div>${data.customers_name}</div></div>
-            <div class="view-item"><label>ผู้รับผิดชอบ</label><div>${data.responsible_person || '-'}</div></div>
-            <div class="view-item"><label>สถานะ</label><div><span class="status-pill ${status.class}">${status.text}</span></div></div>
-            <div class="view-item"><label>สัญญา</label><div>${data.contract_period || '-'}</div></div>
-            <div class="view-item"><label>เริ่มประกัน</label><div>${data.start_date}</div></div>
-            <div class="view-item"><label>สิ้นสุดประกัน</label><div>${data.end_date}</div></div>
-        </div>
-        <h4><i class="fas fa-clipboard-list"></i> แผนการบำรุงรักษา</h4>
-        <div class="table-responsive">
-            <table class="table table-sm view-ma-table">
-                <thead><tr><th>#</th><th>วันที่</th><th>รายละเอียด</th><th>หมายเหตุ</th><th class="text-center">สถานะ</th></tr></thead>
-                <tbody>${maTableBody}</tbody>
-            </table>
-        </div>
-    `;
+            fetch(`pmproject_user.php?action=get_ma_detail&id=${data.id}`)
+                .then(response => response.json())
+                .then(res => {
+                    tbody.innerHTML = '';
+                    if (res.schedule && res.schedule.length > 0) {
+                        res.schedule.forEach((item, index) => {
+                            let fileBtn = item.has_file 
+                                ? `<a href="${item.file_path}" target="_blank" class="btn-action" style="width:30px; height:30px; margin:auto;"><i class="fas fa-file-download" style="color:#2ecc71;"></i></a>` 
+                                : '<span style="color:#ccc;">-</span>';
 
-    document.getElementById('view_modal_content').innerHTML = content;
-    document.getElementById('viewProjectModal').classList.add('show');
-}
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td align="center">${index+1}</td>
+                                    <td>${item.formatted_date}</td>
+                                    <td>${item.note || '-'}</td>
+                                    <td>${item.remark || '-'}</td>
+                                    <td align="center">${fileBtn}</td>
+                                </tr>`;
+                        });
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center">- ไม่มีข้อมูล -</td></tr>';
+                    }
+                });
 
-function closeViewModal() {
-    document.getElementById('viewProjectModal').classList.remove('show');
-}
+            const modal = document.getElementById('viewModal');
+            modal.style.display = 'flex';
+            setTimeout(() => { modal.classList.add('show'); }, 10);
+        }
+
+        function closeViewModal() {
+            const modal = document.getElementById('viewModal');
+            modal.classList.remove('show');
+            setTimeout(() => { modal.style.display = 'none'; }, 300);
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('viewModal');
+            if (event.target == modal) closeViewModal();
+        }

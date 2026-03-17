@@ -208,31 +208,34 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>MaintDash - Customers</title>
+    <title>MaintDash</title>
     <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/customers.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap">
+    <link rel="stylesheet" href="CSS/customers.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
     <div class="main-content">
-        <div class="page-header">
-            <div>
-                <h2 class="page-title">Customers</h2>
-                <p class="page-subtitle">จัดการข้อมูลลูกค้า แผนก และการติดต่อแยกตามกลุ่มองค์กร</p>
+        <div class="header-banner-custom">
+            <div class="header-left-content">
+                <div class="header-icon-circle"><i class="fas fa-users-cog"></i></div>
+                <div class="header-text-group">
+                    <h2 class="header-main-title">Customers</h2>
+                    <p class="header-sub-desc">จัดการข้อมูลลูกค้า แผนก และการติดต่อแยกตามกลุ่มองค์กร</p>
+                </div>
             </div>
             <div class="header-right-action">
-                <button class="btn btn-success" onclick="window.location='customers_export.php'"><i class="fas fa-file-excel"></i> Excel</button>
-                <button class="btn btn-primary" onclick="openModal('create')"><i class="fas fa-plus"></i> เพิ่มข้อมูล</button>
+                <button class="btn-pill-excel" onclick="window.location='customers_export.php'"><i class="fas fa-file-excel"></i> Excel</button>
+                <button class="btn-pill-primary" onclick="openModal('create')"><i class="fas fa-plus"></i> เพิ่มข้อมูล</button>
             </div>
         </div>
 
         <div class="table-toolbar">
-            <div class="search-container">
+            <div class="search-container-custom">
                 <i class="fas fa-search"></i>
                 <input type="text" id="searchInput" placeholder="ค้นหาชื่อลูกค้า, แผนก, หรือเบอร์โทร..." onkeyup="filterTable()">
             </div>
@@ -240,7 +243,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
 
         <div class="card">
             <div class="table-responsive">
-                <table class="table">
+                <table>
                     <thead>
                         <tr>
                             <th style="width: 50px;"></th>
@@ -259,46 +262,78 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
     </div>
 
     <div id="customerModal" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h3 id="modalTitle" class="modal-title">ข้อมูลลูกค้า</h3>
-                <button class="btn-close" onclick="closeModal()"></button>
+        <div class="modal-box custom-modal-style">
+            <div class="modal-header-custom">
+                <div class="header-left">
+                    <div class="header-icon-box"><i class="fas fa-pen"></i></div>
+                    <div class="header-titles">
+                        <h3 id="modalTitle">ข้อมูลลูกค้า</h3>
+                        <p class="header-subtitle">จัดการรายละเอียดข้อมูลองค์กรและผู้ติดต่อ</p>
+                    </div>
+                </div>
+                <button class="close-btn-custom" onclick="closeModal()"><i class="fas fa-times"></i></button>
             </div>
             <form id="customerForm">
-                <div class="modal-body">
+                <div class="modal-body custom-scroll">
                     <input type="hidden" name="customers_id" id="customers_id">
                     <input type="hidden" name="action" id="form_action" value="create">
                     
+                    <div class="section-header">
+                        <div class="section-indicator"></div><i class="fas fa-building section-icon"></i><span>ข้อมูลองค์กรและหน่วยงาน</span>
+                    </div>
                     <div class="form-grid">
-                        <div class="form-group col-span-2">
-                            <label class="form-label">ชื่อองค์กร <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="customers_name" id="customers_name" required>
+                        <div class="form-group form-full">
+                            <label class="form-label">ชื่อองค์กร <span style="color:red">*</span></label>
+                            <div class="input-icon-wrapper">
+                                <i class="fas fa-user-tie input-icon"></i>
+                                <input type="text" class="form-control-custom" name="customers_name" id="customers_name" required>
+                            </div>
                         </div>
-                        <div class="form-group col-span-2">
+                        <div class="form-group form-full">
                             <label class="form-label">แผนก / หน่วยงาน</label>
-                            <input type="text" class="form-control" name="agency" id="agency">
+                            <div class="input-icon-wrapper">
+                                <i class="fas fa-sitemap input-icon"></i>
+                                <input type="text" class="form-control-custom" name="agency" id="agency">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-header mt-4">
+                        <div class="section-indicator"></div><i class="fas fa-address-book section-icon"></i><span>รายละเอียดการติดต่อ</span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">ชื่อผู้ติดต่อ <span style="color:red">*</span></label>
+                            <div class="input-icon-wrapper">
+                                <i class="fas fa-user input-icon"></i>
+                                <input type="text" class="form-control-custom" name="contact_name" id="contact_name" required>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">ชื่อผู้ติดต่อ <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="contact_name" id="contact_name" required>
+                            <label class="form-label">เบอร์โทรศัพท์ <span style="color:red">*</span></label>
+                            <div class="input-icon-wrapper">
+                                <i class="fas fa-phone-alt input-icon"></i>
+                                <input type="text" class="form-control-custom" name="phone" id="phone" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="phone" id="phone" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
-                        </div>
-                        <div class="form-group col-span-2">
+                        <div class="form-group form-full">
                             <label class="form-label">ที่อยู่</label>
-                            <textarea class="form-control" name="address" id="address" rows="3"></textarea>
+                            <div class="input-icon-wrapper">
+                                <i class="fas fa-map-marker-alt input-icon" style="top:15px; transform:none;"></i>
+                                <textarea class="form-control-custom" name="address" id="address" rows="3"></textarea>
+                            </div>
                         </div>
-                        <div class="form-group col-span-2">
-                            <label class="form-label">จังหวัด <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="province" id="province" required>
+                        <div class="form-group form-full">
+                            <label class="form-label">จังหวัด <span style="color:red">*</span></label>
+                            <div class="input-icon-wrapper">
+                                <i class="fas fa-map input-icon"></i>
+                                <input type="text" class="form-control-custom" name="province" id="province" required>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
-                    <button type="submit" class="btn btn-primary" id="saveBtn">บันทึกข้อมูล</button>
+                <div class="modal-footer-custom">
+                    <button type="submit" class="btn-save-custom" id="saveBtn"><i class="fas fa-check-circle"></i> บันทึกข้อมูล</button>
                 </div>
             </form>
         </div>

@@ -152,53 +152,67 @@ if($count_row = mysqli_fetch_assoc($count_res)) {
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>MaintDash - Customers</title>
+    <title>MaintDash</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/customers.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="CSS/customers_user.css">
+
 </head>
 <body>
     <?php include 'sidebar_user.php'; ?>
 
     <div class="main-content">
-        <div class="page-header">
-            <div>
-                <h2 class="page-title">Customers</h2>
-                <p class="page-subtitle">ข้อมูลลูกค้าและรายละเอียดการติดต่อ</p>
+        
+        <div class="page-header-card animate-zoom">
+            <div class="header-title-group">
+                <h1>Customers</h1>
+                <div class="header-subtitle">จัดการข้อมูลลูกค้า แผนก และข้อมูลการติดต่อแยกตามกลุ่มองค์กร
+
+
+
+</div>
             </div>
         </div>
 
-        <div class="table-toolbar">
-            <div class="search-container">
+        <div class="hero-card animate-zoom">
+            <div class="hero-info">
+                <h3 id="totalCountDisplay"><?= number_format($total_groups); ?></h3>
+                <span>กลุ่มลูกค้าทั้งหมด (Total Groups)</span>
+            </div>
+            <i class="fas fa-users hero-icon"></i>
+        </div>
+        
+        <div class="toolbar animate-zoom">
+           
+            <div class="search-box">
                 <i class="fas fa-search"></i>
                 <input type="text" id="searchInput" placeholder="ค้นหาชื่อ, เบอร์โทร..." onkeyup="filterTable()">
             </div>
         </div>
 
-        <div class="card">
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th style="width: 50px;"></th>
-                            <th style="width: 35%;">ชื่อองค์กร / แผนก</th>
-                            <th style="width: 15%;">ผู้ติดต่อ</th>
-                            <th style="width: 15%;">เบอร์โทรศัพท์</th>
-                            <th style="width: 25%;">ที่อยู่</th>
-                            <th style="width: 10%;">จังหวัด</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr><td colspan="6" class="text-center p-5">กำลังโหลดข้อมูล...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="table-responsive animate-zoom">
+            <table class="grouped-table">
+                <thead>
+    <tr>
+        <th style="width: 50px;"></th> 
+        <th style="width: 35%;">ชื่อองค์กร / แผนก</th> 
+        <th style="width: 15%;">ผู้ติดต่อ</th> <th style="width: 15%;">เบอร์โทรศัพท์</th>
+        <th style="width: 25%;">ที่อยู่</th>
+        <th style="width: 10%;">จังหวัด</th>
+    </tr>
+</thead>
+                <tbody id="tableBody">
+                     <tr><td colspan="6" class="text-center" style="padding:20px;">กำลังโหลดข้อมูล...</td></tr>
+                </tbody>
+            </table>
         </div>
+
     </div>
     
     <script src="js/customers_user.js"></script>
+
 </body>
 </html>
