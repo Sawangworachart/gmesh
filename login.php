@@ -378,7 +378,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="login-card-wrapper <?php echo !empty($error_msg) ? 'no-anim' : ''; ?>" id="loginCard">
         <div class="login-card-inner">
             <div class="login-header">
-                <img src="images/logomaintdash1.png" alt="LogoMaintDash" class="login-logo" id="mainLogo">
+                <img src="images/logomaintdash.png" alt="LogoMaintDash" class="login-logo" id="mainLogo">
                 <div class="divider"></div>
             </div>
 
