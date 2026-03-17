@@ -32,11 +32,7 @@ body {
     color: var(--text-main);
 }
 
-.main-content {
-    margin-left: 250px;
-    padding: 30px;
-    min-height: 100vh;
-}
+/* .main-content (ใช้จาก sidebar.css) */
 
 /* =========================================
    2. Header Banner & Stats

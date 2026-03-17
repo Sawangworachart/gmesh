@@ -29,23 +29,8 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   2. LAYOUT (แก้จุดที่ซ้อนกันตรงนี้)
+   2. LAYOUT (ใช้จาก sidebar.css)
    -------------------------------------------------------------------------- */
-.main-content {
-    padding: 30px 20px;
-    min-height: 100vh;
-    box-sizing: border-box;
-}
-
-
-/* สำหรับมือถือ */
-@media (max-width: 768px) {
-    .main-content {
-        margin-left: 0 !important;
-        width: 100% !important;
-        padding-top: 80px !important;
-    }
-}
 
 .glass-effect {
     background: var(--glass-bg);

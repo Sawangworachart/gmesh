@@ -19,20 +19,7 @@ body {
     margin: 0;
 }
 
-/* --- 1. โครงสร้างหลัก --- */
-.main-content {
-    margin-left: 250px;
-    padding: 30px;
-    min-height: 100vh;
-    transition: margin-left 0.3s ease;
-}
-
-@media (max-width: 992px) {
-    .main-content {
-        margin-left: 0 !important;
-        padding: 15px;
-    }
-}
+/* --- 1. โครงสร้างหลัก (ใช้จาก sidebar.css) --- */
 
 /* --- 2. การ์ดตัวเลขด้านบน (Stats Cards - Modern Animated) --- */
 
