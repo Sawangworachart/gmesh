@@ -289,6 +289,7 @@ $is_project_active = is_active_parent($project_pages, $active_page);
         --active-color: var(--primary-color);
         --text-white: #ffffff;
         --danger-color: #e74c3c;
+        --sidebar-item-height: 48px;
     }
 
     body {
@@ -429,20 +430,29 @@ $is_project_active = is_active_parent($project_pages, $active_page);
 
     .sidebar-nav {
         list-style: none;
-        padding: 0 15px;
+        padding: 0 12px;
         margin: 15px 0 10px 0;
         flex-grow: 1;
+    }
+
+    .sidebar-nav li {
+        margin-bottom: 6px;
+    }
+
+    .sidebar-nav li:last-child {
+        margin-bottom: 0;
     }
 
     .sidebar-nav li a {
         display: flex;
         align-items: center;
-        padding: 10px 15px;
+        min-height: var(--sidebar-item-height);
+        padding: 12px 16px;
         color: var(--sidebar-color);
         text-decoration: none;
         font-size: 1rem;
         transition: all 0.2s;
-        border-radius: 8px;
+        border-radius: 12px;
         white-space: nowrap;
         background: rgba(255, 255, 255, 0.0);
     }
@@ -462,10 +472,16 @@ $is_project_active = is_active_parent($project_pages, $active_page);
     }
 
     .sidebar-nav i {
-        min-width: 30px;
+        min-width: 22px;
+        width: 22px;
         font-size: 1.1rem;
         text-align: center;
-        margin-right: 10px;
+        margin-right: 12px;
+    }
+
+    .sidebar-nav .link-text {
+        flex: 1;
+        min-width: 0;
     }
 
     .sidebar-nav li.active a i,
@@ -524,10 +540,11 @@ $is_project_active = is_active_parent($project_pages, $active_page);
     .sidebar-footer a {
         display: flex;
         align-items: center;
+        min-height: var(--sidebar-item-height);
         color: var(--danger-color);
         text-decoration: none;
-        padding: 10px;
-        border-radius: 8px;
+        padding: 12px 16px;
+        border-radius: 12px;
         transition: 0.2s;
     }
 
@@ -558,7 +575,8 @@ $is_project_active = is_active_parent($project_pages, $active_page);
     }
 
     .sidebar.collapsed .sidebar-nav li a {
-        padding: 15px 0;
+        min-height: var(--sidebar-item-height);
+        padding: 12px 0;
         justify-content: center;
         border-radius: 0;
     }
@@ -595,7 +613,8 @@ $is_project_active = is_active_parent($project_pages, $active_page);
 
     .sidebar.collapsed .sidebar-footer a {
         justify-content: center;
-        padding: 10px 0;
+        min-height: var(--sidebar-item-height);
+        padding: 12px 0;
     }
 
     .sidebar.collapsed .sidebar-footer a span {
