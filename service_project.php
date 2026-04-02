@@ -28,39 +28,6 @@ function getStatusText($id)
     return $map[$id] ?? 'On-site';
 }
 
-function normalizeFilePaths($rawValue)
-{
-    if (empty($rawValue)) {
-        return [];
-    }
-
-    $decoded = json_decode($rawValue, true);
-    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-        return array_values(array_filter($decoded, function ($item) {
-            return is_string($item) && trim($item) !== '';
-        }));
-    }
-
-    return [trim((string) $rawValue)];
-}
-
-function encodeFilePaths($filePaths)
-{
-    $filePaths = array_values(array_filter($filePaths, function ($item) {
-        return is_string($item) && trim($item) !== '';
-    }));
-
-    if (empty($filePaths)) {
-        return null;
-    }
-
-    if (count($filePaths) === 1) {
-        return $filePaths[0];
-    }
-
-    return json_encode($filePaths, JSON_UNESCAPED_UNICODE);
-}
-
 // --------------------------------------------------------------------------
 //  API HANDLER (UPDATED FOR service_type IN DETAIL)
 // --------------------------------------------------------------------------
@@ -118,7 +85,6 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             $data = [];
             while ($row = $result->fetch_assoc()) {
                 $row['status'] = getStatusText($row['service_type']);
-                $row['file_paths'] = normalizeFilePaths($row['file_path'] ?? null);
                 $data[] = $row;
             }
 
@@ -188,7 +154,6 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
 
             if ($row) {
                 $row['status_val'] = getStatusText($row['service_type']);
-                $row['file_paths'] = normalizeFilePaths($row['file_path'] ?? null);
             }
 
             echo json_encode(['success' => true, 'data' => $row]);
@@ -222,43 +187,16 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
             try {
 
                 // ---------------- FILE UPLOAD ----------------
-                $existingFilePaths = [];
-                if ($detail_id > 0) {
-                    $stmtExisting = $conn->prepare("SELECT file_path FROM service_project_detail WHERE detail_id = ? LIMIT 1");
-                    $stmtExisting->bind_param("i", $detail_id);
-                    $stmtExisting->execute();
-                    $existingRow = $stmtExisting->get_result()->fetch_assoc();
-                    $existingFilePaths = normalizeFilePaths($existingRow['file_path'] ?? null);
-                }
+                $filenameToSave = null;
+                if (isset($_FILES['service_file']) && $_FILES['service_file']['error'] == 0) {
+                    $ext = pathinfo($_FILES['service_file']['name'], PATHINFO_EXTENSION);
+                    $newFilename = 'service_' . time() . '_' . rand(100, 999) . '.' . $ext;
+                    $targetPath = 'uploads/' . $newFilename;
 
-                $uploadedFiles = [];
-                if (isset($_FILES['service_file']['name']) && is_array($_FILES['service_file']['name'])) {
-                    $totalFiles = count($_FILES['service_file']['name']);
-
-                    for ($i = 0; $i < $totalFiles; $i++) {
-                        if (($_FILES['service_file']['error'][$i] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-                            continue;
-                        }
-
-                        $originalName = $_FILES['service_file']['name'][$i] ?? '';
-                        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-                        if ($ext !== 'pdf') {
-                            throw new Exception('รองรับเฉพาะไฟล์ PDF เท่านั้น');
-                        }
-
-                        $newFilename = 'service_' . time() . '_' . rand(100, 999) . '_' . $i . '.' . $ext;
-                        $targetPath = 'uploads/' . $newFilename;
-
-                        if (!move_uploaded_file($_FILES['service_file']['tmp_name'][$i], $targetPath)) {
-                            throw new Exception('อัปโหลดไฟล์ PDF ไม่สำเร็จ');
-                        }
-
-                        $uploadedFiles[] = $newFilename;
+                    if (move_uploaded_file($_FILES['service_file']['tmp_name'], $targetPath)) {
+                        $filenameToSave = $newFilename;
                     }
                 }
-
-                $allFilePaths = array_merge($existingFilePaths, $uploadedFiles);
-                $fileValueToSave = encodeFilePaths($allFilePaths);
 
                 // ---------------- A. หา/สร้าง Project (สำคัญที่สุด) ----------------
                 $stmtFind = $conn->prepare("
@@ -299,7 +237,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
                         start_date=?,
                         end_date=?";
 
-                    if ($fileValueToSave !== null) {
+                    if ($filenameToSave) {
                         $sql .= ", file_path=?";
                     }
 
@@ -307,7 +245,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
 
                     $stmtD = $conn->prepare($sql);
 
-                    if ($fileValueToSave !== null) {
+                    if ($filenameToSave) {
                         $stmtD->bind_param(
                             "iissssssssi",
                             $customers_id,
@@ -319,7 +257,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
                             $action_taken,
                             $start_date,
                             $end_date,
-                            $fileValueToSave,
+                            $filenameToSave,
                             $detail_id
                         );
                     } else {
@@ -360,7 +298,7 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
                         $action_taken,
                         $start_date,
                         $end_date,
-                        $fileValueToSave
+                        $filenameToSave
                     );
 
                     $stmtD->execute();
@@ -651,7 +589,7 @@ if ($c_res) {
                                 class="fas fa-file-upload"></i></div>
                         <div style="font-weight: 600; color: #475569;">แนบรูปภาพหรือไฟล์ PDF</div>
                         <div id="filePreview" style="margin-top:10px; font-size:0.9rem;"></div>
-                        <input type="file" id="service_file" name="service_file[]" style="display:none;" multiple accept=".pdf,application/pdf"
+                        <input type="file" id="service_file" name="service_file" style="display:none;"
                             onchange="previewFile(this)">
                     </div>
                 </div>
