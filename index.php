@@ -1,3 +1,2 @@
 <?php
-header("Location: login.php");
-exit;
+require __DIR__ . '/public/index.php';
