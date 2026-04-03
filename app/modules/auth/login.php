@@ -145,7 +145,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
         /* --- Effect เมาส์เรืองแสง (คงเดิม) --- */
-        .mouse-glow {
+        /* .mouse-glow {
             position: fixed;
             width: 60px;
             height: 60px;
@@ -165,11 +165,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             height: 100px;
             opacity: 1;
             background: radial-gradient(circle, rgba(243, 156, 18, 1) 0%, rgba(26, 42, 68, 0) 70%);
-        }
+        } */
 
         /* ---------------------------------- */
 
-        .orb {
+        /* .orb {
             position: absolute;
             border-radius: 50%;
             z-index: 1;
@@ -200,10 +200,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             bottom: 10%;
             right: 10%;
             opacity: 0.6;
-        }
+        } */
 
         /* --- ลบส่วนนี้ออกเพื่อปิดแสงสีเหลืองรอบกล่อง --- */
-        /* .login-card-wrapper::before {
+        .login-card-wrapper::before {
             content: '';
             position: absolute;
             inset: -4px;
@@ -215,7 +215,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             /* ใหญ่กว่า inner เล็กน้อย */
             filter: blur(5px);
             /* ทำให้แสงฟุ้ง */
-            animation: gradientMove 5s ease infinite alternate;
+            /* animation: gradientMove 5s ease infinite alternate; */
         }
 
         /* --- ปรับปรุง Login Card (กรอบเคลื่อนไหว) --- */
@@ -227,7 +227,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             /* เรียกใช้ slideInLeft นาน 0.8 วินาที */
             animation: slideInLeft 2.8s cubic-bezier(0.215, 0.610, 0.355, 1.000) both;
-        } */
+        }
 
         /* เนื้อหาข้างในการ์ด (พื้นหลังสีขาว) */
         .login-card-inner {
