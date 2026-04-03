@@ -2,7 +2,7 @@
 // db.php
 $servername = "localhost";
 // โค้ด SQL dump บอกว่า Host: localhost:3304 ดังนั้นต้องกำหนด port
-$port = "3304";
+$port = "3304"; 
 $username = "root"; // เปลี่ยนเป็น username ของคุณ
 $password = "Global_Secure!2025"; // เปลี่ยนเป็น password ของคุณ
 $dbname = "mesh";

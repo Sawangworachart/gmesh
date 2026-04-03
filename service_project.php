@@ -111,8 +111,8 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
 
             while ($row = $res->fetch_assoc()) {
                 $status_key = getStatusText($row['service_type']);
-                $summary[$status_key] = (int) $row['count'];
-                $summary['Total'] += (int) $row['count'];
+                $summary[$status_key] = (int)$row['count'];
+                $summary['Total'] += (int)$row['count'];
             }
 
             echo json_encode(['success' => true, 'data' => $summary]);
@@ -164,23 +164,23 @@ if (isset($_GET['api']) && $_GET['api'] == 'true') {
         // 5. Save Data  ✅ เวอร์ชันถูกต้อง
         if ($action == 'save_data') {
 
-            $service_id = intval($_POST['service_id'] ?? 0);
-            $detail_id = intval($_POST['detail_id'] ?? 0);
+            $service_id  = intval($_POST['service_id'] ?? 0);
+            $detail_id   = intval($_POST['detail_id'] ?? 0);
 
             $customers_id = intval($_POST['customers_id']);
             $project_name = trim($_POST['project_name']);
 
-            $statusString = $_POST['status'];
+            $statusString   = $_POST['status'];
             $serviceTypeInt = getStatusId($statusString);
 
             $start_date = $_POST['start_date'];
-            $end_date = !empty($_POST['end_date']) ? $_POST['end_date'] : NULL;
+            $end_date   = !empty($_POST['end_date']) ? $_POST['end_date'] : NULL;
 
-            $equipment = $_POST['equipment'] ?? '';
-            $sn = $_POST['sn'] ?? '';
-            $number = $_POST['number'] ?? '';
-            $symptom = $_POST['symptom'] ?? '';
-            $action_taken = $_POST['action_taken'] ?? '';
+            $equipment     = $_POST['equipment'] ?? '';
+            $sn            = $_POST['sn'] ?? '';
+            $number        = $_POST['number'] ?? '';
+            $symptom       = $_POST['symptom'] ?? '';
+            $action_taken  = $_POST['action_taken'] ?? '';
 
             $conn->begin_transaction();
 
@@ -327,8 +327,7 @@ $project_filter_opt = [];
 $p_res = $conn->query("SELECT DISTINCT project_name FROM service_project_new ORDER BY project_name ASC");
 if ($p_res) {
     while ($r = $p_res->fetch_assoc()) {
-        if (!empty($r['project_name']))
-            $project_filter_opt[] = $r['project_name'];
+        if (!empty($r['project_name'])) $project_filter_opt[] = $r['project_name'];
     }
 }
 
@@ -353,9 +352,7 @@ if ($c_res) {
     <title>MaintDash</title>
     <link rel="icon" type="image/png" sizes="32x32" href="images/logomaintdash1.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="CSS/service_project.css?v=<?php echo time(); ?>">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -379,8 +376,7 @@ if ($c_res) {
             </div>
 
             <div class="header-right-action" style="display: flex; gap: 10px; align-items: center;">
-                <a href="service_project_export.php" class="btn-add-custom" style="background:#10b981;"
-                    onclick="exportExcel()">
+                <a href="service_project_export.php" class="btn-add-custom" style="background:#10b981;" onclick="exportExcel()">
                     <i class="fas fa-file-excel"></i> Excel
                 </a>
                 <button class="btn-add-custom" onclick="openModal()">
@@ -423,8 +419,7 @@ if ($c_res) {
         <div class="table-toolbar-combined">
             <div class="search-box-wrapper">
                 <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="ค้นหาชื่องาน, ชื่อลูกค้า, หรือ S/N..."
-                    onkeyup="filterTable()">
+                <input type="text" id="searchInput" placeholder="ค้นหาชื่องาน, ชื่อลูกค้า, หรือ S/N..." onkeyup="filterTable()">
             </div>
 
             <div class="filter-box-wrapper">
@@ -498,8 +493,7 @@ if ($c_res) {
                     <div class="form-group">
                         <label class="form-label">เลขที่โครงการ</label>
                         <div class="input-group-modern">
-                            <input type="text" id="number" name="number" class="form-control"
-                                placeholder="เช่น PJ67xxx">
+                            <input type="text" id="number" name="number" class="form-control" placeholder="เช่น PJ67xxx">
                             <span class="input-icon"><i class="fas fa-hashtag"></i></span>
                         </div>
                     </div>
@@ -508,8 +502,7 @@ if ($c_res) {
                 <div class="form-group">
                     <label class="form-label">ชื่อโครงการ (Project)</label>
                     <div class="input-group-modern">
-                        <input type="text" id="project_name" name="project_name" class="form-control"
-                            list="project_options" placeholder="เลือกโครงการเดิมหรือพิมพ์ใหม่" required>
+                        <input type="text" id="project_name" name="project_name" class="form-control" list="project_options" placeholder="เลือกโครงการเดิมหรือพิมพ์ใหม่" required>
                         <span class="input-icon"><i class="fas fa-project-diagram"></i></span>
                         <datalist id="project_options">
                             <?php foreach ($project_options_all as $proj): ?>
@@ -541,16 +534,14 @@ if ($c_res) {
                     <label class="form-label">อาการเสีย / สิ่งที่พบ</label>
                     <div class="input-group-modern">
                         <textarea id="symptom" name="symptom" class="form-control" rows="2"></textarea>
-                        <span class="input-icon" style="top: 20px; transform: none;"><i
-                                class="fas fa-exclamation-triangle"></i></span>
+                        <span class="input-icon" style="top: 20px; transform: none;"><i class="fas fa-exclamation-triangle"></i></span>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">การแก้ไข / ดำเนินการ</label>
                     <div class="input-group-modern">
                         <textarea id="action_taken" name="action_taken" class="form-control" rows="2"></textarea>
-                        <span class="input-icon" style="top: 20px; transform: none;"><i
-                                class="fas fa-check-circle"></i></span>
+                        <span class="input-icon" style="top: 20px; transform: none;"><i class="fas fa-check-circle"></i></span>
                     </div>
                 </div>
 
@@ -585,12 +576,10 @@ if ($c_res) {
 
                 <div class="form-group" style="margin-top: 15px;">
                     <div class="upload-ui" onclick="document.getElementById('service_file').click()">
-                        <div class="upload-icon" style="font-size: 2rem; color: #4361ee;"><i
-                                class="fas fa-file-upload"></i></div>
+                        <div class="upload-icon" style="font-size: 2rem; color: #4361ee;"><i class="fas fa-file-upload"></i></div>
                         <div style="font-weight: 600; color: #475569;">แนบรูปภาพหรือไฟล์ PDF</div>
                         <div id="filePreview" style="margin-top:10px; font-size:0.9rem;"></div>
-                        <input type="file" id="service_file" name="service_file" style="display:none;"
-                            onchange="previewFile(this)">
+                        <input type="file" id="service_file" name="service_file" style="display:none;" onchange="previewFile(this)">
                     </div>
                 </div>
 
@@ -601,109 +590,76 @@ if ($c_res) {
         </div>
     </div>
 
-    <div class="modal-overlay" id="viewModal">
-        <div class="modal-box glass-modal animate-slide-in"
-            style="max-width: 850px; width: 95%; border-radius: 24px; overflow: hidden; border:none; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);">
+<div class="modal-overlay" id="viewModal">
+    <div class="modal-box glass-modal animate-slide-in" style="max-width: 850px; width: 95%; border-radius: 24px; overflow: hidden; border:none; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);">
 
-            <div class="modal-header-custom"
-                style="background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%); color: #1e293b; padding: 30px; position: relative; border-bottom: 1px solid #e2e8f0;">
-                <div style="display: flex; align-items: center; gap: 20px;">
-                    <div
-                        style="background: #e0f2fe; color: #0ea5e9; padding: 15px; border-radius: 16px; font-size: 1.8rem; border: 1px solid #bae6fd; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);">
-                        <i class="fas fa-eye"></i>
-                    </div>
-                    <div style="flex: 1;">
-                        <h3 id="view_project_name_header"
-                            style="margin:0; font-size: 1.6rem; font-weight: 800; color: #0c4a6e; letter-spacing: -0.025em; line-height: 1.2;">
-                            กำลังโหลดชื่อโครงการ...</h3>
-                        <p
-                            style="margin: 6px 0 0 0; color: #64748b; font-size: 1rem; display: flex; align-items: center; gap: 10px;">
-                            <i class="fas fa-user-tie" style="color: #0ea5e9;"></i>
-                            <span id="view_customer_name_header" style="font-weight: 500;">-</span>
-                            <span style="opacity: 0.3;">|</span>
-                            <span
-                                style="font-family: monospace; background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                                ID: <span id="view_ref_number_header">-</span>
-                            </span>
-                        </p>
-                    </div>
+        <div class="modal-header-custom" style="background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%); color: #1e293b; padding: 30px; position: relative; border-bottom: 1px solid #e2e8f0;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="background: #e0f2fe; color: #0ea5e9; padding: 15px; border-radius: 16px; font-size: 1.8rem; border: 1px solid #bae6fd; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);">
+                    <i class="fas fa-eye"></i>
                 </div>
-                <button onclick="closeViewModal()"
-                    style="background: #f1f5f9; border: none; color: #b89494; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: 30px; right: 30px; transition: 0.3s; border: 1px solid #e2e8f0;"
-                    onmouseover="this.style.background='#fee2e2'; this.style.color='#ef4444';"
-                    onmouseout="this.style.background='#f1f5f9'; this.style.color='#94a3b8';">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div style="flex: 1;">
+                    <h3 id="view_project_name_header" style="margin:0; font-size: 1.6rem; font-weight: 800; color: #0c4a6e; letter-spacing: -0.025em; line-height: 1.2;">กำลังโหลดชื่อโครงการ...</h3>
+                    <p style="margin: 6px 0 0 0; color: #64748b; font-size: 1rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-user-tie" style="color: #0ea5e9;"></i> 
+                        <span id="view_customer_name_header" style="font-weight: 500;">-</span>
+                        <span style="opacity: 0.3;">|</span>
+                        <span style="font-family: monospace; background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            ID: <span id="view_ref_number_header">-</span>
+                        </span>
+                    </p>
+                </div>
+            </div>
+            <button onclick="closeViewModal()" style="background: #f1f5f9; border: none; color: #b89494; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: 30px; right: 30px; transition: 0.3s; border: 1px solid #e2e8f0;" onmouseover="this.style.background='#fee2e2'; this.style.color='#ef4444';" onmouseout="this.style.background='#f1f5f9'; this.style.color='#94a3b8';">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="modal-body-custom custom-scroll" style="padding: 35px; background: #f8fafc; max-height: 75vh; overflow-y: auto;">
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <div style="background: white; padding: 20px; border-radius: 18px; border: 1px solid #e2e8f0; border-bottom: 4px solid #4361ee; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                    <label style="display:block; font-size: 0.75rem; color: #64748b; margin-bottom: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">รูปแบบบริการ</label>
+                    <div id="view_status_badge" style="font-weight: 700; font-size: 1.1rem; color: #1e293b;">-</div>
+                </div>
+                <div style="background: white; padding: 20px; border-radius: 18px; border: 1px solid #e2e8f0; border-bottom: 4px solid #10b981; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                    <label style="display:block; font-size: 0.75rem; color: #64748b; margin-bottom: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">ช่วงเวลาดำเนินการ</label>
+                    <span id="view_date_range" style="font-weight: 700; color: #1e293b; font-size: 1.05rem;">-</span>
+                </div>
+                <div style="background: white; padding: 20px; border-radius: 18px; border: 1px solid #e2e8f0; border-bottom: 4px solid #f59e0b; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                    <label style="display:block; font-size: 0.75rem; color: #64748b; margin-bottom: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">อุปกรณ์หลัก / SN</label>
+                    <div id="view_equipment_sn" style="font-weight: 700; color: #1e293b; font-size: 1.05rem; line-height: 1.3;">-</div>
+                </div>
             </div>
 
-            <div class="modal-body-custom custom-scroll"
-                style="padding: 35px; background: #f8fafc; max-height: 75vh; overflow-y: auto;">
-
-                <div
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px;">
-                    <div
-                        style="background: white; padding: 20px; border-radius: 18px; border: 1px solid #e2e8f0; border-bottom: 4px solid #4361ee; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                        <label
-                            style="display:block; font-size: 0.75rem; color: #64748b; margin-bottom: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">รูปแบบบริการ</label>
-                        <div id="view_status_badge" style="font-weight: 700; font-size: 1.1rem; color: #1e293b;">-</div>
-                    </div>
-                    <div
-                        style="background: white; padding: 20px; border-radius: 18px; border: 1px solid #e2e8f0; border-bottom: 4px solid #10b981; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                        <label
-                            style="display:block; font-size: 0.75rem; color: #64748b; margin-bottom: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">ช่วงเวลาดำเนินการ</label>
-                        <span id="view_date_range"
-                            style="font-weight: 700; color: #1e293b; font-size: 1.05rem;">-</span>
-                    </div>
-                    <div
-                        style="background: white; padding: 20px; border-radius: 18px; border: 1px solid #e2e8f0; border-bottom: 4px solid #f59e0b; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                        <label
-                            style="display:block; font-size: 0.75rem; color: #64748b; margin-bottom: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">อุปกรณ์หลัก
-                            / SN</label>
-                        <div id="view_equipment_sn"
-                            style="font-weight: 700; color: #1e293b; font-size: 1.05rem; line-height: 1.3;">-</div>
-                    </div>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 25px;">
+                <div style="background:white; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);">
+                    <h4 style="margin-top:0; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; color: #ef4444; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; font-weight: 700;">
+                        <i class="fas fa-exclamation-circle"></i> อาการเสีย / สิ่งที่พบ
+                    </h4>
+                    <div id="view_symptom" style="line-height: 1.8; color: #334155; font-size: 1rem; padding-top: 15px; white-space: pre-line;">-</div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr; gap: 25px;">
-                    <div
-                        style="background:white; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);">
-                        <h4
-                            style="margin-top:0; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; color: #ef4444; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; font-weight: 700;">
-                            <i class="fas fa-exclamation-circle"></i> อาการเสีย / สิ่งที่พบ
-                        </h4>
-                        <div id="view_symptom"
-                            style="line-height: 1.8; color: #334155; font-size: 1rem; padding-top: 15px; white-space: pre-line;">
-                            -</div>
-                    </div>
+                <div style="background:white; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);">
+                    <h4 style="margin-top:0; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; color: #10b981; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; font-weight: 700;">
+                        <i class="fas fa-check-circle"></i> การแก้ไข / ดำเนินการ
+                    </h4>
+                    <div id="view_action" style="line-height: 1.8; color: #334155; font-size: 1rem; padding-top: 15px; white-space: pre-line;">-</div>
+                </div>
 
-                    <div
-                        style="background:white; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);">
-                        <h4
-                            style="margin-top:0; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; color: #10b981; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; font-weight: 700;">
-                            <i class="fas fa-check-circle"></i> การแก้ไข / ดำเนินการ
-                        </h4>
-                        <div id="view_action"
-                            style="line-height: 1.8; color: #334155; font-size: 1rem; padding-top: 15px; white-space: pre-line;">
-                            -</div>
-                    </div>
-
-                    <div
-                        style="background:white; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);">
-                        <label
-                            style="display:block; font-size: 0.75rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.05em;">ไฟล์แนบ
-                            / หลักฐาน</label>
-                        <div id="view_file_container">
-                            <div
-                                style="text-align: center; padding: 20px; border: 2px dashed #e2e8f0; border-radius: 12px; color: #cbd5e1;">
-                                <i class="fas fa-file-alt" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                                <div style="font-size: 0.85rem; font-style: italic;">ไม่มีไฟล์แนบ</div>
-                            </div>
+                <div style="background:white; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);">
+                    <label style="display:block; font-size: 0.75rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.05em;">ไฟล์แนบ / หลักฐาน</label>
+                    <div id="view_file_container">
+                        <div style="text-align: center; padding: 20px; border: 2px dashed #e2e8f0; border-radius: 12px; color: #cbd5e1;">
+                            <i class="fas fa-file-alt" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                            <div style="font-size: 0.85rem; font-style: italic;">ไม่มีไฟล์แนบ</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

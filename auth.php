@@ -18,8 +18,7 @@ if (!isset($_SESSION['user_id'])) {
  * ใช้เรียกในหน้าที่ต้องการจำกัดสิทธิ์เฉพาะกลุ่ม
  * * @param string|array $allowed_roles Role ที่อนุญาตให้เข้าหน้านี้ (เช่น 'admin' หรือ ['admin', 'user'])
  */
-function requireRole($allowed_roles)
-{
+function requireRole($allowed_roles) {
     // แปลงให้เป็น Array เสมอ เพื่อความง่ายในการเช็ค
     if (!is_array($allowed_roles)) {
         $allowed_roles = [$allowed_roles];
@@ -28,7 +27,7 @@ function requireRole($allowed_roles)
     // ตรวจสอบว่า Role ของคนที่ล็อกอินอยู่ มีสิทธิ์ไหม
     if (!in_array($_SESSION['user_role'], $allowed_roles)) {
         // --- ถ้าไม่มีสิทธิ์ (Access Denied) ---
-
+        
         // ให้เด้งกลับไป Dashboard ของตัวเอง
         if ($_SESSION['user_role'] == 'admin') {
             header("Location: dashboard.php");
@@ -39,3 +38,4 @@ function requireRole($allowed_roles)
     }
 }
 ?>
+

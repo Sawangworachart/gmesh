@@ -22,7 +22,7 @@ if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_token'])) {
     if ($res->num_rows === 1) {
         $u = $res->fetch_assoc();
 
-        $_SESSION['user_id'] = $u['id'];
+        $_SESSION['user_id']  = $u['id'];
         $_SESSION['username'] = $u['username'];
         $_SESSION['user_role'] = $u['role'];
 
@@ -59,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($is_password_correct) {
             if ($row['status'] == 1) {
 
-                $_SESSION['user_id'] = $row['id'];
+                $_SESSION['user_id']  = $row['id'];
                 $_SESSION['username'] = $row['username'];
                 $_SESSION['user_role'] = $row['role'];
 
@@ -81,9 +81,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         "remember_token",
                         $rawToken,
                         [
-                            'expires' => time() + (86400 * 30),
-                            'path' => '/',
-                            'secure' => false,      // ถ้าเป็น https ค่อย true
+                            'expires'  => time() + (86400 * 30),
+                            'path'     => '/',
+                            'secure'   => false,      // ถ้าเป็น https ค่อย true
                             'httponly' => true,
                             'samesite' => 'Lax'      // ⭐ ตัวนี้สำคัญ
                         ]
@@ -142,6 +142,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             background: url('images/information.png') center/cover no-repeat;
         }
 
+
+
+        /* --- Effect เมาส์เรืองแสง (คงเดิม) --- */
+        .mouse-glow {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(243, 156, 18, 0.8) 0%, rgba(243, 156, 18, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            filter: blur(10px);
+            mix-blend-mode: screen;
+            opacity: 0.9;
+            transition: width 0.2s, height 0.2s, opacity 0.2s;
+        }
+
+        .mouse-glow.active {
+            width: 100px;
+            height: 100px;
+            opacity: 1;
+            background: radial-gradient(circle, rgba(243, 156, 18, 1) 0%, rgba(26, 42, 68, 0) 70%);
+        }
+
         /* ---------------------------------- */
 
         .orb {
@@ -175,6 +200,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             bottom: 10%;
             right: 10%;
             opacity: 0.6;
+        }
+
+        /* --- ลบส่วนนี้ออกเพื่อปิดแสงสีเหลืองรอบกล่อง --- */
+        .login-card-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            /* ความหนาของกรอบ */
+            background: linear-gradient(45deg, #f39c12, #1a2a44, #f39c12, #2c3e50);
+            background-size: 400% 400%;
+            z-index: -1;
+            border-radius: 18px;
+            /* ใหญ่กว่า inner เล็กน้อย */
+            filter: blur(5px);
+            /* ทำให้แสงฟุ้ง */
+            animation: gradientMove 5s ease infinite alternate;
         }
 
         /* --- ปรับปรุง Login Card (กรอบเคลื่อนไหว) --- */
@@ -342,6 +383,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 
 <body>
+    <div class="mouse-glow" id="mouseGlow"></div>
+
     <div class="orb orb-blue"></div>
     <div class="orb orb-orange"></div>
     <div class="orb orb-blue-lg"></div>
@@ -357,8 +400,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="input-group">
                     <label class="form-label">ชื่อผู้ใช้งาน</label>
                     <input type="text" name="username" class="input-field" placeholder="กรอกชื่อผู้ใช้งาน"
-                        value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>"
-                        required>
+                        value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>" required>
                 </div>
 
                 <div class="input-group">
@@ -377,6 +419,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 
     <script>
+        // --- Script สำหรับ Effect เมาส์เรืองแสง (คงเดิม) ---
+        const glow = document.getElementById('mouseGlow');
+        document.addEventListener('mousemove', (e) => {
+            glow.style.left = e.clientX + 'px';
+            glow.style.top = e.clientY + 'px';
+        });
+        const interactiveElements = document.querySelectorAll('button, input, a, label, .login-card-inner');
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                glow.classList.add('active');
+            });
+            el.addEventListener('mouseleave', () => {
+                glow.classList.remove('active');
+            });
+        });
+        // ----------------------------------
+
         // --- Script สำหรับ Effect โลโก้ 3D Tilt ---
         const card = document.getElementById('loginCard');
         const logo = document.getElementById('mainLogo');

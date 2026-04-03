@@ -38,33 +38,23 @@ body {
 
 /* Animation Keyframes: สั่งให้พื้นหลังเลื่อนไปมา */
 @keyframes gradientMove {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .stats-card {
     border: none;
-    border-radius: 12px;
-    /* ความโค้งมนตามรูปภาพ */
+    border-radius: 12px; /* ความโค้งมนตามรูปภาพ */
     padding: 15px 20px;
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 100px;
-    /* ปรับความสูงให้ดู Slim */
+    height: 100px; /* ปรับความสูงให้ดู Slim */
     color: #fff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     transition: transform 0.3s ease;
 }
 
@@ -81,10 +71,9 @@ body {
 
 .stats-card p {
     color: #fff !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     position: relative;
-    z-index: 2;
-    /* ให้อยู่เหนือพื้นหลัง */
+    z-index: 2; /* ให้อยู่เหนือพื้นหลัง */
 }
 
 .stats-card h3 {
@@ -106,13 +95,10 @@ body {
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 3rem;
-    /* ขนาดไอคอนใหญ่ขึ้น */
-    opacity: 0.2;
-    /* ทำให้โปร่งแสงตามรูป */
+    font-size: 3rem; /* ขนาดไอคอนใหญ่ขึ้น */
+    opacity: 0.2;    /* ทำให้โปร่งแสงตามรูป */
     z-index: 1;
-    background: transparent !important;
-    /* ลบพื้นหลังสีขาวออก */
+    background: transparent !important; /* ลบพื้นหลังสีขาวออก */
     border: none !important;
     box-shadow: none !important;
     backdrop-filter: none !important;
@@ -158,25 +144,23 @@ body {
 .card-white {
     background: #fff !important;
     color: var(--text-main) !important;
-    animation: none;
-    /* ปิด Animation พื้นหลัง */
+    animation: none; /* ปิด Animation พื้นหลัง */
 }
 
 /* แก้สีตัวหนังสือภายในการ์ดสีขาว ให้กลับมาเป็นสีเข้ม */
 /* ขยายหัวข้อกราฟทุกการ์ด */
-.card-white h4 {
+.card-white h4{
     font-size: 29px !important;
     font-weight: 800 !important;
 }
 
 /* ขยายคำอธิบายใต้หัวข้อ */
-.card-white small.fw-bold {
+.card-white small.fw-bold{
     font-size: 22px !important;
     letter-spacing: 0.3px;
 }
-
 /* ขยายฟอนต์ dropdown เลือกปี */
-.card-white select.form-select {
+.card-white select.form-select{
     font-size: 16px !important;
     font-weight: 600;
 }
@@ -188,48 +172,33 @@ body {
 }
 
 .card-white small.fw-bold {
-    /* สีเดิมของ small text (เช่นคำว่า Primitive ใต้หัวข้อกราฟ) */
-    color: #0056b3 !important;
+     /* สีเดิมของ small text (เช่นคำว่า Primitive ใต้หัวข้อกราฟ) */
+     color: #0056b3 !important; 
 }
 
 /* แก้ไอคอนในการ์ดสีขาว ให้ไม่มีพื้นหลังแบบกระจกฝ้า */
 .card-white .card-icon {
-    background: transparent !important;
-    /* หรือสี Gradient เดิม */
+    background: transparent !important; /* หรือสี Gradient เดิม */
     backdrop-filter: none;
     border: none;
     box-shadow: none;
-    color: #fff !important;
-    /* ไอคอนยังคงสีขาว แต่พื้นหลังจะเป็น Gradient ตาม Class Bootstrap ด้านล่าง */
+    color: #fff !important; /* ไอคอนยังคงสีขาว แต่พื้นหลังจะเป็น Gradient ตาม Class Bootstrap ด้านล่าง */
 }
 
 /* Restore Gradient Backgrounds for Icons in White Cards */
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #5599ff 0%, #3a75c4 100%) !important;
-}
-
-.bg-gradient-success {
-    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important;
-}
-
-.bg-gradient-warning {
-    background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%) !important;
-}
-
-.bg-gradient-danger {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
-}
+.bg-gradient-primary { background: linear-gradient(135deg, #5599ff 0%, #3a75c4 100%) !important; }
+.bg-gradient-success { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important; }
+.bg-gradient-warning { background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%) !important; }
+.bg-gradient-danger  { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important; }
 
 /* --- 4. Scrollbar --- */
 .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
     height: 6px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
     background: #d0e4ff;
     border-radius: 10px;
@@ -240,17 +209,14 @@ body {
     position: relative;
     width: 100%;
 }
-
 /* เปลี่ยนสไตล์ dashboard-header ให้เป็นแบบที่ 2 */
 .dashboard-header {
     background: #ffffff !important;
     padding: 25px 35px !important;
-    border-radius: 30px !important;
-    /* โค้งมนมากเป็นพิเศษตามรูป */
+    border-radius: 30px !important; /* โค้งมนมากเป็นพิเศษตามรูป */
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
     margin-bottom: 30px;
-    border-left: 10px solid #4361ee !important;
-    /* เส้นสีฟ้าหนาด้านซ้าย */
+    border-left: 10px solid #4361ee !important; /* เส้นสีฟ้าหนาด้านซ้าย */
     border-top: none !important;
     border-right: none !important;
     border-bottom: none !important;
@@ -293,8 +259,7 @@ body {
     color: #fff !important;
     border: none !important;
     padding: 12px 28px !important;
-    border-radius: 50px !important;
-    /* ทรงแคปซูล */
+    border-radius: 50px !important; /* ทรงแคปซูล */
     font-weight: 600 !important;
     font-size: 15px;
     cursor: pointer;
@@ -310,27 +275,26 @@ body {
     filter: brightness(1.1);
     box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
 }
-
 /* Badge สไตล์ Pastel ตามรูปภาพ */
 
 /* 1. รอการตรวจสอบ (โทนเหลืองส้มจาง) */
-.badge-pending {
-    background-color: #fef3c7 !important;
-    color: #92400e !important;
+.badge-pending { 
+    background-color: #fef3c7 !important; 
+    color: #92400e !important; 
     border: 1px solid #fde68a;
 }
 
 /* 2. กำลังดำเนินการ (โทนม่วง/น้ำเงินจาง) */
-.badge-processing {
-    background-color: #e0e7ff !important;
-    color: #3730a3 !important;
+.badge-processing { 
+    background-color: #e0e7ff !important; 
+    color: #3730a3 !important; 
     border: 1px solid #c7d2fe;
 }
 
 /* 3. ดำเนินการเสร็จสิ้น (โทนเขียวจาง) */
-.badge-completed {
-    background-color: #d1fae5 !important;
-    color: #065f46 !important;
+.badge-completed { 
+    background-color: #d1fae5 !important; 
+    color: #065f46 !important; 
     border: 1px solid #a7f3d0;
 }
 

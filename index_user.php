@@ -2,8 +2,8 @@
 // index_user.php - ตกแต่งเฉพาะ Header และ Box (Logic เดิม)
 
 session_start();
-include_once 'auth.php';
-require_once 'db.php';
+include_once 'auth.php'; 
+require_once 'db.php';   
 
 // ตั้งค่าโซนเวลา
 date_default_timezone_set('Asia/Bangkok');
@@ -27,7 +27,7 @@ $result_ma = mysqli_query($conn, $sql_ma);
 
 if ($result_ma) {
     while ($row = mysqli_fetch_assoc($result_ma)) {
-
+        
         $ma_time = strtotime($row['ma_date']);
         $today_time = strtotime($today);
         $diff_seconds = $ma_time - $today_time;
@@ -65,33 +65,26 @@ $js_notifications = json_encode($all_notifications);
 
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard</title>
-
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style_user.css">
-
+    <link rel="stylesheet" href="css/style_user.css"> 
+    
     <style>
-        body {
-            font-family: 'Sarabun', sans-serif;
-            background-color: #f4f7f6;
-        }
+        body { font-family: 'Sarabun', sans-serif; background-color: #f4f7f6; }
 
         /* --- 1. ตกแต่ง Header ให้สวยงาม --- */
         .premium-header {
-            background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);
-            /* ไล่สีฟ้าสดใส */
+            background: linear-gradient(135deg, #0061ff 0%, #60efff 100%); /* ไล่สีฟ้าสดใส */
             color: white;
             padding: 40px 30px;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 97, 255, 0.3);
-            /* เงาฟุ้งๆ สีฟ้า */
+            box-shadow: 0 10px 30px rgba(0, 97, 255, 0.3); /* เงาฟุ้งๆ สีฟ้า */
             position: relative;
             overflow: hidden;
             margin-bottom: 30px;
@@ -111,18 +104,9 @@ $js_notifications = json_encode($all_notifications);
             pointer-events: none;
         }
 
-        .header-title {
-            font-size: 2.2rem;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-subtitle {
-            font-size: 1.1rem;
-            opacity: 0.95;
-            font-weight: 300;
-        }
-
+        .header-title { font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header-subtitle { font-size: 1.1rem; opacity: 0.95; font-weight: 300; }
+        
         /* ป้ายนับจำนวนรายการ */
         .count-badge {
             background: rgba(255, 255, 255, 0.25);
@@ -131,7 +115,7 @@ $js_notifications = json_encode($all_notifications);
             border-radius: 30px;
             font-weight: bold;
             color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255,255,255,0.4);
         }
 
         /* --- 2. ตกแต่งกล่องรายการ (Box Container) --- */
@@ -139,8 +123,7 @@ $js_notifications = json_encode($all_notifications);
             background: white;
             border-radius: 20px;
             border: none;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
-            /* เงานุ่มๆ */
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05); /* เงานุ่มๆ */
             overflow: hidden;
         }
 
@@ -155,10 +138,8 @@ $js_notifications = json_encode($all_notifications);
         .header-icon-box {
             width: 45px;
             height: 45px;
-            background: #eef2ff;
-            /* สีพื้นหลังไอคอนจางๆ */
-            color: #0061ff;
-            /* สีไอคอน */
+            background: #eef2ff; /* สีพื้นหลังไอคอนจางๆ */
+            color: #0061ff;       /* สีไอคอน */
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -182,36 +163,24 @@ $js_notifications = json_encode($all_notifications);
             padding: 20px 25px;
             transition: background 0.2s;
         }
+        .list-group-item:hover { background-color: #fafbff; }
+        .list-group-item:last-child { border-bottom: none; }
 
-        .list-group-item:hover {
-            background-color: #fafbff;
-        }
-
-        .list-group-item:last-child {
-            border-bottom: none;
-        }
-
-        .toast-container {
-            z-index: 9999;
-        }
+        .toast-container { z-index: 9999; }
     </style>
 </head>
-
 <body>
-
+    
     <?php include 'sidebar_user.php'; ?>
 
     <div class="main-content">
-
+        
         <div class="premium-header">
             <h1 class="header-title"><i class="fas fa-bell me-2"></i> ระบบแจ้งเตือน MA (User)</h1>
             <div class="header-subtitle mt-2 d-flex align-items-center flex-wrap gap-2">
-                <span>สวัสดีคุณ
-                    <strong><?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'ผู้ใช้งาน'; ?></strong></span>
+                <span>สวัสดีคุณ <strong><?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'ผู้ใช้งาน'; ?></strong></span>
                 <span class="mx-1">|</span>
-                <span><i class="far fa-calendar-alt"></i> วันนี้วันที่
-                    <?php echo date('d/m/');
-                    echo (date('Y') + 543); ?></span>
+                <span><i class="far fa-calendar-alt"></i> วันนี้วันที่ <?php echo date('d/m/'); echo (date('Y')+543); ?></span>
                 <span class="mx-1">|</span>
                 <span class="count-badge">
                     พบรายการแจ้งเตือน <?php echo count($all_notifications); ?> รายการ
@@ -220,41 +189,39 @@ $js_notifications = json_encode($all_notifications);
         </div>
 
         <?php if (!empty($all_notifications)): ?>
-            <div class="premium-box">
-                <div class="premium-box-header">
-                    <div class="header-icon-box">
-                        <i class="fas fa-list-ul"></i>
-                    </div>
-                    <div>
-                        <h5 class="box-title">รายการที่ต้องดูแลเร็วๆ นี้</h5>
-                        <small class="text-muted">ภายใน 7 วัน</small>
-                    </div>
+        <div class="premium-box">
+            <div class="premium-box-header">
+                <div class="header-icon-box">
+                    <i class="fas fa-list-ul"></i>
                 </div>
-
-                <ul class="list-group list-group-flush">
-                    <?php foreach ($all_notifications as $notif): ?>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <span class="badge <?php echo $notif['badge_color']; ?> me-2 rounded-pill shadow-sm">
-                                    <?php echo $notif['time_text']; ?>
-                                </span>
-                                <strong style="font-size: 1.05rem;" class="text-dark">
-                                    <?php echo htmlspecialchars($notif['title']); ?>
-                                </strong>
-                                <span class="text-muted small ms-1">(<?php echo htmlspecialchars($notif['customer']); ?>)</span>
-                                <div class="mt-2 text-muted small">
-                                    <i class="far fa-calendar-alt me-1 text-primary"></i> กำหนด:
-                                    <?php echo $notif['date_str']; ?>
-                                    <?php if ($notif['note']): ?>
-                                        | <i class="far fa-comment-alt me-1"></i> Note:
-                                        <?php echo htmlspecialchars($notif['note']); ?>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
+                <div>
+                    <h5 class="box-title">รายการที่ต้องดูแลเร็วๆ นี้</h5>
+                    <small class="text-muted">ภายใน 7 วัน</small>
+                </div>
             </div>
+
+            <ul class="list-group list-group-flush">
+                <?php foreach ($all_notifications as $notif): ?>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge <?php echo $notif['badge_color']; ?> me-2 rounded-pill shadow-sm">
+                            <?php echo $notif['time_text']; ?>
+                        </span>
+                        <strong style="font-size: 1.05rem;" class="text-dark">
+                            <?php echo htmlspecialchars($notif['title']); ?>
+                        </strong> 
+                        <span class="text-muted small ms-1">(<?php echo htmlspecialchars($notif['customer']); ?>)</span>
+                        <div class="mt-2 text-muted small">
+                            <i class="far fa-calendar-alt me-1 text-primary"></i> กำหนด: <?php echo $notif['date_str']; ?> 
+                            <?php if($notif['note']): ?>
+                                | <i class="far fa-comment-alt me-1"></i> Note: <?php echo htmlspecialchars($notif['note']); ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
         <?php else: ?>
             <div class="premium-box text-center py-5">
                 <i class="fas fa-check-circle fa-4x text-success mb-3 opacity-25"></i>
@@ -263,7 +230,7 @@ $js_notifications = json_encode($all_notifications);
         <?php endif; ?>
 
     </div>
-
+    
     <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -272,7 +239,7 @@ $js_notifications = json_encode($all_notifications);
     <script>
         const notifications = <?php echo $js_notifications; ?>;
         // JS เดิมสำหรับ Toast
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const container = document.querySelector('.toast-container');
             if (notifications.length > 0) {
                 notifications.forEach((item, index) => {
@@ -296,5 +263,4 @@ $js_notifications = json_encode($all_notifications);
         });
     </script>
 </body>
-
 </html>

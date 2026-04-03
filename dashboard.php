@@ -5,7 +5,7 @@ include_once 'auth.php';
 require_once 'db.php';
 
 // 1. รับค่าแยกกัน 3 ตัวแปร (ถ้าไม่มีค่าส่งมา ให้เป็นค่าว่าง)
-$year_pm = isset($_GET['year_pm']) ? $_GET['year_pm'] : '';
+$year_pm      = isset($_GET['year_pm']) ? $_GET['year_pm'] : '';
 $year_service = isset($_GET['year_service']) ? $_GET['year_service'] : '';
 $year_product = isset($_GET['year_product']) ? $_GET['year_product'] : '';
 
@@ -66,14 +66,10 @@ if ($res_pm_status) {
     while ($row = $res_pm_status->fetch_assoc()) {
         $rawStatus = $row['status'];
         // แปลงสถานะตัวเลขเป็นข้อความตาม Database Comment
-        if ($rawStatus == 2)
-            $status_th = 'กำลังดำเนินการ';
-        elseif ($rawStatus == 3)
-            $status_th = 'ดำเนินการเสร็จสิ้น';
-        elseif ($rawStatus == 1)
-            $status_th = 'รอการตรวจสอบ';
-        else
-            $status_th = 'อื่นๆ';
+        if ($rawStatus == 2) $status_th = 'กำลังดำเนินการ';
+        elseif ($rawStatus == 3) $status_th = 'ดำเนินการเสร็จสิ้น';
+        elseif ($rawStatus == 1) $status_th = 'รอการตรวจสอบ';
+        else $status_th = 'อื่นๆ';
 
         if (!isset($status_aggregated[$status_th])) {
             $status_aggregated[$status_th] = 0;
@@ -99,14 +95,10 @@ $service_data = [];
 if ($res_service_chart) {
     while ($row = $res_service_chart->fetch_assoc()) {
         $rawType = $row['status'];
-        if ($rawType == 1)
-            $status_th = 'On-site';
-        elseif ($rawType == 2)
-            $status_th = 'Remote';
-        elseif ($rawType == 3)
-            $status_th = 'แจ้ง Subcontractor';
-        else
-            $status_th = 'อื่นๆ';
+        if ($rawType == 1) $status_th = 'On-site';
+        elseif ($rawType == 2) $status_th = 'Remote';
+        elseif ($rawType == 3) $status_th = 'แจ้ง Subcontractor';
+        else $status_th = 'อื่นๆ';
 
         $service_labels[] = $status_th;
         $service_data[] = $row['count'];
@@ -122,16 +114,11 @@ $product_data = [];
 if ($res_product_chart) {
     while ($row = $res_product_chart->fetch_assoc()) {
         $rawStatus = $row['status'];
-        if ($rawStatus == 1)
-            $status_th = 'รอสินค้าจากลูกค้า';
-        elseif ($rawStatus == 2)
-            $status_th = 'ตรวจสอบ';
-        elseif ($rawStatus == 3)
-            $status_th = 'รอสินค้าจาก supplier';
-        elseif ($rawStatus == 4)
-            $status_th = 'ส่งคืนลูกค้า';
-        else
-            $status_th = 'อื่นๆ';
+        if ($rawStatus == 1) $status_th = 'รอสินค้าจากลูกค้า';
+        elseif ($rawStatus == 2) $status_th = 'ตรวจสอบ';
+        elseif ($rawStatus == 3) $status_th = 'รอสินค้าจาก supplier';
+        elseif ($rawStatus == 4) $status_th = 'ส่งคืนลูกค้า';
+        else $status_th = 'อื่นๆ';
 
         $product_labels[] = $status_th;
         $product_data[] = $row['count'];
@@ -150,8 +137,7 @@ if ($res_product_chart) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="CSS/dashboard.css">
 </head>
 
@@ -166,8 +152,7 @@ if ($res_product_chart) {
                     <div class="header-text-group">
                         <h2 class="header-main-title">Dashboard</h2>
                         <p class="header-sub-desc">
-                            <i class="far fa-calendar-alt me-1"></i> ข้อมูลภาพรวมระบบ ณ วันที่
-                            <?php echo date('d/m/Y'); ?>
+                            <i class="far fa-calendar-alt me-1"></i> ข้อมูลภาพรวมระบบ ณ วันที่ <?php echo date('d/m/Y'); ?>
                         </p>
                     </div>
                 </div>
@@ -180,8 +165,7 @@ if ($res_product_chart) {
 
             <div class="row g-3 mb-4">
                 <div class="col-12 col-sm-6 col-xl-3">
-                    <div class="stats-card card-primitive" onclick="location.href='pm_project.php'"
-                        style="cursor: pointer;">
+                    <div class="stats-card card-primitive" onclick="location.href='pm_project.php'" style="cursor: pointer;">
                         <div class="stats-card-info">
                             <p>Preventive Maintenance</p>
                             <h3 class="stat-val" data-count="<?php echo $pm_total; ?>">0</h3>
@@ -191,8 +175,7 @@ if ($res_product_chart) {
                 </div>
 
                 <div class="col-12 col-sm-6 col-xl-3">
-                    <div class="stats-card card-service" onclick="location.href='service_project.php'"
-                        style="cursor: pointer;">
+                    <div class="stats-card card-service" onclick="location.href='service_project.php'" style="cursor: pointer;">
                         <div class="stats-card-info">
                             <p>Service</p>
                             <h3 class="stat-val" data-count="<?php echo $service_active; ?>">0</h3>
@@ -212,8 +195,7 @@ if ($res_product_chart) {
                 </div>
 
                 <div class="col-12 col-sm-6 col-xl-3">
-                    <div class="stats-card card-customer" onclick="location.href='customers.php'"
-                        style="cursor: pointer;">
+                    <div class="stats-card card-customer" onclick="location.href='customers.php'" style="cursor: pointer;">
                         <div class="stats-card-info">
                             <p>Customers</p>
                             <h3 class="stat-val" data-count="<?php echo $group_total; ?>">0</h3>
@@ -228,18 +210,14 @@ if ($res_product_chart) {
                     <div class="stats-card card-white p-4 h-100">
                         <div class="d-flex align-items-center justify-content-between mb-4">
                             <div class="d-flex align-items-center">
-                                <div class="card-icon bg-gradient-primary me-3 mb-0"
-                                    style="width: 45px; height: 45px; font-size: 1.2rem;"><i
-                                        class="fas fa-chart-pie"></i></div>
+                                <div class="card-icon bg-gradient-primary me-3 mb-0" style="width: 45px; height: 45px; font-size: 1.2rem;"><i class="fas fa-chart-pie"></i></div>
                                 <div>
                                     <h4 class="fw-bold text-dark m-0">สถานะโครงการ</h4>
-                                    <small class="fw-bold" style="color: #0056b3 !important;">Preventive
-                                        Maintenance</small>
+                                    <small class="fw-bold" style="color: #0056b3 !important;">Preventive Maintenance</small>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center">
-                                <select class="form-select form-select-sm rounded-pill border-0 shadow-sm px-3"
-                                    style="width: 140px; background-color: #f8f9fa;" id="yearPmSelect">
+                                <select class="form-select form-select-sm rounded-pill border-0 shadow-sm px-3" style="width: 140px; background-color: #f8f9fa;" id="yearPmSelect">
                                     <?php
                                     $currentYear = date('Y');
                                     $sel_pm = $year_pm;
@@ -264,16 +242,13 @@ if ($res_product_chart) {
                     <div class="stats-card card-white p-4 h-100">
                         <div class="d-flex align-items-center justify-content-between mb-4">
                             <div class="d-flex align-items-center">
-                                <div class="card-icon bg-gradient-success me-3 mb-0"
-                                    style="width: 45px; height: 45px; font-size: 1.2rem;"><i class="fas fa-tools"></i>
-                                </div>
+                                <div class="card-icon bg-gradient-success me-3 mb-0" style="width: 45px; height: 45px; font-size: 1.2rem;"><i class="fas fa-tools"></i></div>
                                 <div>
                                     <h4 class="fw-bold text-dark m-0">สถานะการเข้าบริการ</h4>
                                     <small class="fw-bold" style="color: #0056b3 !important;">Service</small>
                                 </div>
                             </div>
-                            <select class="form-select form-select-sm rounded-pill border-0 shadow-sm px-3"
-                                style="width: 120px;" id="yearServiceSelect">
+                            <select class="form-select form-select-sm rounded-pill border-0 shadow-sm px-3" style="width: 120px;" id="yearServiceSelect">
                                 <option value="">ดูทั้งหมด</option>
                                 <?php
                                 for ($i = 0; $i < 10; $i++) {
@@ -293,16 +268,13 @@ if ($res_product_chart) {
                     <div class="stats-card card-white p-4 h-100">
                         <div class="d-flex align-items-center justify-content-between mb-4">
                             <div class="d-flex align-items-center">
-                                <div class="card-icon bg-gradient-danger me-3 mb-0"
-                                    style="width: 45px; height: 45px; font-size: 1.2rem;"><i
-                                        class="fas fa-box-open"></i></div>
+                                <div class="card-icon bg-gradient-danger me-3 mb-0" style="width: 45px; height: 45px; font-size: 1.2rem;"><i class="fas fa-box-open"></i></div>
                                 <div>
                                     <h4 class="fw-bold text-dark m-0">สถานะการซ่อมบำรุง</h4>
                                     <small class="fw-bold" style="color: #0056b3 !important;">Product Claim</small>
                                 </div>
                             </div>
-                            <select class="form-select form-select-sm rounded-pill border-0 shadow-sm px-3"
-                                style="width: 120px;" id="yearProductSelect">
+                            <select class="form-select form-select-sm rounded-pill border-0 shadow-sm px-3" style="width: 120px;" id="yearProductSelect">
                                 <option value="">ดูทั้งหมด</option>
                                 <?php
                                 for ($i = 0; $i < 10; $i++) {
@@ -538,30 +510,30 @@ if ($res_product_chart) {
                 loadChart('product', e.target.value, productChart);
             });
 
-        function animateCounters() {
-            $('.stat-val').each(function () {
-                const $this = $(this);
-                const countTo = parseInt($this.attr('data-count')) || 0;
-
-                $({ countNum: 0 }).animate({
-                    countNum: countTo
-                }, {
-                    duration: 1500, // ความเร็ว (1.5 วินาที)
-                    easing: 'swing',
-                    step: function () {
-                        // อัปเดตตัวเลขและใส่ comma (,)
-                        $this.text(Math.floor(this.countNum).toLocaleString());
-                    },
-                    complete: function () {
-                        $this.text(this.countNum.toLocaleString());
-                    }
-                });
-            });
-        }
-
-        $(document).ready(function () {
-            animateCounters();
+            function animateCounters() {
+    $('.stat-val').each(function() {
+        const $this = $(this);
+        const countTo = parseInt($this.attr('data-count')) || 0;
+        
+        $({ countNum: 0 }).animate({
+            countNum: countTo
+        }, {
+            duration: 1500, // ความเร็ว (1.5 วินาที)
+            easing: 'swing',
+            step: function() {
+                // อัปเดตตัวเลขและใส่ comma (,)
+                $this.text(Math.floor(this.countNum).toLocaleString());
+            },
+            complete: function() {
+                $this.text(this.countNum.toLocaleString());
+            }
         });
+    });
+}
+
+$(document).ready(function() {
+    animateCounters();
+});
     </script>
 </body>
 
