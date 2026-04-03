@@ -203,7 +203,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         /* --- ลบส่วนนี้ออกเพื่อปิดแสงสีเหลืองรอบกล่อง --- */
-        .login-card-wrapper::before {
+        /* .login-card-wrapper::before {
             content: '';
             position: absolute;
             inset: -4px;
@@ -227,7 +227,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             /* เรียกใช้ slideInLeft นาน 0.8 วินาที */
             animation: slideInLeft 2.8s cubic-bezier(0.215, 0.610, 0.355, 1.000) both;
-        }
+        } */
 
         /* เนื้อหาข้างในการ์ด (พื้นหลังสีขาว) */
         .login-card-inner {
