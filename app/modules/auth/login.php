@@ -420,20 +420,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <script>
         // --- Script สำหรับ Effect เมาส์เรืองแสง (คงเดิม) ---
-        const glow = document.getElementById('mouseGlow');
-        document.addEventListener('mousemove', (e) => {
-            glow.style.left = e.clientX + 'px';
-            glow.style.top = e.clientY + 'px';
-        });
-        const interactiveElements = document.querySelectorAll('button, input, a, label, .login-card-inner');
-        interactiveElements.forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                glow.classList.add('active');
-            });
-            el.addEventListener('mouseleave', () => {
-                glow.classList.remove('active');
-            });
-        });
+        // const glow = document.getElementById('mouseGlow');
+        // document.addEventListener('mousemove', (e) => {
+        //     glow.style.left = e.clientX + 'px';
+        //     glow.style.top = e.clientY + 'px';
+        // });
+        // const interactiveElements = document.querySelectorAll('button, input, a, label, .login-card-inner');
+        // interactiveElements.forEach(el => {
+        //     el.addEventListener('mouseenter', () => {
+        //         glow.classList.add('active');
+        //     });
+        //     el.addEventListener('mouseleave', () => {
+        //         glow.classList.remove('active');
+        //     });
+        // });
         // ----------------------------------
 
         // --- Script สำหรับ Effect โลโก้ 3D Tilt ---
