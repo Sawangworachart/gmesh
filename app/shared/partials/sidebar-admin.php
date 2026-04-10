@@ -56,7 +56,7 @@ if (isset($conn)) {
 
     // 3. แสดงผล (ถ้ามีงาน และไม่อยู่หน้า warn_admin.php)
     if ($total_notify > 0 && basename($_SERVER['PHP_SELF']) != 'warn_admin.php') {
-?>
+        ?>
         <script>
             if (typeof Swal === 'undefined') {
                 document.write('<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"><\/script>');
@@ -161,7 +161,7 @@ if (isset($conn)) {
         </style>
 
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 let overdue = <?php echo $cnt_overdue; ?>;
                 let today = <?php echo $cnt_today; ?>;
                 let future = <?php echo $cnt_future; ?>;
@@ -246,7 +246,7 @@ if (isset($conn)) {
                 });
             });
         </script>
-<?php
+        <?php
     }
 }
 
@@ -460,12 +460,22 @@ $is_project_active = is_active_parent($project_pages, $active_page);
         font-weight: 600;
         box-shadow: 0 4px 10px rgba(85, 153, 255, 0.4);
     }
-
-    .sidebar-nav i {
+/*อันเก่า
+    /* .sidebar-nav i {
         min-width: 30px;
         font-size: 1.1rem;
         text-align: center;
         margin-right: 10px;
+    } */
+    .sidebar-nav i {
+        width: 30px;
+        /* เปลี่ยนจาก min-width */
+        min-width: 30px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.1rem;
+        margin-right: 12px;
     }
 
     .sidebar-nav li.active a i,
@@ -838,7 +848,8 @@ $is_project_active = is_active_parent($project_pages, $active_page);
 
         <li class="<?php echo is_active('pm_project.php', $active_page); ?>">
             <a href="pm_project.php" title="Preventive Maintenance">
-                <i class="fas fa-project-diagram"></i> <span class="link-text" data-i18n="preventive_maintenance">Preventive Maintenance</span>
+                <i class="fas fa-project-diagram"></i> <span class="link-text"
+                    data-i18n="preventive_maintenance">Preventive Maintenance</span>
             </a>
         </li>
 
@@ -866,7 +877,7 @@ $is_project_active = is_active_parent($project_pages, $active_page);
             </a>
         </li>
 
-        <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'superadmin') : ?>
+        <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'superadmin'): ?>
             <li class="<?php echo is_active('manage_admin.php', $active_page); ?>">
                 <a href="manage_admin.php" title="Edit user">
                     <i class="fas fa-user-cog"></i>
@@ -887,6 +898,7 @@ $is_project_active = is_active_parent($project_pages, $active_page);
         <i class="fas fa-user-shield"></i>
         <span class="link-text" data-i18n="status">สถานะ:
             <?php echo isset($_SESSION['user_role']) ? $_SESSION['user_role'] : 'unknown'; ?>
+        </span>
     </div>
 </div>
 
@@ -909,7 +921,7 @@ $is_project_active = is_active_parent($project_pages, $active_page);
     if (typeof jQuery == 'undefined') {
         console.error("jQuery is required.");
     } else {
-        $(document).ready(function() {
+        $(document).ready(function () {
             function adjustContent(isCollapsed) {
                 if ($(window).width() <= 768) {
                     $('.main-content').css('margin-left', '0px');
@@ -924,17 +936,17 @@ $is_project_active = is_active_parent($project_pages, $active_page);
 
             adjustContent($('#sidebar').hasClass('collapsed'));
 
-            $('#mobile-menu-btn').click(function() {
+            $('#mobile-menu-btn').click(function () {
                 $('#sidebar').addClass('mobile-active');
                 $('#mobile-overlay-backdrop').addClass('active');
             });
 
-            $('#mobile-overlay-backdrop').click(function() {
+            $('#mobile-overlay-backdrop').click(function () {
                 $('#sidebar').removeClass('mobile-active');
                 $('#mobile-overlay-backdrop').removeClass('active');
             });
 
-            $('#sidebar-toggle').click(function() {
+            $('#sidebar-toggle').click(function () {
                 const sidebar = $('.sidebar');
                 sidebar.toggleClass('collapsed');
 
@@ -948,7 +960,7 @@ $is_project_active = is_active_parent($project_pages, $active_page);
                 }
             });
 
-            $(window).resize(function() {
+            $(window).resize(function () {
                 if ($(window).width() > 768) {
                     $('#sidebar').removeClass('mobile-active');
                     $('#mobile-overlay-backdrop').removeClass('active');
@@ -956,7 +968,7 @@ $is_project_active = is_active_parent($project_pages, $active_page);
                 adjustContent($('#sidebar').hasClass('collapsed'));
             });
 
-            $('.has-submenu > .toggle-btn').click(function(e) {
+            $('.has-submenu > .toggle-btn').click(function (e) {
                 e.preventDefault();
                 if ($('.sidebar').hasClass('collapsed') && $(window).width() > 768) return;
 
@@ -982,20 +994,20 @@ $is_project_active = is_active_parent($project_pages, $active_page);
                 $('.has-submenu .fa-caret-down').css('transform', 'rotate(180deg)');
             }
 
-            $('#logout-btn').click(function(e) {
+            $('#logout-btn').click(function (e) {
                 e.preventDefault();
                 $('#custom-logout-modal').addClass('active');
             });
 
-            $('#modal-cancel-btn').click(function() {
+            $('#modal-cancel-btn').click(function () {
                 $('#custom-logout-modal').removeClass('active');
             });
 
-            $('#modal-logout-btn').click(function() {
+            $('#modal-logout-btn').click(function () {
                 window.location.href = 'logout.php';
             });
 
-            $('#custom-logout-modal').click(function(e) {
+            $('#custom-logout-modal').click(function (e) {
                 if ($(e.target).is(this)) {
                     $(this).removeClass('active');
                 }
