@@ -551,10 +551,11 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
 /* =========================================
    FIX: Z-Index for SweetAlert
    ========================================= */
 .swal2-container {
-    z-index: 99999 !important; /* ค่าสูงกว่า Modal แน่นอน */
+    z-index: 99999 !important;
+    /* ค่าสูงกว่า Modal แน่นอน */
 }
-
