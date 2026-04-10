@@ -86,7 +86,7 @@ if (isset($conn)) {
 
 <style>
     /* --- CSS SIDEBAR เดิม (ห้ามเปลี่ยน) --- */
-    :root { --sidebar-width: 250px; --toggle-btn-color: #2962ff; --sidebar-bg: #fff; --sidebar-item-height: 48px; --sidebar-item-radius: 12px; --sidebar-icon-size: 22px; }
+    :root { --sidebar-width: 250px; --toggle-btn-color: #2962ff; --sidebar-bg: #fff; }
     .sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; top: 0; left: 0; background: var(--sidebar-bg); box-shadow: 2px 0 10px rgba(0,0,0,0.05); z-index: 1100; overflow-y: auto; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     .main-content { 
         margin-left: var(--sidebar-width) !important; 
@@ -99,20 +99,13 @@ if (isset($conn)) {
     .menu-toggle-btn { position: fixed; top: 15px; left: 15px; width: 40px; height: 40px; z-index: 1200; background: var(--toggle-btn-color); color: #fff; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     @media (min-width: 992px) { .menu-toggle-btn { left: calc(var(--sidebar-width) - 50px); top: 10px; background: transparent; color: #555; } body.sidebar-collapsed .menu-toggle-btn { left: 20px; background: var(--toggle-btn-color); color: #fff; } }
     .sidebar-header { padding: 30px 20px 20px; text-align: center; border-bottom: 1px solid #eee; margin-top: 15px; }
-    .nav-menu { list-style: none; padding: 0 12px; margin: 12px 0; }
-    .nav-menu li { margin-bottom: 6px; }
-    .nav-menu li:last-child { margin-bottom: 0; }
-    .nav-menu li a { display: flex; align-items: center; min-height: var(--sidebar-item-height); gap: 12px; padding: 12px 16px; color: #555; text-decoration: none; font-weight: 500; border-left: 4px solid transparent; border-radius: var(--sidebar-item-radius); line-height: 1.2; }
+    .nav-menu { list-style: none; padding: 0; margin: 10px 0; }
+    .nav-menu li a { display: flex; align-items: center; gap: 10px; padding: 12px 25px; color: #555; text-decoration: none; font-weight: 500; border-left: 4px solid transparent; }
     .nav-menu li a:hover, .nav-menu li.active > a { background-color: #f8f9fa; color: var(--toggle-btn-color); border-left-color: var(--toggle-btn-color); }
-    .nav-menu li a i:first-child { width: var(--sidebar-icon-size); min-width: var(--sidebar-icon-size); text-align: center; font-size: 1rem; }
-    .nav-label { flex: 1; display: inline-flex; align-items: center; min-width: 0; }
     .sidebar-footer { position: absolute; bottom: 0; width: 100%; background: #f8f9fa; padding: 15px; border-top: 1px solid #eee; }
     .badge-alert { background: #dc3545; color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; }
-    .nav-menu .badge-alert { margin-left: auto; flex-shrink: 0; }
     .animated-logo { width: 100px; animation: logo-float 4s ease-in-out infinite; }
     @keyframes logo-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-    .logout-link { display: flex; align-items: center; min-height: var(--sidebar-item-height); gap: 12px; padding: 12px 16px; border-radius: var(--sidebar-item-radius); }
-    .logout-link i { width: var(--sidebar-icon-size); min-width: var(--sidebar-icon-size); text-align: center; }
 
     /* --- CSS NOTIFICATION ดีไซน์ใหม่ (เหมือน Admin) --- */
     .notify-toast {
@@ -177,15 +170,14 @@ if (isset($conn)) {
         <img src="images/logomaintdash1.png" alt="Logo" class="animated-logo"> 
     </div>
     <ul class="nav-menu">
-        <li class="<?= $current_page == 'user_dashboard.php' ? 'active' : '' ?>"><a href="user_dashboard.php"><i class="fas fa-tachometer-alt"></i><span class="nav-label">Dashboard</span></a></li>
-        <li class="<?= $current_page == 'pmproject_user.php' ? 'active' : '' ?>"><a href="pmproject_user.php"><i class="fas fa-project-diagram"></i><span class="nav-label">Preventive Maintenance</span></a></li>
-        <li class="<?= $current_page == 'service_user.php' ? 'active' : '' ?>"><a href="service_user.php"><i class="fas fa-tools"></i><span class="nav-label">Service</span></a></li>
-        <li class="<?= $current_page == 'product_user.php' ? 'active' : '' ?>"><a href="product_user.php"><i class="fas fa-microchip"></i><span class="nav-label">Product Claim</span></a></li>
-        <li class="<?= $current_page == 'customers_user.php' ? 'active' : '' ?>"><a href="customers_user.php"><i class="fas fa-users"></i><span class="nav-label">Customers</span></a></li>
+        <li class="<?= $current_page == 'user_dashboard.php' ? 'active' : '' ?>"><a href="user_dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li class="<?= $current_page == 'pmproject_user.php' ? 'active' : '' ?>"><a href="pmproject_user.php"><i class="fas fa-project-diagram"></i> Preventive Maintenance</a></li>
+        <li class="<?= $current_page == 'service_user.php' ? 'active' : '' ?>"><a href="service_user.php"><i class="fas fa-tools"></i> Service</a></li>
+        <li class="<?= $current_page == 'product_user.php' ? 'active' : '' ?>"><a href="product_user.php"><i class="fas fa-microchip"></i> Product Claim</a></li>
+        <li class="<?= $current_page == 'customers_user.php' ? 'active' : '' ?>"><a href="customers_user.php"><i class="fas fa-users"></i> Customers</a></li>
         <li class="<?= ($current_page == 'warn_user.php') ? 'active' : '' ?>">
-            <a href="warn_user.php">
-                <i class="fas fa-bell"></i>
-                <span class="nav-label">Alarms</span>
+            <a href="warn_user.php" style="display: flex; justify-content: space-between; align-items: center;">
+                <span><i class="fas fa-bell"></i> Alarms</span>
                 <?php if($total_notify > 0): ?> <span class="badge-alert"><?= $total_notify ?></span> <?php endif; ?>
             </a>
         </li>
